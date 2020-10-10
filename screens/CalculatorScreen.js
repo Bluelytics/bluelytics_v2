@@ -4,6 +4,7 @@ import {useEffect, useState} from 'react';
 import {Picker} from '@react-native-community/picker';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {RFPercentage} from 'react-native-responsive-fontsize';
+import analytics from '@react-native-firebase/analytics';
 
 export default function CalculatorScreen() {
   return <Calculator />;
@@ -59,6 +60,13 @@ export function Calculator() {
   }, [loading]);
 
   useEffect(() => {
+    analytics().logSelectContent({
+      content_type: 'selected_currency',
+      item_id: selectedValue,
+    })
+  }, [selectedValue])
+
+  useEffect(() => {
     if (
       valorInput === '' ||
       !('blue' in dolar) ||
@@ -96,7 +104,7 @@ export function Calculator() {
           ),
           oficialSell: fromCurrency(
             valorInput,
-            dolar.oficial.value_sell * 1.3,
+            dolar.oficial.value_sell * 1.65,
             selectedValue,
           ),
           oficialBuy: fromCurrency(
@@ -115,7 +123,7 @@ export function Calculator() {
           blueBuy: toCurrency(valorInput, dolar.blue.value_buy, selectedValue),
           oficialSell: toCurrency(
             valorInput,
-            dolar.oficial.value_sell * 1.3,
+            dolar.oficial.value_sell * 1.65,
             selectedValue,
           ),
           oficialBuy: toCurrency(

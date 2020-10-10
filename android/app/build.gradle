@@ -79,7 +79,7 @@ import com.android.build.OutputFile
 
 project.ext.react = [
     entryFile: "index.js",
-    enableHermes: true,  // clean and rebuild if changing
+    enableHermes: false,  // clean and rebuild if changing
 ]
 
 apply from: "../../node_modules/react-native/react.gradle"
@@ -133,8 +133,9 @@ android {
         applicationId "com.bluelytics.mobileapp"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 3
-        versionName "1.1"
+        versionCode 4
+        versionName "1.2"
+        multiDexEnabled true
     }
     splits {
         abi {
@@ -199,7 +200,11 @@ dependencies {
     //noinspection GradleDynamicVersion
     implementation "com.facebook.react:react-native:+"  // From node_modules
 
+    implementation 'com.android.support:multidex:1.0.3'
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
+
+    implementation "com.google.android.gms:play-services-base:16.1.0"
+    implementation "com.google.firebase:firebase-core:16.0.8"
 
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
       exclude group:'com.facebook.fbjni'
@@ -238,3 +243,4 @@ configurations.all {
 apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
 
 apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
+apply plugin: 'com.google.gms.google-services'

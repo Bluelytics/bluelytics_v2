@@ -54,6 +54,6 @@ function getHeaderTitle(route) {
     case 'Calculator':
       return 'Calculadora Blue';
     case 'Settings':
-      return 'Ajustes';
+      return 'Alertas';
   }
 }

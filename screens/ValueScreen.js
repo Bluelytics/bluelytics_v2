@@ -7,6 +7,7 @@ import {
   View,
   SafeAreaView,
   RefreshControl,
+  AppState,
 } from 'react-native';
 import {ScrollView} from 'react-native-gesture-handler';
 import {useEffect, useState} from 'react';
@@ -34,20 +35,37 @@ export default function ValueScreen() {
 export function DolarCotizacion() {
   const [dolar, setDolar] = useState({});
   const [loading, setLoading] = useState(true);
+  const [appState, setAppState] = useState(AppState.currentState);
+
 
   useEffect(() => {
-    fetch('http://api.bluelytics.com.ar/v2/latest')
-      .then(response => response.json())
-      .then(json => setDolar(json))
-      .catch(error => console.error(error))
-      .finally(() => {
-        setLoading(false);
-      });
+        fetch('http://api.bluelytics.com.ar/v2/latest')
+        .then(response => response.json())
+        .then(json => setDolar(json))
+        .catch(error => console.error(error))
+        .finally(() => {
+          setLoading(false);
+        });
   }, [loading]);
 
   const onRefresh = React.useCallback(() => {
     setLoading(true);
   });
+
+  useEffect(() => {
+    AppState.addEventListener("change", _handleAppStateChange);
+
+    return () => {
+      AppState.removeEventListener("change", _handleAppStateChange);
+    };
+  }, []);
+
+  const _handleAppStateChange = nextAppState => {
+    if (nextAppState === "active") {
+      onRefresh();
+    }
+    setAppState(nextAppState);
+  };
 
   return (
     <SafeAreaView style={styles.cotizacionContainer}>
@@ -119,11 +137,11 @@ export function DolarValor(data) {
             Venta
           </Text>
           <Text style={[styles.impPais, {color: data.color}]}>
-            {data.id === 'oficial' ? '(+30% impuesto pais)' : ''}
+            {data.id === 'oficial' ? '(+65% impuestos)' : ''}
           </Text>
           <Text style={[styles.rateBlue, {color: data.color}]}>
             {data.id === 'oficial'
-              ? (valueSell * 1.3).toFixed(2)
+              ? (valueSell * 1.65).toFixed(2)
               : valueSell.toFixed(2)}
           </Text>
         </View>

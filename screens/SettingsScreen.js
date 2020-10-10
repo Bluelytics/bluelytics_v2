@@ -1,16 +1,18 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import * as React from 'react';
 import {
-  Image,
   StyleSheet,
   Text,
   View,
-  SafeAreaView,
-  RefreshControl,
+  Switch
 } from 'react-native';
 import {ScrollView} from 'react-native-gesture-handler';
 import {useEffect, useState} from 'react';
-import {RFPercentage} from 'react-native-responsive-fontsize';
+import messaging from '@react-native-firebase/messaging';
+import AsyncStorage from '@react-native-community/async-storage';
+import analytics from '@react-native-firebase/analytics';
+import { ScreenStackHeaderRightView } from 'react-native-screens';
+
 
 export default function SettingsScreen() {
   return (
@@ -18,158 +20,116 @@ export default function SettingsScreen() {
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.contentContainer}>
-        <View style={styles.logoContainer}>
-          <Image
-            source={require('../assets/images/icon.png')}
-            style={styles.logoImage}
-          />
-        </View>
+      
+      <View style={styles.alertContainer}>
+          <Text style={styles.textAlertas}>Activar Alertas Dolar Blue</Text>
+        <AlertasBlue></AlertasBlue>
+      </View>
+      <View style={{flex:1, flexDirection: 'row'}}>
 
-        <DolarCotizacion />
+        <Text style={styles.helpTextAlerta}>Mientras tengas activadas las alertas, recibiras notificaciones en el celular cada vez que haya un cambio significativo en el valor de venta del Dolar Blue.</Text>
+      </View>
       </ScrollView>
     </View>
   );
 }
 
-export function DolarCotizacion() {
-  const [dolar, setDolar] = useState({});
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch('http://api.bluelytics.com.ar/v2/latest')
-      .then(response => response.json())
-      .then(json => setDolar(json))
-      .catch(error => console.error(error))
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [loading]);
-
-  const onRefresh = React.useCallback(() => {
-    setLoading(true);
-  });
-
-  return (
-    <SafeAreaView style={styles.cotizacionContainer}>
-      <ScrollView
-        contentContainerStyle={styles.scrollView}
-        refreshControl={
-          <RefreshControl refreshing={loading} onRefresh={onRefresh} />
-        }>
-        <ListaDolares dolares={dolar} />
-      </ScrollView>
-    </SafeAreaView>
-  );
-}
-
-export function ListaDolares(dolares) {
-  var DolarBlue =
-    'blue' in dolares.dolares ? (
-      <DolarValor
-        id="blue"
-        valor={dolares.dolares.blue}
-        nombre="Dolar Blue/Libre"
-        color="#221199"
-      />
-    ) : null;
-  var DolarOficial =
-    'oficial' in dolares.dolares ? (
-      <DolarValor
-        id="oficial"
-        valor={dolares.dolares.oficial}
-        nombre="Dolar Oficial"
-        color="#229922"
-      />
-    ) : null;
-
-  return (
-    <View>
-      <View style={{flex: 2, marginBottom: 30}}>{DolarBlue}</View>
-      <View style={{flex: 2, marginBottom: 30}}>{DolarOficial}</View>
-    </View>
-  );
-}
-
-export function DolarValor(data) {
-  var valueBuy = data.valor.value_buy;
-  var valueSell = data.valor.value_sell;
-
-  if ('multiplier' in data) {
-    valueBuy = valueBuy * data.multiplier;
-    valueSell = valueSell * data.multiplier;
+export function AlertasBlue() {
+  const [isSubscribed, setisSubscribed] = useState(null);
+  const toggleSwitch = async(newState) => {
+    setisSubscribed(newState)
+    console.log(newState);
+    if(newState == true){
+      messaging()
+      .subscribeToTopic('alertas-blue')
+      .then(() => _storeSub('true'))
+      .then(() => analytics().logEvent('subscribe_alertas_blue', {}));
+    }else if (newState == false){
+      messaging()
+      .unsubscribeFromTopic('alertas-blue')
+      .then(() => _storeSub('false'))
+      .then(() => analytics().logEvent('unsubscribe_alertas_blue', {}));
+    }
   }
 
-  return (
-    <View>
-      <Text style={[styles.tituloRateBlue, {color: data.color}]}>
-        {data.nombre}
-      </Text>
-      <View style={{flex: 3, flexDirection: 'row'}}>
-        <View style={{flex: 6, flexDirection: 'column'}}>
-          <Text style={[styles.subtituloRateBlue, {color: data.color}]}>
-            Compra
-          </Text>
-          <Text style={[styles.impPais, {color: data.color}]} />
-          <Text style={[styles.rateBlue, {color: data.color}]}>
-            {valueBuy.toFixed(2)}
-          </Text>
-        </View>
-        <View style={{flex: 6, flexDirection: 'column'}}>
-          <Text style={[styles.subtituloRateBlue, {color: data.color}]}>
-            Venta
-          </Text>
-          <Text style={[styles.impPais, {color: data.color}]}>
-            {data.id === 'oficial' ? '(+30% impuesto pais)' : ''}
-          </Text>
-          <Text style={[styles.rateBlue, {color: data.color}]}>
-            {data.id === 'oficial'
-              ? (valueSell * 1.3).toFixed(2)
-              : valueSell.toFixed(2)}
-          </Text>
-        </View>
-      </View>
-    </View>
-  );
+  _storeSub = async (value) => {
+      try {
+          await AsyncStorage.setItem('subState', value);
+      } catch (error) {
+        console.log(error);
+      }
+  }
+
+  _retrieveSub = async () => {
+    try {
+        const value = await AsyncStorage.getItem('subState');
+        console.log('Retrieved ' + value)
+        return(value == 'true')
+    } catch (error) {
+      console.log(error);
+    }
 }
+
+  useEffect(() => {
+    _retrieveSub()
+      .then(val => setisSubscribed(val))
+   }, []);
+
+  if(isSubscribed === null){
+    return(<Text>...</Text>)
+  }else{
+    return(
+      <Switch style={styles.switchAlertas}
+              trackColor={{ false: "#767577", true: "#81b0ff" }}
+              thumbColor={isSubscribed ? "#221199" : "#f4f3f4"}
+              ios_backgroundColor="#3e3e3e"
+              onValueChange={(value) => toggleSwitch(value)}
+              value={isSubscribed}
+            />
+      )
+  }
+  
+}
+
+
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
   },
-  tituloRateBlue: {
-    fontSize: RFPercentage(4.5),
-    textAlign: 'center',
-  },
-  rateBlue: {
-    fontSize: RFPercentage(5),
-    textAlign: 'center',
-    fontWeight: 'bold',
-  },
-  subtituloRateBlue: {
-    fontSize: RFPercentage(3.5),
-    textAlign: 'center',
-  },
-  impPais: {
-    fontSize: RFPercentage(2),
-    textAlign: 'center',
-  },
   contentContainer: {
-    paddingTop: 5,
+    paddingTop: 100,
   },
-  scrollView: {
-    paddingTop: 3,
+  alertContainer: {
+    flex:1,
+    flexDirection: 'row',
+    marginRight: 30,
+    marginRight:40,
+    marginLeft:40,
+    marginTop:10,
+    paddingTop:20,
+    paddingBottom:20,
+    backgroundColor:'#efefef',
+    borderRadius:10,
+    borderWidth: 1,
+    borderColor: '#332299'
   },
-  logoContainer: {
-    alignItems: 'center',
-    marginTop: 10,
-    marginBottom: 15,
+  textAlertas:{
+    fontSize:16,
+    flex:4,
+    flexDirection: 'column',
+    textAlign: 'right',
   },
-  cotizacionContainer: {
-    flex: 1,
+  switchAlertas:{
+    flex:1,
+    flexDirection: 'column',
+    justifyContent: 'space-between'
   },
-  logoImage: {
-    height: RFPercentage(10),
-    resizeMode: 'contain',
-  },
+  helpTextAlerta:{
+    flex:1,
+    fontSize:12,
+    paddingTop:25,
+    textAlign: 'center'
+  }
 });
