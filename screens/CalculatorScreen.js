@@ -271,7 +271,7 @@ export function MonedaComponente(data) {
             Compra {data.inverted ? 'ARS' : data.currency}
           </Text>
           <Text style={[styles.rateValue, {color: data.color}]}>
-            {data.buy}
+            {parseFloat(data.buy).toLocaleString('en-US')}
           </Text>
         </View>
         <View style={{flex: 6, flexDirection: 'column'}}>
@@ -279,7 +279,7 @@ export function MonedaComponente(data) {
             Venta {data.inverted ? 'ARS' : data.currency}
           </Text>
           <Text style={[styles.rateValue, {color: data.color}]}>
-            {data.sell}
+            {parseFloat(data.sell).toLocaleString('en-US')}
           </Text>
         </View>
       </View>
