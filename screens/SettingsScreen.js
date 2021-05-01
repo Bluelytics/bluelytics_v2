@@ -105,15 +105,15 @@ const styles = StyleSheet.create({
     flex:1,
     flexDirection: 'row',
     marginRight: 30,
-    marginRight:40,
-    marginLeft:40,
+    marginRight:20,
+    marginLeft:20,
     marginTop:10,
     paddingTop:20,
     paddingBottom:20,
-    backgroundColor:'#efefef',
+    backgroundColor:'#f7f7f7',
     borderRadius:10,
-    borderWidth: 1,
-    borderColor: '#332299'
+    borderWidth: 4,
+    borderColor: '#eeeeee'
   },
   textAlertas:{
     fontSize:16,
