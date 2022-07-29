@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {StyleSheet, Text, View, TextInput} from 'react-native';
 import {useEffect, useState} from 'react';
-import {Picker} from '@react-native-community/picker';
+import {Picker} from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import analytics from '@react-native-firebase/analytics';
@@ -104,7 +104,7 @@ export function Calculator() {
           ),
           oficialSell: fromCurrency(
             valorInput,
-            dolar.oficial.value_sell * 1.65,
+            dolar.oficial.value_sell * 1.75,
             selectedValue,
           ),
           oficialBuy: fromCurrency(
@@ -123,7 +123,7 @@ export function Calculator() {
           blueBuy: toCurrency(valorInput, dolar.blue.value_buy, selectedValue),
           oficialSell: toCurrency(
             valorInput,
-            dolar.oficial.value_sell * 1.65,
+            dolar.oficial.value_sell * 1.75,
             selectedValue,
           ),
           oficialBuy: toCurrency(

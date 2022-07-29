@@ -9,7 +9,7 @@ import {
 import {ScrollView} from 'react-native-gesture-handler';
 import {useEffect, useState} from 'react';
 import messaging from '@react-native-firebase/messaging';
-import AsyncStorage from '@react-native-community/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import analytics from '@react-native-firebase/analytics';
 import { ScreenStackHeaderRightView } from 'react-native-screens';
 

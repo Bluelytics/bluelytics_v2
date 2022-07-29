@@ -137,11 +137,11 @@ export function DolarValor(data) {
             Venta
           </Text>
           <Text style={[styles.impPais, {color: data.color}]}>
-            {data.id === 'oficial' ? '(+65% impuestos)' : ''}
+            {data.id === 'oficial' ? '(+75% impuestos)' : ''}
           </Text>
           <Text style={[styles.rateBlue, {color: data.color}]}>
             {data.id === 'oficial'
-              ? (valueSell * 1.65).toFixed(2)
+              ? (valueSell * 1.75).toFixed(2)
               : valueSell.toFixed(2)}
           </Text>
         </View>
