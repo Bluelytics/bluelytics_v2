@@ -1,6 +1,6 @@
 require_relative '../node_modules/react-native/scripts/react_native_pods'
 require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
-$RNFirebaseAsStaticFramework = false
+$RNFirebaseAsStaticFramework = true
 $RNFirebaseAnalyticsWithoutAdIdSupport=true
 
 platform :ios, '12.4'
@@ -14,6 +14,7 @@ target 'bluelytics_mobile_v3' do
   flags = get_default_flags()
 
   pod 'RNFBApp', :path => '../node_modules/@react-native-firebase/app'
+  pod 'GoogleUtilities', :modular_headers => true
 
   use_react_native!(
     :path => config[:reactNativePath],
