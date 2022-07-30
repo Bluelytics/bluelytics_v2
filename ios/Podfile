@@ -13,7 +13,7 @@ target 'bluelytics_mobile_v3' do
   # Flags change depending on the env values.
   flags = get_default_flags()
 
-  use_frameworks!
+  pod 'RNFBApp', :path => '../node_modules/@react-native-firebase/app'
 
   use_react_native!(
     :path => config[:reactNativePath],
