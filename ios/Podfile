@@ -11,6 +11,20 @@ target 'bluelytics_mobile_v3' do
   config = use_native_modules!
   # Flags change depending on the env values.
   flags = get_default_flags()
+
+  pod 'Firebase', :modular_headers => true
+  pod 'FirebaseCore', :modular_headers => true
+  pod 'FirebaseCoreInternal', :modular_headers => true
+  pod 'FirebaseStorageInternal', :modular_headers => true
+  pod 'FirebaseCoreExtension', :modular_headers => true
+  pod 'FirebaseAppCheckInterop', :modular_headers => true
+  pod 'FirebaseAuthInterop', :modular_headers => true
+  pod 'FirebaseMessagingInterop', :modular_headers => true
+  pod 'GTMSessionFetcher', :modular_headers => true
+  pod 'FirebaseAppCheckInterop', :modular_headers => true
+  pod 'FirebaseAuthInterop', :modular_headers => true
+  pod 'GoogleUtilities', :modular_headers => true
+
   use_react_native!(
     :path => config[:reactNativePath],
     # to enable hermes on iOS, change `false` to `true` and then install pods
@@ -28,7 +42,6 @@ target 'bluelytics_mobile_v3' do
     # Pods for testing
   end
 
-  use_frameworks!
 
   post_install do |installer|
     react_native_post_install(installer)
