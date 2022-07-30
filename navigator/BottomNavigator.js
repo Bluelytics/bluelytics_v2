@@ -11,9 +11,6 @@ const INITIAL_ROUTE_NAME = 'Value';
 
 export default function BottomNavigator({ navigation, route }) {
   
-  React.useLayoutEffect(() => {
-    navigation.setOptions({ headerTitle: getHeaderTitle(route) });
-  }, [navigation, route]);
 
   return (
     <BottomTab.Navigator initialRouteName={INITIAL_ROUTE_NAME}>
@@ -21,7 +18,7 @@ export default function BottomNavigator({ navigation, route }) {
         name="Value"
         component={ValueScreen}
         options={{
-          title: 'Valor',
+          title: 'Cotizacion Dolar-ARS',
           tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="dollar" />,
         }}
       />
@@ -29,7 +26,7 @@ export default function BottomNavigator({ navigation, route }) {
         name="Calculator"
         component={CalculatorScreen}
         options={{
-          title: 'Calculadora',
+          title: 'Calculadora Blue',
           tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="calculator" />,
         }}
       />

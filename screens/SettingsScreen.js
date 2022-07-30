@@ -4,13 +4,16 @@ import {
   StyleSheet,
   Text,
   View,
-  Switch
+  Switch,
+  TouchableOpacity
 } from 'react-native';
 import {ScrollView} from 'react-native-gesture-handler';
 import {useEffect, useState} from 'react';
 import messaging from '@react-native-firebase/messaging';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import analytics from '@react-native-firebase/analytics';
+import {RFPercentage} from 'react-native-responsive-fontsize';
+
 
 async function requestUserPermission() {
   const authStatus = await messaging().requestPermission();
@@ -26,19 +29,15 @@ async function requestUserPermission() {
 export default function SettingsScreen() {
   return (
     <View style={styles.container}>
-      <ScrollView
-        style={styles.container}
-        contentContainerStyle={styles.contentContainer}>
       
-      <View style={styles.alertContainer}>
-          <Text style={styles.textAlertas}>Activar Alertas Dolar Blue</Text>
-        <AlertasBlue></AlertasBlue>
-      </View>
-      <View style={{flex:1, flexDirection: 'row'}}>
-
+      <View style={{flex:1, flexDirection: 'column'}}>
         <Text style={styles.helpTextAlerta}>Mientras tengas activadas las alertas, recibiras notificaciones en el celular cada vez que haya un cambio significativo en el valor de venta del Dolar Blue.</Text>
+
+        <View style={styles.alertContainer}>
+            <Text style={styles.textAlertas}>Activar Alertas Dolar Blue</Text>
+          <AlertasBlue style={{flex:1}}></AlertasBlue>
+        </View>
       </View>
-      </ScrollView>
     </View>
   );
 }
@@ -93,7 +92,6 @@ export function AlertasBlue() {
       <Switch style={styles.switchAlertas}
               trackColor={{ false: "#767577", true: "#81b0ff" }}
               thumbColor={isSubscribed ? "#221199" : "#f4f3f4"}
-              ios_backgroundColor="#3e3e3e"
               onValueChange={(value) => toggleSwitch(value)}
               value={isSubscribed}
             />
@@ -113,29 +111,14 @@ const styles = StyleSheet.create({
     paddingTop: 100,
   },
   alertContainer: {
-    flex:1,
-    flexDirection: 'row',
-    marginRight: 30,
-    marginRight:20,
-    marginLeft:20,
-    marginTop:10,
-    paddingTop:20,
-    paddingBottom:20,
-    backgroundColor:'#f7f7f7',
-    borderRadius:10,
-    borderWidth: 4,
-    borderColor: '#eeeeee'
+    flex:9,
+    flexDirection: 'column',
   },
   textAlertas:{
-    fontSize:16,
-    flex:4,
-    flexDirection: 'column',
-    textAlign: 'right',
+    fontSize: RFPercentage(2),
+    textAlign: 'center'
   },
   switchAlertas:{
-    flex:1,
-    flexDirection: 'column',
-    justifyContent: 'space-between'
   },
   helpTextAlerta:{
     flex:1,

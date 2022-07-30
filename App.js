@@ -23,9 +23,7 @@ const App: () => React$Node = () => {
     <>
       <StatusBar barStyle="light-content" />
       <NavigationContainer ref={containerRef}>
-        <Stack.Navigator>
-          <Stack.Screen name="Root" component={BottomNavigator} />
-        </Stack.Navigator>
+        <BottomNavigator />
       </NavigationContainer>
     </>
   );

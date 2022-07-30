@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {StyleSheet, Text, View, TextInput} from 'react-native';
+import {StyleSheet, Text, View, TextInput, Platform} from 'react-native';
 import {useEffect, useState} from 'react';
 import {Picker} from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -164,7 +164,7 @@ export function Calculator() {
           justifyContent: 'space-evenly',
           height: '100%',
         }}>
-        <View style={{flex: 1}}>
+        <View style={{flex: Platform.OS === 'ios' ? 2 : 1}}>
           <Text style={styles.helpText}>
             Debajo podes elegir desde o a que moneda queres convertir pesos
             argentinos.{'\n'}
@@ -179,7 +179,7 @@ export function Calculator() {
             alignItems: 'flex-end',
           }}>
           <Picker
-            style={{flex: 1, maxWidth: '70%'}}
+            style={{flex: Platform.OS === 'ios' ? 2 : 1, maxWidth: '70%'}}
             selectedValue={selectedValue}
             onValueChange={(value, key) => changeCurrency(value)}
             prompt="Elegi la moneda a convertir">
@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fafafa',
   },
   helpText: {
-    fontSize: RFPercentage(2),
+    fontSize: Platform.OS === 'ios' ? RFPercentage(1.5) : RFPercentage(2),
     flex: 1,
     textAlign: 'center',
     textAlignVertical: 'center',
@@ -316,7 +316,7 @@ const styles = StyleSheet.create({
     flex: 5,
     textAlign: 'right',
     fontWeight: 'bold',
-    fontSize: 20,
+    fontSize: RFPercentage(3.4),
     marginRight: 10,
     marginLeft: 20,
     paddingRight: 5,
