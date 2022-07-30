@@ -265,16 +265,16 @@ export function MonedaComponente(data) {
       <Text style={[styles.tituloRate, {color: data.color}]}>
         {data.nombre}
       </Text>
-      <View style={{flex: 3, flexDirection: 'row'}}>
-        <View style={{flex: 6, flexDirection: 'column'}}>
-          <Text style={[styles.subtituloRateValue, {color: data.color}]}>
+      <View style={{flexDirection: 'row'}}>
+        <View style={{flexDirection: 'column', flex:1}}>
+          <Text style={[styles.subtituloRateValue, {color: data.color,}]}>
             Compra {data.inverted ? 'ARS' : data.currency}
           </Text>
           <Text style={[styles.rateValue, {color: data.color}]}>
             {parseFloat(data.buy).toLocaleString('en-US')}
           </Text>
         </View>
-        <View style={{flex: 6, flexDirection: 'column'}}>
+        <View style={{flexDirection: 'column', flex:1}}>
           <Text style={[styles.subtituloRateValue, {color: data.color}]}>
             Venta {data.inverted ? 'ARS' : data.currency}
           </Text>

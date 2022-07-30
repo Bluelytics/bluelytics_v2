@@ -82,6 +82,7 @@ project.ext.react = [
     enableHermes: false,  // clean and rebuild if changing
 ]
 
+
 apply from: "../../node_modules/react-native/react.gradle"
 
 /**
@@ -182,6 +183,10 @@ android {
         pickFirst "lib/arm64-v8a/libc++_shared.so"
         pickFirst "lib/x86/libc++_shared.so"
         pickFirst "lib/x86_64/libc++_shared.so"
+        pickFirst 'lib/x86/libjsc.so'
+        pickFirst 'lib/x86_64/libjsc.so'
+        pickFirst 'lib/arm64-v8a/libjsc.so'
+        pickFirst 'lib/armeabi-v7a/libjsc.so'
     }
 
     // applicationVariants are e.g. debug, release
@@ -207,6 +212,7 @@ dependencies {
 
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
 
+
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
         exclude group:'com.facebook.fbjni'
     }
@@ -224,7 +230,7 @@ dependencies {
         debugImplementation files(hermesPath + "hermes-debug.aar")
         releaseImplementation files(hermesPath + "hermes-release.aar")
     } else {
-        implementation jscFlavor
+            implementation 'org.webkit:android-jsc-intl:+'
     }
 }
 
@@ -237,7 +243,7 @@ task copyDownloadableDepsToLibs(type: Copy) {
 
 configurations.all {
     resolutionStrategy {
-        force "com.facebook.soloader:soloader:0.8.2"
+        force "com.facebook.soloader:soloader:0.9.0+"
     }
 }
 
