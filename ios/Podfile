@@ -13,7 +13,8 @@ target 'bluelytics_mobile_v3' do
   # Flags change depending on the env values.
   flags = get_default_flags()
 
-  pod 'RNFBApp', :path => '../node_modules/@react-native-firebase/app'
+  pod 'Firebase', :modular_headers => true
+  pod 'FirebaseCore', :modular_headers => true
   pod 'GoogleUtilities', :modular_headers => true
 
   use_react_native!(
@@ -32,6 +33,12 @@ target 'bluelytics_mobile_v3' do
     inherit! :complete
     # Pods for testing
   end
+  
+  # Enables Flipper.
+  #
+  # Note that if you have use_frameworks! enabled, Flipper will not work and
+  # you should disable the next line.
+  use_flipper!()
 
 
   post_install do |installer|
