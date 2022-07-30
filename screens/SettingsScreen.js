@@ -11,8 +11,18 @@ import {useEffect, useState} from 'react';
 import messaging from '@react-native-firebase/messaging';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import analytics from '@react-native-firebase/analytics';
-import { ScreenStackHeaderRightView } from 'react-native-screens';
+import messaging from '@react-native-firebase/messaging';
 
+async function requestUserPermission() {
+  const authStatus = await messaging().requestPermission();
+  const enabled =
+    authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+    authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+  if (enabled) {
+    console.log('Authorization status:', authStatus);
+  }
+}
 
 export default function SettingsScreen() {
   return (
@@ -44,6 +54,8 @@ export function AlertasBlue() {
       .subscribeToTopic('alertas-blue')
       .then(() => _storeSub('true'))
       .then(() => analytics().logEvent('subscribe_alertas_blue', {}));
+
+      requestUserPermission()
     }else if (newState == false){
       messaging()
       .unsubscribeFromTopic('alertas-blue')
