@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {StyleSheet, Text, View, TextInput, Platform} from 'react-native';
+import {StyleSheet, Text, View, TextInput, Platform, Keyboard, TouchableWithoutFeedback} from 'react-native';
 import {useEffect, useState} from 'react';
 import {Picker} from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -157,7 +157,8 @@ export function Calculator() {
   };
 
   return (
-    <View style={styles.container}>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+    <View  style={styles.container}>
       <View
         style={{
           flexDirection: 'column',
@@ -226,7 +227,8 @@ export function Calculator() {
           />
         </View>
       </View>
-    </View>
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 
