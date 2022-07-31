@@ -31,12 +31,9 @@ export default function SettingsScreen() {
     <View style={styles.container}>
       
       <View style={{flex:1, flexDirection: 'column'}}>
+        <AlertasBlue style={{flex:1}}></AlertasBlue>
         <Text style={styles.helpTextAlerta}>Mientras tengas activadas las alertas, recibiras notificaciones en el celular cada vez que haya un cambio significativo en el valor de venta del Dolar Blue.</Text>
 
-        <View style={styles.alertContainer}>
-            <Text style={styles.textAlertas}>Activar Alertas Dolar Blue</Text>
-          <AlertasBlue style={{flex:1}}></AlertasBlue>
-        </View>
       </View>
     </View>
   );
@@ -89,12 +86,21 @@ export function AlertasBlue() {
     return(<Text>...</Text>)
   }else{
     return(
-      <Switch style={styles.switchAlertas}
-              trackColor={{ false: "#767577", true: "#81b0ff" }}
-              thumbColor={isSubscribed ? "#221199" : "#f4f3f4"}
-              onValueChange={(value) => toggleSwitch(value)}
-              value={isSubscribed}
-            />
+
+      <View style={styles.containerInSection}>
+          <View style={styles.containerInnerSection}>
+              <Text style={styles.text} numberOfLines={1} ellipsizeMode={'tail'}>
+              Activar Alertas Dolar Blue
+              </Text>
+              <Switch style={styles.switchAlertas}
+                trackColor={{ false: "#767577", true: "#81b0ff" }}
+                thumbColor={isSubscribed ? "#221199" : "#f4f3f4"}
+                onValueChange={(value) => toggleSwitch(value)}
+                value={isSubscribed}
+              />
+          </View>
+      </View>
+      
       )
   }
   
@@ -107,23 +113,34 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  contentContainer: {
-    paddingTop: 100,
-  },
-  alertContainer: {
-    flex:9,
-    flexDirection: 'column',
-  },
-  textAlertas:{
-    fontSize: RFPercentage(2),
-    textAlign: 'center'
-  },
   switchAlertas:{
+    flex:1
   },
   helpTextAlerta:{
     flex:1,
-    fontSize:12,
+    fontSize: RFPercentage(3),
     paddingTop:25,
     textAlign: 'center'
-  }
+  },
+  containerSection: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center'
+},
+containerInSection: {
+    flex: 1, 
+    margin:10
+},
+containerInnerSection: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center'
+},
+text: {
+    flex: 6,
+    flexDirection: 'row',
+    fontSize: RFPercentage(3),
+    color: 'black'
+},
 });
