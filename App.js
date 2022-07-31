@@ -21,7 +21,7 @@ const App: () => React$Node = () => {
 
   return (
     <>
-      <StatusBar barStyle="light-content" />
+      <StatusBar />
       <NavigationContainer ref={containerRef}>
         <BottomNavigator />
       </NavigationContainer>
