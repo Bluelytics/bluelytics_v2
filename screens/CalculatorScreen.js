@@ -42,13 +42,13 @@ export function Calculator() {
   };
 
   useEffect(() => {
-    fetch('http://api.bluelytics.com.ar/data/json/currency.json')
+    fetch('https://api.bluelytics.com.ar/data/json/currency.json')
       .then(response => response.json())
       .then(json => json.concat([usdVal]))
       .then(json => json.sort((a, b) => a.name > b.name))
       .then(json => setCurrencyData(json))
       .then(() => {
-        fetch('http://api.bluelytics.com.ar/v2/latest')
+        fetch('https://api.bluelytics.com.ar/v2/latest')
           .then(response => response.json())
           .then(json => setDolar(json))
           .catch(error => console.error(error))

@@ -39,7 +39,7 @@ export function DolarCotizacion() {
 
 
   useEffect(() => {
-        fetch('http://api.bluelytics.com.ar/v2/latest')
+        fetch('https://api.bluelytics.com.ar/v2/latest')
         .then(response => response.json())
         .then(json => setDolar(json))
         .catch(error => console.error(error))
