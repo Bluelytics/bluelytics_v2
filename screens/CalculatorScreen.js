@@ -104,7 +104,7 @@ export function Calculator() {
           ),
           oficialSell: fromCurrency(
             valorInput,
-            dolar.oficial.value_sell * 1.75,
+            dolar.oficial.value_sell,
             selectedValue,
           ),
           oficialBuy: fromCurrency(
@@ -123,7 +123,7 @@ export function Calculator() {
           blueBuy: toCurrency(valorInput, dolar.blue.value_buy, selectedValue),
           oficialSell: toCurrency(
             valorInput,
-            dolar.oficial.value_sell * 1.75,
+            dolar.oficial.value_sell,
             selectedValue,
           ),
           oficialBuy: toCurrency(
