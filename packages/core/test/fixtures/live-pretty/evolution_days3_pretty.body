@@ -1,0 +1,20 @@
+[
+  {
+    "date": "2026-11-20",
+    "source": "Oficial",
+    "value_sell": 1595.00,
+    "value_buy": 1543.00
+  },
+  {
+    "date": "2026-11-20",
+    "source": "Blue",
+    "value_sell": 1665.00,
+    "value_buy": 1615.00
+  },
+  {
+    "date": "2026-11-19",
+    "source": "Oficial",
+    "value_sell": 1586.00,
+    "value_buy": 1533.00
+  }
+]

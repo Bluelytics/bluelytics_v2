@@ -1,0 +1,21 @@
+{
+  "name": "@bluelytics/jobs",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@bluelytics/core": "workspace:*",
+    "@bluelytics/db": "workspace:*",
+    "@bluelytics/scrapers": "workspace:*",
+    "@bluelytics/social": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

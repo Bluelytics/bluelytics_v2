@@ -26,3 +26,10 @@ dist/
 .sass-cache/
 __pycache__/
 *.pyc
+# --- workspace tooling output ---
+.wrangler/
+.astro/
+out/
+coverage/
+.pulumi-local/
+*.tsbuildinfo

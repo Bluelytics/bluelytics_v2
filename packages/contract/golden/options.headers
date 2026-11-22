@@ -1,0 +1,14 @@
+HTTP/2 204 
+date: Sun, 22 Nov 2026 14:37:56 GMT
+access-control-allow-methods: GET,HEAD,PUT,PATCH,POST,DELETE
+access-control-allow-origin: *
+vary: Origin
+vary: Access-Control-Request-Method
+vary: Access-Control-Request-Headers
+cf-cache-status: DYNAMIC
+report-to: {"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=NwwJXKySsmTcRdr4%2F6aXOApfZc2Yjg%2FI6%2FgvrccZ88TulKmeId6dm4cBS45rnCKnTKfgoM%2B4VdiqI0Ae%2FnU8scoINaqe7QSNQq1n%2FfBjyWs18zSXj7CRfDOmlbeH18FDfvUsdpu1IC4%3D"}]}
+nel: {"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}
+server: cloudflare
+cf-ray: a5e8accdca920ec1-EZE
+alt-svc: h3=":443"; ma=86400
+

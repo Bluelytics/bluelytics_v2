@@ -1,0 +1,25 @@
+packages:
+  - apps/api
+  - apps/jobs
+  - apps/web
+  - packages/*
+  - infra
+  - tools
+# apps/mobile (frozen React Native app) and legacy/** are deliberately NOT workspace members.
+
+# One version of each shared tool for the whole workspace: reference these as "catalog:".
+catalog:
+  typescript: 6.0.3
+  vitest: 5.1.1
+  "@types/node": 24.19.2
+  wrangler: 4.166.0
+  miniflare: 5.20261119.0-beta
+  "@cloudflare/workers-types": 5.20261121.1
+  tsx: 4.23.15
+
+# pnpm 12 fails the install on unapproved dependency build scripts.
+allowBuilds:
+  esbuild: true
+  workerd: true
+  sharp: true
+  protobufjs: false

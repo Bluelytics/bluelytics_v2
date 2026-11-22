@@ -1,0 +1,38 @@
+{
+  "name": "bluelytics",
+  "version": "2.0.0",
+  "private": true,
+  "description": "bluelytics.com.ar: public API, website, scraper and social posts for the Argentine dólar blue, on Cloudflare",
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "packageManager": "pnpm@12.22.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "typecheck": "pnpm -r run typecheck",
+    "test": "vitest run",
+    "build": "pnpm -r --if-present run build",
+    "dev:api": "pnpm --filter @bluelytics/api run dev",
+    "dev:jobs": "pnpm --filter @bluelytics/jobs run dev",
+    "dev:web": "pnpm --filter @bluelytics/web run dev",
+    "db:migrate:local": "pnpm --filter @bluelytics/api run db:migrate:local",
+    "db:migrate:remote": "pnpm --filter @bluelytics/api run db:migrate:remote",
+    "backfill": "pnpm --filter @bluelytics/tools run backfill",
+    "parity": "pnpm --filter @bluelytics/contract run parity",
+    "cards:preview": "pnpm --filter @bluelytics/tools run cards:preview",
+    "buffer:channels": "pnpm --filter @bluelytics/tools run buffer:channels",
+    "infra:preview": "pnpm --filter @bluelytics/infra run preview",
+    "infra:up": "pnpm --filter @bluelytics/infra run up",
+    "infra:sync-ids": "pnpm --filter @bluelytics/tools run infra:sync-ids",
+    "deploy:api": "pnpm --filter @bluelytics/api run deploy",
+    "deploy:jobs": "pnpm --filter @bluelytics/jobs run deploy",
+    "deploy:web": "pnpm --filter @bluelytics/web run deploy",
+    "deploy:all": "pnpm run deploy:api && pnpm run deploy:jobs && pnpm run deploy:web"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}
