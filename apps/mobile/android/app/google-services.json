@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "741788018211",
+    "firebase_url": "https://bluelytics-mobile.firebaseio.com",
+    "project_id": "bluelytics-mobile",
+    "storage_bucket": "bluelytics-mobile.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:741788018211:android:6ebd2fc0042a1dd5a67396",
+        "android_client_info": {
+          "package_name": "com.bluelytics.mobileapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "741788018211-oha5j8gpp1osbnjnis5geu3rpiqn083n.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bluelytics.mobileapp",
+            "certificate_hash": "f2e9a550c39634e4f32eb4841931ad5ed1d7941a"
+          }
+        },
+        {
+          "client_id": "741788018211-33k7t3d5p6a886gr82pc3bjl0ujagrcl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBvKkwQtar0uDHRmire42GzHOMWkc4tY6U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "741788018211-33k7t3d5p6a886gr82pc3bjl0ujagrcl.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
