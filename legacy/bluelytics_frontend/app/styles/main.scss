@@ -1,0 +1,79 @@
+$icon-font-path: "../bower_components/bootstrap-sass-official/assets/fonts/bootstrap/";
+// bower:scss
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap.scss";
+// endbower
+
+
+h1 {
+  margin-left:10px;
+}
+@media (max-width: 768px) {
+  h1{
+    font-size:22px;
+  }
+}
+
+div.price{
+  margin-bottom:10px;
+  margin-top:10px;
+}
+
+div.price > .name{
+  font-size:1.3em;
+  text-align:right;
+  margin-top:auto;
+  margin-bottom:auto;
+}
+
+div.price > .value_container{
+  font-weight:bold;
+  padding-left:15px;
+}
+
+div.price > .value_container > .value {
+  font-size:1.7em;
+}
+
+
+div.price > .value_container > .tax {
+  font-size:1.4em;
+  margin-top:auto;
+  margin-bottom:auto;
+  color:#707070;
+}
+
+div.price > .value_container > .trend {
+  font-size:1.4em;
+  margin-top:auto;
+  margin-bottom:auto;
+}
+
+div.price > .value_container > .trend.up  {
+  color:#087b02;
+}
+
+div.price > .value_container > .trend.down  {
+  color:#7b0000;
+}
+
+div.price > .value_container > .trend.neutral  {
+  color:#383838;
+}
+
+.calc_rates > p{
+  font-size:1.2em;
+  font-weight:bold;
+}
+
+h2, h3, h4, h5{
+  text-align:center;
+}
+
+.infopage p {
+  text-align:center;
+}
+
+.infopage {
+  max-width: 1000px;
+  margin:auto;
+}

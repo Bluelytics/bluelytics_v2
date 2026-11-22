@@ -1,0 +1,46 @@
+  <h2 translate>GAP.TITLE</h2>
+
+  <div ng-if="loading" layout="row" layout-sm="column" layout-align="space-around">
+  <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+</div>
+
+
+
+    <div layout="row" layout-align="space-around center" md-padding>
+      <md-input-container>
+        <label translate="GAP.COMPARE"></label>
+        <input required type="number" step="any" ng-model="valorCompare" min="1">
+      </md-input-container>
+    </div>
+
+<div layout="column" layout-align="space-around center">
+
+  <md-subheader class="md-primary"><span translate>COMMON.DOLARES.oficial</span> vs <span translate>COMMON.DOLARES.blue</span></md-subheader>
+  <div flex layout="row" layout-align="space-between center">
+    <md-button class="md-raised md-primary">
+      <md-tooltip><span translate>GAP.ABS_VALUE</span></md-tooltip>
+      <span>AR$ {{valorCompare * gap(valorDolarOficial, valorDolarBlue) |number:2}}</span>
+    </md-button>
+      <md-button class="md-raised md-accent">
+        <md-tooltip><span translate>GAP.PERC_VALUE</span></md-tooltip>
+        <span>({{ percFormat(percGap(valorDolarOficial, valorDolarBlue))  }})</span>
+      </md-button>
+  </div>
+  <md-divider></md-divider>
+
+</div>
+
+
+
+<h3 translate>GAP.EVOLUTION_TITLE</h3>
+<div style="height:400px;">
+
+<linechart data="filteredData" options="options" mode=""></linechart>
+<md-content class="md-padding" style="height: 50px; padding: 24px;">
+  <md-tooltip>
+    <span translate>COMMON.SLIDER</span>
+  </md-tooltip>
+  <slider style="width:100%;" ng-model="filter.value" ng-change="filterData()" min="0" step="1" max="filter.maxValue" range="true" tooltip="hide"></slider>
+<md-content>
+
+</div>

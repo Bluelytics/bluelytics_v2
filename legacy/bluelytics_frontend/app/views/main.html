@@ -1,0 +1,44 @@
+<h2 translate>RATE.TITLE</h2>
+
+<div class="row">
+  <div class="col-md-8 col-md-offset-2">
+    <md-tabs md-selected="selectedIndex" md-border-bottom>
+      <md-tab ng-repeat="(dname, dolar) in dolares"
+              label="{{('COMMON.DOLARES.' + dname) | translate}}">
+        <div flex>
+
+            <div layout="row" class="price">
+              <div flex="40" class="name" translate>RATE.BID</div>
+              <div flex="60" class="value_container">
+                  <span class="value">{{dolar.value_buy | number:2}}</span>
+              </div>
+            </div>
+
+            <md-divider></md-divider>
+
+            <div layout="row" class="price">
+              <div flex="40" class="name" translate>RATE.AVG</div>
+              <div flex="60" class="value_container">
+                  <span class="value">{{dolar.value_avg | number:2}}</span>
+              </div>
+            </div>
+
+            <md-divider></md-divider>
+
+            <div layout="row" class="price">
+              <div flex="40" class="name" translate>RATE.ASK</div>
+              <div flex="60" class="value_container">
+                  <span class="value">{{ dolar.value_sell | number:2}}</span>
+                  
+              </div>
+            </div>
+
+        </div>
+      </md-tab>
+    </md-tabs>
+  </div>
+</div>
+
+<div ng-if="loading" layout="row" layout-sm="column" layout-align="space-around">
+  <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+</div>

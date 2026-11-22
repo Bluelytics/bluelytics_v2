@@ -1,0 +1,55 @@
+
+  <h2 translate>CALCULATOR.TITLE</h2>
+
+    <div ng-if="loading" layout="row" layout-sm="column" layout-align="space-around">
+      <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+    </div>
+
+<span ng-if="!loading">
+
+<div layout="row" layout-sm="column" layout-align="center center">
+  <md-tabs md-selected="selectedIndex" md-border-bottom>
+    <md-tab ng-repeat="dolar in dolares_keys"
+            label="{{('COMMON.DOLARES.' + dolar) | translate}}"
+            md-on-select="cambiarDolar(dolar)">
+      <div flex>
+      </div>
+    </md-tab>
+  </md-tabs>
+</div>
+
+<div layout="row" layout-align="center center">
+  <div>
+    <label translate>CALCULATOR.FOREIGN_CURR</label>
+
+    <ui-select style="min-width:300px;" ng-model="moneda.selected" ng-change="update_ext()" ng-disabled="disabled">
+        <ui-select-match placeholder="Seleccione la moneda">{{$select.selected.name}}</ui-select-match>
+        <ui-select-choices repeat="moneda in monedas | filter: $select.search">
+          <div ng-bind-html="moneda.name + ' (' + moneda.code + ')' | highlight: $select.search">
+          <small>{{moneda.code}}</small>
+          </div>
+        </ui-select-choices>
+    </ui-select>
+  </div>
+</div>
+
+<div layout="column" layout-align="space-around center" md-padding class="calc_rates">
+  <p>{{valor_dolar | number:2}} ARS &#8776; 1 USD</p>
+  <p>1 USD &#8776; {{moneda.selected.value |number:2}} {{moneda.selected.code}}</p>
+</div>
+
+<md-divider></md-divider>
+
+
+<div layout="column" layout-align="space-around center" md-padding class="calc_rates">
+  <md-input-container>
+    <label translate="CALCULATOR.VALUE_LOCAL"></label>
+    <input required type="number" ng-change="update_ext()" step="any" name="rate" ng-model="calculo.ars" min="0">
+  </md-input-container>
+
+  <md-input-container>
+    <label translate="CALCULATOR.VALUE_FOREIGN" translate-values="{code: moneda.selected.code}"></label>
+    <input required type="number" ng-change="update_ars()" step="any" name="rate" ng-model="calculo.ext" min="0">
+  </md-input-container>
+</div>
+</span>
