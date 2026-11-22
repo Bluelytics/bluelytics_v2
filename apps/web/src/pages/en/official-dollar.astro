@@ -1,0 +1,11 @@
+---
+import { cachePage, LIVE } from '../../lib/cache.ts';
+import { loadYearPage } from '../../lib/pages.ts';
+import OfficialView from '../../views/OfficialView.astro';
+
+export const prerender = false;
+const data = await loadYearPage();
+cachePage(Astro, LIVE, data.snapshot.updatedAt);
+---
+
+<OfficialView locale="en" data={data} />

@@ -1,0 +1,23 @@
+---
+// Cloudflare Web Analytics: with a site token the beacon is embedded; without one the zone's
+// automatic (edge-injected) setup applies. GA4 only when PUBLIC_GA4_ID is set (ARCHITECTURE §10).
+const beaconToken = import.meta.env.PUBLIC_CF_BEACON_TOKEN;
+const ga4 = import.meta.env.PUBLIC_GA4_ID;
+---
+
+{beaconToken && <script is:inline defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon={JSON.stringify({ token: beaconToken })} />}
+{
+  ga4 && (
+    <>
+      <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(ga4)}`} />
+      <script is:inline define:vars={{ ga4 }}>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() {
+          window.dataLayer.push(arguments);
+        }
+        gtag('js', new Date());
+        gtag('config', ga4);
+      </script>
+    </>
+  )
+}

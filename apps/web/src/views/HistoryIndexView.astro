@@ -1,0 +1,93 @@
+---
+import RangeChart from '../components/RangeChart.astro';
+import Base from '../layouts/Base.astro';
+import { historyPath, historyPaths, ROUTES, type Locale } from '../i18n/routes.ts';
+import { pick, UI } from '../i18n/ui.ts';
+import { formatDay, formatPesos, formatSignedPercent } from '../lib/format.ts';
+import type { HistoryIndexData } from '../lib/history-pages.ts';
+import { datasetNode } from '../lib/seo.ts';
+import { groupByPeriod, summarize, toSeries } from '../lib/series.ts';
+
+interface Props {
+  locale: Locale;
+  data: HistoryIndexData;
+}
+
+const { locale, data } = Astro.props;
+const t = UI[locale];
+const first = data.days[0]?.day;
+const last = data.days.at(-1)?.day;
+const years = groupByPeriod(data.days, 4)
+  .flatMap(({ key, days }) => {
+    const summary = summarize(days);
+    return summary === null ? [] : [{ year: Number(key), summary }];
+  })
+  .reverse();
+const title = pick(locale, 'Dólar blue histórico: cotización día por día desde 2011 | Bluelytics', 'Historical blue dollar: day-by-day rates since 2011 | Bluelytics');
+const description = pick(
+  locale,
+  'Histórico del dólar blue y oficial en Argentina: cotización de compra y venta de cada día desde 2011, organizada por año y por mes.',
+  'History of the blue and official dollar in Argentina: buy and sell rates for every day since 2011, by year and month.',
+);
+---
+
+<Base
+  locale={locale}
+  title={title}
+  description={description}
+  paths={historyPaths()}
+  current="history"
+  crumbs={[{ name: t.nav.history, path: historyPath(locale) }]}
+  dateModified={null}
+  graph={first && last ? [datasetNode(locale, { from: first, to: last })] : []}
+>
+  <div class="page-head">
+    <h1>{pick(locale, 'Dólar blue histórico', 'Blue dollar history')}</h1>
+    <p>
+      {
+        first && last
+          ? pick(locale, `Cotizaciones de cada día entre el ${formatDay(first, locale)} y el ${formatDay(last, locale)}. Elegí un año para ver sus meses y días.`, `Rates for every day from ${formatDay(first, locale)} to ${formatDay(last, locale)}. Pick a year to see its months and days.`)
+          : t.noData
+      }
+    </p>
+  </div>
+  {
+    data.monthly.length > 1 && (
+      <section class="card">
+        <RangeChart locale={locale} mode="rates" data={toSeries(data.monthly)} range="max" label={pick(locale, 'Dólar blue y oficial, cierre de cada mes desde 2011', 'Blue and official dollar, monthly close since 2011')} caption={pick(locale, 'Cierre mensual, precio de venta.', 'Monthly close, sell price.')} />
+      </section>
+    )
+  }
+  <section class="section">
+    <h2>{pick(locale, 'Por año', 'By year')}</h2>
+    <ul class="year-list" role="list">
+      {years.map(({ year, summary }) => {
+        const open = summary.first.blue?.sell ?? 0;
+        const close = summary.last.blue?.sell ?? 0;
+        const ratio = open > 0 ? close / open - 1 : 0;
+        return (
+          <li>
+            <a class="card" href={historyPath(locale, { year })}>
+              <strong>{year}</strong>
+              <span class="num">{formatPesos(close, locale)}</span>
+              <span class:list={['num dim', ratio > 0 ? 'up' : ratio < 0 ? 'down' : '']}>{formatSignedPercent(ratio, locale)}</span>
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  </section>
+  <section class="section prose">
+    <h2>{pick(locale, 'Sobre estos datos', 'About this data')}</h2>
+    <p>
+      {
+        pick(
+          locale,
+          'Cada día muestra el último valor publicado por Bluelytics en esa fecha (el cierre). Los datos completos se pueden descargar desde la ',
+          'Each day shows the last value Bluelytics published on that date (the close). The whole dataset can be downloaded from the ',
+        )
+      }
+      <a href={ROUTES.api[locale]}>API</a>.
+    </p>
+  </section>
+</Base>

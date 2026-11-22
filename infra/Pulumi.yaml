@@ -1,0 +1,9 @@
+name: bluelytics
+description: Long-lived Cloudflare resources for bluelytics (D1, R2, zone rules); Worker code is deployed by wrangler
+main: src/index.ts
+runtime:
+  name: nodejs
+  options:
+    packagemanager: pnpm
+    # Node 24 strips the types itself (the sources are erasable-syntax TypeScript); no ts-node.
+    typescript: false

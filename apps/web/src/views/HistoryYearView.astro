@@ -1,0 +1,89 @@
+---
+import Pager from '../components/Pager.astro';
+import RangeChart from '../components/RangeChart.astro';
+import Base from '../layouts/Base.astro';
+import { historyPath, historyPaths, type Locale } from '../i18n/routes.ts';
+import { pick, UI } from '../i18n/ui.ts';
+import { formatDay, formatPesos, formatSignedPercent, monthName } from '../lib/format.ts';
+import type { HistoryYearData } from '../lib/history-pages.ts';
+import { groupByPeriod, summarize, toSeries } from '../lib/series.ts';
+
+interface Props {
+  locale: Locale;
+  data: HistoryYearData;
+}
+
+const { locale, data } = Astro.props;
+const { year } = data;
+const t = UI[locale];
+const summary = summarize(data.days);
+const months = groupByPeriod(data.days, 7).flatMap(({ key, days }) => {
+  const s = summarize(days);
+  return s === null ? [] : [{ month: Number(key.slice(5, 7)), s }];
+});
+const title = pick(locale, `Dólar blue en ${year}: cotización histórica mes a mes | Bluelytics`, `Blue dollar in ${year}: historical rates month by month | Bluelytics`);
+const description = summary
+  ? pick(
+      locale,
+      `Dólar blue en ${year}: abrió en ${formatPesos(summary.first.blue?.sell ?? 0, locale)}, cerró en ${formatPesos(summary.last.blue?.sell ?? 0, locale)}; mínimo ${formatPesos(summary.minSell, locale)}, máximo ${formatPesos(summary.maxSell, locale)}. Cotización de cada mes y día.`,
+      `Blue dollar in ${year}: opened at ${formatPesos(summary.first.blue?.sell ?? 0, locale)}, closed at ${formatPesos(summary.last.blue?.sell ?? 0, locale)}; low ${formatPesos(summary.minSell, locale)}, high ${formatPesos(summary.maxSell, locale)}. Rates for every month and day.`,
+    )
+  : title;
+const yearLink = (y: number | null) => (y === null ? null : { href: historyPath(locale, { year: y }), label: String(y) });
+---
+
+<Base locale={locale} title={title} description={description} paths={historyPaths({ year })} current="history" crumbs={[{ name: t.nav.history, path: historyPath(locale) }, { name: String(year), path: historyPath(locale, { year }) }]}>
+  <div class="page-head">
+    <h1>{pick(locale, `Dólar blue en ${year}`, `Blue dollar in ${year}`)}</h1>
+    {summary && <p>{description.replace(/ \| Bluelytics$/, '')}</p>}
+  </div>
+  {
+    summary && (
+      <div class="grid tiles">
+        <div class="card tile"><span class="label">{pick(locale, 'Cierre', 'Close')}</span><span class="value num">{formatPesos(summary.last.blue?.sell ?? 0, locale)}</span><span class="tile-foot">{formatDay(summary.last.day, locale, 'short')}</span></div>
+        <div class="card tile"><span class="label">{pick(locale, 'Mínimo', 'Low')}</span><span class="value num">{formatPesos(summary.minSell, locale)}</span><span class="tile-foot">{formatDay(summary.minDay, locale, 'short')}</span></div>
+        <div class="card tile"><span class="label">{pick(locale, 'Máximo', 'High')}</span><span class="value num">{formatPesos(summary.maxSell, locale)}</span><span class="tile-foot">{formatDay(summary.maxDay, locale, 'short')}</span></div>
+      </div>
+    )
+  }
+  {
+    data.days.length > 1 && (
+      <section class="section card">
+        <RangeChart locale={locale} mode="rates" data={toSeries(data.days)} range="1y" label={pick(locale, `Dólar blue y oficial durante ${year}`, `Blue and official dollar during ${year}`)} />
+      </section>
+    )
+  }
+  <section class="section">
+    <h2>{pick(locale, 'Por mes', 'By month')}</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">{pick(locale, 'Mes', 'Month')}</th>
+            <th scope="col" class="num">{pick(locale, 'Cierre', 'Close')}</th>
+            <th scope="col" class="num">{pick(locale, 'Mínimo', 'Low')}</th>
+            <th scope="col" class="num">{pick(locale, 'Máximo', 'High')}</th>
+            <th scope="col" class="num">{pick(locale, 'Variación', 'Change')}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {months.map(({ month, s }) => {
+            const open = s.first.blue?.sell ?? 0;
+            const close = s.last.blue?.sell ?? 0;
+            const ratio = open > 0 ? close / open - 1 : 0;
+            return (
+              <tr>
+                <th scope="row"><a href={historyPath(locale, { year, month })}>{monthName(month, locale)}</a></th>
+                <td class="num">{formatPesos(close, locale)}</td>
+                <td class="num">{formatPesos(s.minSell, locale)}</td>
+                <td class="num">{formatPesos(s.maxSell, locale)}</td>
+                <td class:list={['num', ratio > 0 ? 'up' : ratio < 0 ? 'down' : '']}>{formatSignedPercent(ratio, locale)}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+    <Pager previous={yearLink(data.previous)} next={yearLink(data.next)} label={pick(locale, 'Otros años', 'Other years')} />
+  </section>
+</Base>

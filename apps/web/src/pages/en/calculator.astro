@@ -1,0 +1,11 @@
+---
+import { cachePage, LIVE } from '../../lib/cache.ts';
+import { loadSnapshot } from '../../lib/data.ts';
+import CalculatorView from '../../views/CalculatorView.astro';
+
+export const prerender = false;
+const snapshot = await loadSnapshot();
+cachePage(Astro, LIVE, snapshot.updatedAt);
+---
+
+<CalculatorView locale="en" snapshot={snapshot} />

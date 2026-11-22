@@ -1,0 +1,63 @@
+---
+// Server-rendered line chart; src/client/chart.ts adds hover readout and range presets.
+import type { Locale } from '../i18n/routes.ts';
+import { UI } from '../i18n/ui.ts';
+import { buildChart, defaultIndex, linesFor, RANGE_PRESETS, readoutItems, renderChart, type ChartMode, type RangePreset, type SeriesData } from '../lib/chart.ts';
+
+interface Props {
+  locale: Locale;
+  mode: ChartMode;
+  /** The series drawn on the server (already limited to `range`). */
+  data: SeriesData;
+  /** Preset the server data corresponds to; with `presets`, the client can switch. */
+  range?: RangePreset;
+  presets?: boolean;
+  small?: boolean;
+  /** Accessible summary of what the chart shows. */
+  label: string;
+  caption?: string | undefined;
+  /** Day whose values the readout shows by default (otherwise the last day). */
+  focus?: string;
+}
+
+const { locale, mode, data, range = '1y', presets = false, small = false, label, caption, focus } = Astro.props;
+const t = UI[locale];
+const unit = mode === 'gap' ? 'percent' : 'pesos';
+const model = buildChart(data.days, linesFor(mode, data), unit, locale, small ? 3 : 5);
+const names = { blue: 'Blue', oficial: locale === 'es' ? 'Oficial' : 'Official', gap: t.gap };
+const readout = readoutItems(model, defaultIndex(model, focus), locale);
+---
+
+<figure class="chart" data-chart data-mode={mode} data-locale={locale} data-range={range} data-small={small ? '' : undefined} data-focus={focus} data-src="/data/series.json">
+  <div class="chart-top">
+    <div class="readout" data-readout>
+      <span class="readout-day">{readout.day}</span>
+      {
+        readout.values.map((item) => (
+          <span class={`key key-${item.key}`}>
+            {names[item.key]} <span>{item.text}</span>
+          </span>
+        ))
+      }
+    </div>
+    {
+      presets && (
+        <div class="ranges" role="group" aria-label={t.chart.rangeLabel}>
+          {RANGE_PRESETS.map((preset) => (
+            <button type="button" data-range={preset} aria-pressed={preset === range ? 'true' : 'false'}>
+              {t.chart.ranges[preset]}
+            </button>
+          ))}
+        </div>
+      )
+    }
+  </div>
+  <div class:list={['plot-box', { small }]} role="img" aria-label={label} set:html={renderChart(model)} />
+  <script is:inline type="application/json" data-series set:html={JSON.stringify({ ...data, names }).replace(/</g, '\\u003c')} />
+  {caption && <figcaption class="dim">{caption}</figcaption>}
+</figure>
+
+<script>
+  import { enhanceCharts } from '../client/chart.ts';
+  enhanceCharts();
+</script>

@@ -1,0 +1,74 @@
+---
+import RateHero from '../components/RateHero.astro';
+import RateTile from '../components/RateTile.astro';
+import Base from '../layouts/Base.astro';
+import { ROUTES, type Locale } from '../i18n/routes.ts';
+import { pick, UI } from '../i18n/ui.ts';
+import { formatHundredths, formatPesos } from '../lib/format.ts';
+import type { EuroData } from '../lib/pages.ts';
+import { exchangeRateNode } from '../lib/seo.ts';
+import { ogVersion } from '../lib/snapshot.ts';
+
+interface Props {
+  locale: Locale;
+  data: EuroData;
+}
+
+const { locale, data } = Astro.props;
+const { snapshot, eurPerUsd } = data;
+const { blue, oficial } = snapshot;
+const t = UI[locale];
+const euroBlue = blue && blue.euroSell > 0 ? { buy: blue.euroBuy, sell: blue.euroSell } : null;
+
+const title = euroBlue
+  ? pick(locale, `Euro blue hoy: ${formatPesos(euroBlue.sell, locale)} venta · ${formatPesos(euroBlue.buy, locale)} compra | Bluelytics`, `Blue euro today: ${formatPesos(euroBlue.sell, locale)} sell · ${formatPesos(euroBlue.buy, locale)} buy | Bluelytics`)
+  : pick(locale, 'Euro blue hoy | Bluelytics', 'Blue euro today | Bluelytics');
+const description = pick(
+  locale,
+  'Cotización del euro blue y del euro oficial hoy en Argentina, calculadas a partir del dólar blue y oficial con el tipo de cambio euro/dólar del día.',
+  "Today's blue and official euro rates in Argentina, derived from the blue and official dollar with the day's euro/dollar exchange rate.",
+);
+const usdPerEur = eurPerUsd !== null && eurPerUsd > 0 ? Math.round(10_000 / eurPerUsd) : null;
+---
+
+<Base
+  locale={locale}
+  title={title}
+  description={description}
+  paths={ROUTES.euro}
+  current="euro"
+  crumbs={[{ name: t.nav.euro, path: ROUTES.euro[locale] }]}
+  dateModified={snapshot.updatedAt}
+  ogVersion={ogVersion(snapshot)}
+  graph={euroBlue ? [{ ...exchangeRateNode({ name: t.euroBlue, buy: euroBlue.buy, sell: euroBlue.sell }), currency: 'EUR' }] : []}
+>
+  <RateHero locale={locale} title={pick(locale, 'Euro blue hoy', 'Blue euro today')} rate={euroBlue} updatedAt={snapshot.updatedAt}>
+    <div class="hero-side prose">
+      <p class="muted">
+        {
+          pick(
+            locale,
+            'En Argentina el euro se negocia poco en el mercado informal: su precio sigue al dólar blue. Lo calculamos dividiendo el dólar blue por la cotización euro/dólar del día.',
+            'Euros trade thinly on Argentina’s informal market and their price follows the blue dollar. We derive it by dividing the blue dollar by the day’s euro/dollar rate.',
+          )
+        }
+      </p>
+    </div>
+  </RateHero>
+
+  <section class="section">
+    <div class="grid tiles">
+      {oficial && oficial.euroSell > 0 && <RateTile locale={locale} label={t.euroOficial} value={formatPesos(oficial.euroSell, locale)} foot={`${t.buy} ${formatPesos(oficial.euroBuy, locale)}`} />}
+      {blue && <RateTile locale={locale} href={ROUTES.home[locale]} label={t.blue} value={formatPesos(blue.sell, locale)} move={snapshot.blueMove} foot={`${t.buy} ${formatPesos(blue.buy, locale)}`} />}
+      {usdPerEur !== null && <RateTile locale={locale} label={pick(locale, 'Euro / dólar', 'Euro / dollar')} value={`US$ ${formatHundredths(usdPerEur, locale)}`} foot={pick(locale, 'por cada euro', 'per euro')} />}
+    </div>
+  </section>
+
+  <section class="section prose">
+    <h2>{pick(locale, '¿Querés convertir euros a pesos?', 'Converting euros to pesos?')}</h2>
+    <p>
+      {pick(locale, 'La', 'The')} <a href={ROUTES.calculator[locale]}>{pick(locale, 'calculadora', 'calculator')}</a>
+      {pick(locale, 'convierte euros y dólares a pesos (y al revés) al valor blue u oficial.', 'converts euros and dollars to pesos (and back) at the blue or official rate.')}
+    </p>
+  </section>
+</Base>

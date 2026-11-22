@@ -1,0 +1,72 @@
+---
+// Embeddable card (iframe target of /embed.js). Self-contained: system fonts, inline CSS, no script.
+import type { Locale } from '../i18n/routes.ts';
+import { absoluteUrl, ROUTES } from '../i18n/routes.ts';
+import { pick, UI } from '../i18n/ui.ts';
+import { cachePage, LIVE } from '../lib/cache.ts';
+import { loadSnapshot } from '../lib/data.ts';
+import { formatDateTime, formatPesos } from '../lib/format.ts';
+
+export const prerender = false;
+const locale: Locale = Astro.url.searchParams.get('lang') === 'en' ? 'en' : 'es';
+const themeParam = Astro.url.searchParams.get('theme');
+const theme = themeParam === 'dark' || themeParam === 'light' ? themeParam : 'auto';
+const snapshot = await loadSnapshot();
+cachePage(Astro, LIVE, snapshot.updatedAt);
+const t = UI[locale];
+const rows = [
+  { name: t.blue, rate: snapshot.blue },
+  { name: t.oficial, rate: snapshot.oficial },
+];
+---
+
+<!doctype html>
+<html lang={locale === 'es' ? 'es-AR' : 'en'} data-theme={theme}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>{pick(locale, 'Dólar blue hoy', 'Blue dollar today')} · Bluelytics</title>
+    <style is:inline>
+      :root{--bg:#fff;--text:#0b1320;--muted:#475467;--line:#dfe5ee;--brand:#0163a4;color-scheme:light}
+      @media (prefers-color-scheme:dark){:root[data-theme=auto]{--bg:#111823;--text:#f2f5f9;--muted:#a3aebd;--line:#223044;--brand:#7fb0ff;color-scheme:dark}}
+      :root[data-theme=dark]{--bg:#111823;--text:#f2f5f9;--muted:#a3aebd;--line:#223044;--brand:#7fb0ff;color-scheme:dark}
+      *{box-sizing:border-box}
+      body{margin:0;font:14px/1.4 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:var(--text);background:var(--bg)}
+      .w{border:1px solid var(--line);border-radius:14px;padding:12px 14px;height:170px;display:grid;grid-template-rows:auto 1fr auto;gap:6px}
+      table{width:100%;border-collapse:collapse}
+      th,td{padding:4px 0;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+      th:first-child{text-align:left}
+      thead th{color:var(--muted);font-size:12px;font-weight:600}
+      tbody th{font-weight:600}
+      td.s{font-size:20px;font-weight:700}
+      .f{display:flex;justify-content:space-between;color:var(--muted);font-size:12px}
+      a{color:var(--brand);font-weight:600;text-decoration:none}
+    </style>
+  </head>
+  <body>
+    <div class="w">
+      <a href={absoluteUrl(ROUTES.home[locale])} target="_blank" rel="noopener">bluelytics</a>
+      <table>
+        <thead>
+          <tr><th></th><th>{t.buy}</th><th>{t.sell}</th></tr>
+        </thead>
+        <tbody>
+          {
+            rows.map(({ name, rate }) => (
+              <tr>
+                <th scope="row">{name}</th>
+                <td>{rate ? formatPesos(rate.buy, locale) : '–'}</td>
+                <td class="s">{rate ? formatPesos(rate.sell, locale) : '–'}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+      <div class="f">
+        <span>{snapshot.updatedAt && `${t.updated}: ${formatDateTime(snapshot.updatedAt, locale)}`}</span>
+        <a href={absoluteUrl(ROUTES.history[locale])} target="_blank" rel="noopener">{t.nav.history} →</a>
+      </div>
+    </div>
+  </body>
+</html>

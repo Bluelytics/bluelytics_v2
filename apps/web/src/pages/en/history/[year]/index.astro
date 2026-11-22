@@ -1,0 +1,15 @@
+---
+import { CLOSED, cachePage, notFound, SLOW } from '../../../../lib/cache.ts';
+import { currentYear } from '../../../../lib/data.ts';
+import { parseYear } from '../../../../lib/history.ts';
+import { loadHistoryYear } from '../../../../lib/history-pages.ts';
+import HistoryYearView from '../../../../views/HistoryYearView.astro';
+
+export const prerender = false;
+const year = parseYear(Astro.params.year, currentYear());
+const data = year === null ? null : await loadHistoryYear(year);
+if (data === null) return notFound(Astro);
+cachePage(Astro, data.closed ? CLOSED : SLOW);
+---
+
+<HistoryYearView locale="en" data={data} />

@@ -1,4 +1,5 @@
 import type { AlertRow } from '@bluelytics/core';
+import { toStoredUtc } from '@bluelytics/core';
 import type { D1DatabaseLike, D1StatementLike } from './d1.ts';
 import { insertRowsStatements } from './d1.ts';
 
@@ -29,6 +30,21 @@ export async function insertAlert(db: D1DatabaseLike, alert: NewAlert): Promise<
     .first<AlertRecord>();
   if (!row) throw new Error('insertAlert: no row returned');
   return alertFromRecord(row);
+}
+
+/**
+ * Inserts the alert only when no alert exists at or after `since` (the jobs Worker passes
+ * `now − cooldown`), in one statement, so two overlapping runs (a cron run and a forced
+ * `/admin/run`) cannot both record and push the same move. `null` = another run got there first.
+ */
+export async function insertAlertUnlessRecent(db: D1DatabaseLike, alert: NewAlert, since: string): Promise<AlertRow | null> {
+  const row = await db
+    .prepare(
+      'INSERT INTO alerts (alert_at, buy, sell, push_status) SELECT ?, ?, ?, ? WHERE NOT EXISTS (SELECT 1 FROM alerts WHERE alert_at >= ?) RETURNING *',
+    )
+    .bind(alert.alertAt, alert.buy, alert.sell, alert.pushStatus ?? null, toStoredUtc(since))
+    .first<AlertRecord>();
+  return row ? alertFromRecord(row) : null;
 }
 
 /** Inserts alerts with explicit ids (backfill: the autoincrement then continues after the largest id). */

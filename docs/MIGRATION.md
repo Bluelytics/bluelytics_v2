@@ -64,10 +64,16 @@ Total (estimate): about 10–12 days from Phase 0 to the end of the 48-hour watc
 
 Write the answer next to each; several of them change commands below.
 
-- [ ] **Workers Free or Paid.** Recommended: **Paid** before Phase 3. Free allows 100,000 Worker requests per
-      day **account-wide**: in `worker` mode every API request and every website page request is a Worker
-      request. Free also allows 10 ms CPU per cron run (parsing several HTML pages is expected to exceed it)
-      and one Browser Run screenshot per 10 s. Step 0.8 gives you the real daily request count to confirm.
+- [ ] **Workers Paid (required for the jobs Worker).** Not a real choice: on Free the jobs Worker does not
+      fit. Free allows 50 D1 queries per invocation (Paid: 1,000) and a counted Friday 18:05 run (daily step,
+      tick, update and weekly posts on two networks) makes exactly 50, so one more network, a story or an
+      alert goes over; Free also allows 10 ms CPU per cron run (ticks where the value moves and the daily step
+      exceed it) and one Browser Run Quick Action per 10 s. Switch to **Paid** before step 2.4. For request
+      volume, Free allows 100,000 Worker requests per day **account-wide**; in `worker` mode every API request
+      is one, and every website request is **at least two** billed invocations (the gateway calls the Astro
+      entrypoint through `ctx.exports`, and favicon, images and `robots.txt` pass the gateway too; only
+      `/_astro/*` skips it). Multiply the page requests of step 0.8 by 2 or more when sizing against Free's
+      100k/day or Paid's 10M/month.
 - [ ] **`/json/last_price` bug.** Legacy returns the *oficial* numbers in the `blue` entry. v2 fixes it by
       default; `LEGACY_V1_BLUE_BUG=true` keeps the bug. Three third-party bindings use this endpoint; the
       choice is announced before the switch (step 3.4).
@@ -98,6 +104,34 @@ What `/v2/latest` shows at the switch is not a choice: legacy is frozen at cutov
 own consensus from the switch on. The blue value may step at that moment (on 2026-11-20 it would have been
 1635/1670 → 1655/1675; the legacy scraper patch in progress may already have changed that gap). The shadow
 period measures the real difference, and step 3.4 announces it.
+
+### Already done or found out (2026-11-22)
+
+Owner decisions and read-only findings from the first session. Re-check them only if something seems off.
+
+- **Decisions:** Workers **Paid** (assumed active on the account; it is shared with the owner's other project).
+  Social stays on Buffer: the new API key works and lists two connected channels, whose ids equal the legacy
+  profile ids: `BUFFER_CHANNELS={"twitter":"532affdc1d36e0037832ea01","instagram":"5eaee89c594d230afc4f3418"}`.
+- **Credentials on the operator machine:** wrangler OAuth login (account `bb89fd1555c4374955e50cf1112d2845`);
+  `CLOUDFLARE_INFRA_TOKEN` (the Pulumi + ops token of 0.4, verified active with every read permission) and
+  `BUFFER_API_KEY` in `~/dev/bluelytics/.env`, outside every repository. `aws login` works (it resolves to the
+  account root user; an IAM user or SSO role is advisable).
+- **Cloudflare zone** (`0a984ad377dc9f0db7092fd75702ccdc`, Free zone plan; inventory saved in `.work/inventory/`):
+  apex and `www` are proxied CNAMEs to the S3 website endpoint `bluelytics.com.ar.s3-website-sa-east-1.amazonaws.com`
+  (the bucket is in **sa-east-1**, not us-west-2); `api` is a proxied CNAME to the load balancer
+  `bluelytics-api-lb-976772362.us-west-2.elb.amazonaws.com`; Zoho MX records and a Google site-verification TXT
+  must be kept; three `_…acm-validations.aws` CNAMEs can go at teardown. No page rules, no Worker routes. One
+  cache rule, "Latest value", caches **every hostname** except the path `/v2/latest` for 7200 s at edge and
+  browser — scope it to the legacy API before shadow hostnames serve traffic (0.6/1.x). SSL mode is
+  **Flexible** (move to Full (strict) once AWS origins are gone), Always Use HTTPS on, minimum TLS 1.0.
+- **AWS (us-west-2):** scraper = ECS Fargate cluster `bluelytics-scraper`, task definitions
+  `bluelytics-scraper:3` (EventBridge rule `scraper-every-5-min`, `cron(0/15 * ? * MON-FRI *)`) and
+  `bluelytics-scraper-currencies:1` (rule `bluelytics-scraper-currency-every-6-h`), both on the `:latest`
+  image, credentials injected as ECS secrets. API = ECS service `bluelytics-api-service` in cluster
+  `bluelytics-api-cluster` behind the load balancer above. Database = RDS Postgres 16 `bluelytics`
+  (db.t4g.micro, private, automated snapshots kept 3 days). Logs in CloudWatch `/ecs/bluelytics-scraper` and
+  `/ecs/bluelytics-scraper-currencies`. The legacy scraper fix was deployed on 2026-11-22 (image
+  `sha256:caedf503…`); the previous image is tagged `rollback-2024-09-03` in ECR.
 
 ---
 
@@ -222,15 +256,15 @@ to work around on the day. Check each; if one fails, stop and get it fixed.
 
 | # | Behaviour this guide needs | How to check |
 |---|---|---|
-| C1 | `pnpm deploy:jobs -- <flags>` passes the flags through to `wrangler deploy` | `pnpm deploy:jobs -- --dry-run` prints wrangler's dry-run summary and uploads nothing |
-| C2 | A flag is on only for the exact string `"true"` (`"false"`, empty or missing → off) | A test in `apps/jobs` covers it; `grep -rn "_ENABLED" apps/jobs/src` shows a comparison with `'true'` |
+| C1 | `pnpm deploy:api`, `deploy:jobs` and `deploy:web` `-- <flags>` pass the flags through to `wrangler deploy` (pnpm forwards a literal `--`; the shared `scripts/wrangler-deploy.mjs` drops it) | For each of the three, `pnpm deploy:<app> -- --dry-run` ends with `--dry-run: exiting now.` and uploads nothing. Run it with no `CLOUDFLARE_API_TOKEN` exported, so a regression fails at the token prompt instead of deploying |
+| C2 | A flag is on only for the exact string `"true"` (`"false"`, empty or missing → off) | A test in `apps/jobs` covers it; `grep -n "=== 'true'" apps/jobs/src/env.ts` shows the comparison in `isEnabled`, and `grep -rn "_ENABLED" apps/jobs/src` shows every flag read through it |
 | C3 | `GET /admin/health` reports the effective `PUSH_ENABLED` and `SOCIAL_ENABLED` | Read the handler or its test |
 | C4 | With `PUSH_ENABLED` off, a new alert row gets `push_status` `disabled` (or another non-`sent` value) and nothing is sent; with `SOCIAL_ENABLED` off, a post row gets `dry_run` and Buffer is not called | The pipeline test in `apps/jobs` |
 | C5 | `FIREBASE_SERVICE_ACCOUNT_JSON` is parsed only when a push is sent, so a placeholder value is harmless in shadow mode | Read the FCM sender |
 | C6 | `POST /admin/run?force=1` outside the trading window does not write `daily_rates`, `ticks`, `alerts` or `social_posts` (fetching sources and writing `observations` is fine) | Read the handler or its test. If it does write them, never call it outside the trading window (2.4) |
 | C7 | `pnpm backfill` (full run) writes `daily_rates`, the last two `alerts` with their legacy ids, `currencies`, `latest_rates`, and re-renders the `rendered` bodies | `--dry-run` output lists each table with a row count |
 | C8 | `pnpm backfill -- --since <day>` writes only `daily_rates` for days ≥ `<day>` and the last two `alerts`, then re-renders the affected bodies; it never touches `latest_rates`, `currencies`, `ticks`, `observations` or `social_posts` | `--dry-run --since <day>` output lists only those tables |
-| C9 | The social rule's baseline is the newest **`sent`** post per network (`getLastSentPost` with its default statuses); `dry_run` rows do not count | Read the jobs Worker's call site |
+| C9 | With `SOCIAL_ENABLED` on, the social rule's baseline is the newest **`sent`** post per network; `dry_run` rows do not count. With it off, `dry_run` rows stand in for `sent` ones (so shadow rows follow the real cooldowns and 0.75 % rule) and their event keys end in `-dry`, so they never block or seed a live post | Read `runSocial` in `apps/jobs/src/social.ts`; the shadow-mode pipeline test switches posting on mid-day and expects real posts |
 | C10 | Recommended, not in `ARCHITECTURE.md` §7: `POST /admin/push/test` sends an FCM `validate_only: true` message with the deployed secret and reports the result | If missing, the deployed Firebase secret cannot be tested before the first real alert (known gap; see 4.10) |
 
 **Undo:** nothing changed.
@@ -388,9 +422,10 @@ Write down, in `$MIG_DIR/aws/inventory.md`:
 
 In the Cloudflare dashboard, open the zone's traffic analytics for the last 30 days and record requests per
 day. If the view lets you filter by hostname, record `api.bluelytics.com.ar` and the apex separately; if not,
-the zone total is an upper bound. Decision input: if API plus website requests exceed about 80,000 on any day
-(a margin chosen here under Free's 100,000/day account-wide limit), Workers Free is ruled out; more than
-~10M API requests per month is when Phase 7 starts to save money.
+the zone total is an upper bound. Workers Paid is needed anyway for the jobs Worker (Decisions list); this
+number sizes request volume against Paid's included 10M/month. Count each website request as at least two
+billed Worker invocations (gateway plus the Astro entrypoint); API requests count once. More than ~10M API
+requests per month is when Phase 7 starts to save money.
 
 - [ ] API requests/day: peak ______, average ______. Website requests/day: peak ______.
 
@@ -535,18 +570,29 @@ In `apps/jobs/wrangler.jsonc` → `vars` (names from `ARCHITECTURE.md` §7, §9)
 | `API_MODE` | `"worker"` |
 | `LEGACY_V1_BLUE_BUG` | `"false"` (or `"true"` if you decided to keep the bug) |
 | `BUFFER_CHANNELS` | set in step 2.7 |
+| `MEDIA_HOSTNAME` | `"media.bluelytics.com.ar"` (the R2 custom domain; image URLs sent to Buffer) |
+| `API_HOSTNAME` | `"api.bluelytics.com.ar"` (only read by the static-first purge, Phase 7) |
+| `CLOUDFLARE_ZONE_ID` | `""` now; set to `$CF_ZONE_ID` in step 7.3 before switching to static-first |
 
-Admin host: set `workers_dev` / `routes` in `apps/jobs/wrangler.jsonc` as decided (Decisions list).
+Admin host: set `workers_dev` / `routes` in `apps/jobs/wrangler.jsonc` as decided (Decisions list). The file
+ships with `"workers_dev": true` and no routes (the `workers.dev` admin host).
+
+`apps/api/wrangler.jsonc` vars: `SHADOW_HOSTNAME` (`"api-v2.bluelytics.com.ar"`, answers there carry
+`noindex`), and copies of `LEGACY_V1_BLUE_BUG` and `API_MODE` that the API Worker does not read. Keep those two
+equal to the jobs values by hand: the jobs Worker renders the bodies, so its values decide the output.
+`apps/web/wrangler.jsonc` vars: `PRODUCTION_HOSTNAME` (`"bluelytics.com.ar"`, every other host gets `noindex`)
+and `MEDIA_ORIGIN` (`"https://media.bluelytics.com.ar"`, Open Graph images).
 
 For `apps/web`: leave `PUBLIC_ANDROID_URL`, `PUBLIC_IOS_URL` unset (badges hidden); set `PUBLIC_GA4_ID` only if
 you decided to use GA4. A var and a secret must never share a name: deploying a var with a secret's name
 silently deletes the secret (`cloudflare.md` §11).
 
-Analytics [FIND OUT]: read how `apps/web` includes Cloudflare Web Analytics (a beacon `<script>` with a site
-token in the page, or nothing, relying on the edge injection found in 0.6). Whether edge injection works on
-Worker-rendered HTML, and whether the v2 Content-Security-Policy allows `static.cloudflareinsights.com`, has not
-been verified; 2.8 and 4.9 check it. If the page embeds the beacon, create or reuse the Web Analytics site in
-the dashboard and give the implementation its token (it is public, not a secret).
+Analytics: `apps/web` embeds the Cloudflare Web Analytics beacon `<script>` only when the build-time env
+`PUBLIC_CF_BEACON_TOKEN` is set (a public site token, not a secret: create or reuse the Web Analytics site in the
+dashboard and export it before `pnpm deploy:web`). Unset, the page relies on the zone's edge injection found
+in 0.6; whether that works on Worker-rendered HTML has not been verified, so setting the token is the safer
+choice. v2 sends no Content-Security-Policy, so nothing blocks `static.cloudflareinsights.com`. 2.8 and 4.9
+check the beacon loads.
 
 ```sh
 grep -nE '"(PUSH|SOCIAL)_ENABLED"' apps/jobs/wrangler.jsonc      # both must read "false"
@@ -812,9 +858,13 @@ curl -sS "https://api.bluelytics.com.ar/v2/alerts?ts=$(date +%s)"
       shadow period**, because the gap changes.
 - [ ] v2 shadow alerts happen at roughly the moments legacy alerted (about one per trading day historically),
       plus possible opening-gap alerts legacy never sends.
-- [ ] `dry_run` social rows appear when legacy posts, plus on Mondays (legacy never posts on Mondays).
+- [ ] `dry_run` social rows appear when legacy posts, plus on Mondays (legacy never posts on Mondays). Each row
+      is a post v2 would have sent: the cooldowns (X 15 min, Instagram 60 min) and the 0.75 % rule apply to the
+      dry runs as they will to live posts, so expect at most one row per network per move. Keys end in `-dry`;
+      an update key with `-after-<instant>` names the dry run it was compared with.
 - [ ] Workers errors: dashboard Workers metrics / Workers Logs for all three Workers; `wr_jobs tail` during a run if something looks wrong.
-- [ ] On Workers Free only: cron CPU time per invocation below 10 ms (Workers Logs `cpuTime`), Browser Run under 10 minutes/day. If either fails, switch to Paid before cutover.
+- [ ] Workers Paid is active (Decisions list: the jobs Worker exceeds Free's 50 D1 queries per invocation and
+      10 ms CPU). Browser Run under its daily allowance (dashboard).
 
 The first time each of these happens, check it explicitly; it proves the flags are honoured with real data:
 
@@ -910,7 +960,7 @@ rm "$MIG_DIR/ROLLBACK_PROBE.sh"
         shows it as `current` once re-rendered, so from 4.6 on that endpoint no longer matches legacy's.
 - [ ] Friday weekly `dry_run` row created for each network after 18:00 ART; card looks right.
 - [ ] Rehearsals 2.3 and 3.2 done, including the rollback script from a fresh shell.
-- [ ] Plan decision taken (Free/Paid) and in effect.
+- [ ] Workers Paid in effect (Decisions list).
 - [ ] New Firebase key validated with the local dry run below (it sends nothing to any device). If C10
       (`/admin/push/test`) exists, it is used on Sunday (4.10) against the deployed secret.
 - [ ] Step 3.4 done at least one week before the planned cutover Saturday.
@@ -1070,6 +1120,10 @@ Expect byte-identical `/v2/evolution.*`, `/v2/historical` and `/v2/alerts`; only
 `/v2/latest`, `/json/last_price`, `currency.json` and headers (table in 2.5). Do not force a jobs run here: the
 backfill re-renders the bodies (C8), and a forced run on a Saturday is only safe if C6 holds.
 
+The API Worker keeps each past day of `/v2/historical` in memory for up to an hour, so a warm isolate can still
+answer a shadow-period day with the pre-backfill row. If parity differs only on such a day, re-run it an hour
+after the backfill (or `pnpm deploy:api`, which starts fresh isolates) before treating it as a failure.
+
 If a weekend `live` row exists, or `latest_rates` changed, or parity differs elsewhere: restore the time-travel
 point, find out why, and repeat; do not switch with a wrong history.
 
@@ -1086,8 +1140,9 @@ wr_api d1 execute bluelytics --remote --command "SELECT tipo, buy, sell, updated
 
 - [ ] No `pending` or `failed` rows. Failed posts are retried up to twice on later runs; a shadow-period row
       retried after enabling would publish an old price. Delete such rows
-      (`DELETE FROM social_posts WHERE status IN ('pending','failed')`). `dry_run` rows stay as history; they are
-      not a baseline (C9) and their event keys carry shadow dates, so they never block a later post.
+      (`DELETE FROM social_posts WHERE status IN ('pending','failed')`). `dry_run` rows stay as history; once
+      `SOCIAL_ENABLED` is on they are not a baseline (C9), their keys end in `-dry`, and they are never retried,
+      so they never block a later post.
 - [ ] Social baseline, one `sent` row per network with **v2's** published blue (the `latest_rates` row above,
       which is what production serves from 4.7). Without it, the first post compares Monday's price with
       Friday's daily row, which after 4.5 is legacy's value, so a v2 − legacy gap of 0.75 % or more would post
@@ -1272,6 +1327,13 @@ Validate them as deployed:
 curl -sS -X POST -H "Authorization: Bearer $ADMIN_TOKEN" "https://$JOBS_HOST/admin/push/test"      # C10: validate_only, sends nothing
 curl -sS -X POST -H "Authorization: Bearer $ADMIN_TOKEN" "https://$JOBS_HOST/admin/social/test"    # drafts only; delete them in Buffer
 ```
+
+The social test is a **hard gate** for `SOCIAL_ENABLED`: it sends the same `createPost` document as a live
+post, and that document spreads `... on MutationError`, which only validates if Buffer's live schema still
+declares `implements MutationError` on its payload types (the saved `buffer-schema.graphql` lost those
+clauses and cannot prove it). Every network must come back with a draft id and appear in Buffer's drafts. A
+GraphQL validation error (`Fragment cannot be spread here …`) means every live post would fail: leave
+`SOCIAL_ENABLED` off and get the client fixed.
 
 If C10 does not exist, this is a known gap: the deployed Firebase secret is first used by Monday's first real
 alert. Re-run the 3.3 local test with the same key file before shredding it, and watch `push_status` closely in
@@ -1707,8 +1769,9 @@ Check backups and sync tools (Time Machine, Dropbox, etc.) for copies of these d
 
 ## Phase 7 — Optional: static-first API
 
-What it is: the jobs Worker also writes each fixed API body to R2; the CDN serves the hot fixed paths from R2
-with no Worker request; Worker routes remain only for parameterised paths (`ARCHITECTURE.md` D5, §6).
+What it is: the jobs Worker also writes each fixed API body to R2; the CDN serves the six fixed paths, when
+requested without a query string, from R2 with no Worker request; everything else (query strings,
+`/v2/historical`, unknown paths) still reaches the API Worker (`ARCHITECTURE.md` D5, §6; `infra/README.md`).
 Worth it only when API traffic makes Worker requests cost real money (above 10M/month on Paid; step 0.8).
 
 ### 7.1 Prerequisites
@@ -1718,6 +1781,8 @@ Worth it only when API traffic makes Worker requests cost real money (above 10M/
 - [ ] Pulumi token has Zone Cloud Connector Write; a new token with only zone **Cache Purge**, stored in the
       password manager and as jobs secret `CLOUDFLARE_PURGE_TOKEN` (`wr_jobs secret put CLOUDFLARE_PURGE_TOKEN`).
       The ops token no longer exists (6.11); manual purges in this phase use this token.
+- [ ] Jobs vars `CLOUDFLARE_ZONE_ID` and `API_HOSTNAME` known: `$CF_ZONE_ID` and `api.bluelytics.com.ar`
+      (the purge target). Without the zone id every static-first run fails before copying anything.
 
 ### 7.2 Live tests first [TEST FIRST]
 
@@ -1733,12 +1798,20 @@ On a test hostname or test path, never on the live paths. From `cloudflare.md` �
 
 ### 7.3 Enable
 
-1. Set `API_MODE` to `"static-first"` in `apps/jobs/wrangler.jsonc`, `pnpm deploy:jobs`, force a run inside the
-   trading window, and check that every fixed body exists in R2 under `api/…` with the right content type.
-2. `pulumi config set bluelytics:apiMode static-first` and `pnpm infra:preview`; expect only the Cloud Connector
-   rule, the cache rule and the CORS transform. Then `pnpm infra:up`.
-3. Shrink the API Worker routes to the parameterised paths as the implementation documents; `pnpm deploy:api`.
-   Commit and push.
+1. In `apps/jobs/wrangler.jsonc` → `vars`, set `CLOUDFLARE_ZONE_ID` to `$CF_ZONE_ID`, check `API_HOSTNAME` is
+   `"api.bluelytics.com.ar"`, and set `API_MODE` to `"static-first"`. `pnpm deploy:jobs`, then
+   `/admin/health` must show `"staticFirstMissing": []` (anything listed there is still unset). Force a run
+   inside the trading window; its report must have no `static-api` error and `staticApi.purged: true`, and
+   every fixed body must exist in R2 under `api/…` with the right content type.
+2. `pulumi config set bluelytics:apiMode static-first` and `pnpm infra:preview`. Expect exactly the rules
+   `infra/README.md` lists for static-first: the `transform-rules` URL rewrite `api_static_r2_key` (path →
+   `/api<path>`, the R2 key), the Cloud Connector rule, the two cache rules `api_static_browser_30s` and
+   `api_static_browser_300s` (2 h edge TTL, browser 30 s / 300 s), and the `response-header-rules` CORS
+   transform `api_static_cors`. Nothing else may change. Then `pnpm infra:up`.
+3. Keep the `api.bluelytics.com.ar/*` Worker route: requests with a query string and `/v2/historical` need it.
+   Only if live test 7.2 showed that a Worker route takes precedence over Cloud Connector, narrow the route
+   so that it excludes the six fixed paths (their query-string variants are then answered from R2 without
+   `?days`/`?callback`/`?pretty` handling, so record that decision), `pnpm deploy:api`, commit and push.
 4. Run the 4.8 suite. On the fixed paths, `cf-cache-status` should become `HIT` on repeat and the Worker's
    request count should drop.
 
@@ -1792,7 +1865,13 @@ first. Run the 4.8 suite.
 | `API_MODE` | var | `apps/jobs/wrangler.jsonc` | `"worker"` (Phase 7: `"static-first"`) |
 | `LEGACY_V1_BLUE_BUG` | var | `apps/jobs/wrangler.jsonc` | owner decision |
 | `BUFFER_CHANNELS` | var | `apps/jobs/wrangler.jsonc` | `pnpm buffer:channels` (2.7) |
+| `MEDIA_HOSTNAME` | var | `apps/jobs/wrangler.jsonc` | `"media.bluelytics.com.ar"` (Pulumi `bluelytics:mediaHostname`) |
+| `API_HOSTNAME`, `CLOUDFLARE_ZONE_ID` | var | `apps/jobs/wrangler.jsonc` | `"api.bluelytics.com.ar"`; zone id `""` until 7.3, then `$CF_ZONE_ID` |
+| `SHADOW_HOSTNAME` | var | `apps/api/wrangler.jsonc` | `"api-v2.bluelytics.com.ar"` (`noindex` there) |
+| `LEGACY_V1_BLUE_BUG`, `API_MODE` (copies) | var | `apps/api/wrangler.jsonc` | not read by the API Worker; keep equal to the jobs values |
+| `PRODUCTION_HOSTNAME`, `MEDIA_ORIGIN` | var | `apps/web/wrangler.jsonc` | `"bluelytics.com.ar"`, `"https://media.bluelytics.com.ar"` |
 | `PUBLIC_ANDROID_URL`, `PUBLIC_IOS_URL`, `PUBLIC_GA4_ID` | build-time public env, optional | `apps/web` build environment | owner decisions |
+| `PUBLIC_CF_BEACON_TOKEN` | build-time public env, optional | `apps/web` build environment | Web Analytics site token (1.5); unset = zone edge injection |
 | D1 `database_id`, R2 bucket name | IDs (not secret) | `apps/*/wrangler.jsonc` | `pnpm infra:sync-ids` |
 | AWS profiles `bl-readonly`, `bl-admin` | credentials, local only | `~/.aws` | 0.3; deleted when the AWS account closes |
 | Legacy, retired in Phase 6: `PG_USER`, `PG_PASSWORD`, `PG_HOSTNAME`, `PG_DB`, `PG_SSLMODE`, `OPENEX_API_KEY`, legacy `BUFFER_API_KEY`, `SN_PROFILE_*`, `S3_BUCKET`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, the Firebase admin JSON file | legacy | legacy `.env`, task definitions, Secrets Manager / SSM, image | rotated/deleted per 6.8 and 6.11 |

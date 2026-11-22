@@ -1,0 +1,36 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "bluelytics-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-22",
+  "upload_source_maps": true,
+  "workers_dev": false,
+  "preview_urls": false,
+  // docs/MIGRATION.md 1.1: only the shadow hostname until the cutover (step 4.7). A custom_domain route on a
+  // hostname that already has a DNS record replaces that record without asking: never add one for
+  // api.bluelytics.com.ar. The production entry is a plain zone route on the existing proxied record.
+  "routes": [
+    { "pattern": "api-v2.bluelytics.com.ar", "custom_domain": true }
+    // Cutover (MIGRATION.md 4.7) adds the production zone route here and keeps the shadow entry. The guide
+    // holds the exact entry, so the 1.1 grep guard lists only routes that are live.
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "bluelytics",
+      // Placeholder: `pnpm infra:sync-ids` writes the id of the Pulumi-managed database here.
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "../../packages/db/migrations"
+    }
+  ],
+  "vars": {
+    // Responses on this host carry `X-Robots-Tag: noindex` (keeps the shadow API out of search engines).
+    "SHADOW_HOSTNAME": "api-v2.bluelytics.com.ar",
+    // Not read by this Worker: bodies are pre-rendered by bluelytics-jobs, whose values of these two flags
+    // decide the output. Keep them equal to apps/jobs/wrangler.jsonc so the deployed config tells the truth.
+    "LEGACY_V1_BLUE_BUG": "false",
+    "API_MODE": "worker"
+  },
+  // Sampled: at millions of requests a month full logging would exceed the included Workers Logs volume.
+  "observability": { "enabled": true, "head_sampling_rate": 0.05 }
+}

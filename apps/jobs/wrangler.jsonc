@@ -1,0 +1,46 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "bluelytics-jobs",
+  "main": "src/index.ts",
+  // >= 2026-03-24: the BROWSER binding's quickAction() (Browser Run Quick Actions).
+  "compatibility_date": "2026-11-22",
+  "upload_source_maps": true,
+  // Admin host (docs/MIGRATION.md, Decisions): the workers.dev URL by default. For a custom domain set
+  // "workers_dev": false and add a routes entry with custom_domain true on a new, unused hostname.
+  "workers_dev": true,
+  "preview_urls": false,
+  // UTC; the handler branches on Argentine time. Undo (MIGRATION.md 2.4): "crons": [] and redeploy.
+  "triggers": { "crons": ["*/5 * * * *"] },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "bluelytics",
+      // Placeholder: `pnpm infra:sync-ids` writes the id of the Pulumi-managed database here.
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "../../packages/db/migrations"
+    }
+  ],
+  // Pulumi `media-bucket`, public at MEDIA_HOSTNAME: social/… post images, og/latest.jpg, api/… (static-first).
+  "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "bluelytics-public" }],
+  "browser": { "binding": "BROWSER" },
+  "vars": {
+    // Flags are on only for the exact string "true". Shadow mode = both "false" (MIGRATION.md 1.5, 4.10).
+    "PUSH_ENABLED": "false",
+    "SOCIAL_ENABLED": "false",
+    // "worker" | "static-first" (Phase 7: also copy the fixed bodies to R2 api/… and purge them).
+    "API_MODE": "worker",
+    // Keep equal to apps/api/wrangler.jsonc; this Worker renders the bodies, so its value decides.
+    "LEGACY_V1_BLUE_BUG": "false",
+    // {"twitter":"<Buffer channel id>","instagram":"<id>"} from `pnpm buffer:channels` (MIGRATION.md 2.7).
+    "BUFFER_CHANNELS": "{}",
+    "MEDIA_HOSTNAME": "media.bluelytics.com.ar",
+    // static-first only: the purge names these (secret CLOUDFLARE_PURGE_TOKEN).
+    "API_HOSTNAME": "api.bluelytics.com.ar",
+    "CLOUDFLARE_ZONE_ID": ""
+  },
+  // Secrets, by name only: BUFFER_API_KEY, FIREBASE_SERVICE_ACCOUNT_JSON, ADMIN_TOKEN, and optionally
+  // OPS_WEBHOOK_URL and CLOUDFLARE_PURGE_TOKEN (static-first). The first deploy passes them with
+  // --secrets-file (MIGRATION.md 2.4). Never declare a var with one of these names: it deletes the secret.
+  "secrets": { "required": ["BUFFER_API_KEY", "FIREBASE_SERVICE_ACCOUNT_JSON", "ADMIN_TOKEN"] },
+  "observability": { "enabled": true, "head_sampling_rate": 1, "issues": { "enabled": true } }
+}

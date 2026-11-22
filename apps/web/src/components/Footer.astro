@@ -1,0 +1,63 @@
+---
+import { API_ORIGIN, AUTHOR, SOCIAL } from '../config.ts';
+import { ROUTES, type Locale } from '../i18n/routes.ts';
+import { UI } from '../i18n/ui.ts';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = UI[locale];
+const android = import.meta.env.PUBLIC_ANDROID_URL;
+const ios = import.meta.env.PUBLIC_IOS_URL;
+const appLabel = locale === 'es' ? 'App móvil' : 'Mobile app';
+---
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <p><strong>bluelytics</strong> · {t.footer.tagline}</p>
+        {
+          (android || ios) && (
+            <div class="badges" aria-label={appLabel}>
+              {android && <a class="tool" href={android} rel="noopener">Google Play</a>}
+              {ios && <a class="tool" href={ios} rel="noopener">App Store</a>}
+            </div>
+          )
+        }
+      </div>
+      <nav aria-label={t.footer.more}>
+        <h2>{t.footer.more}</h2>
+        <ul>
+          <li><a href={ROUTES.history[locale]}>{t.nav.history}</a></li>
+          <li><a href={ROUTES.about[locale]}>{t.footer.sources}</a></li>
+          <li><a href={ROUTES.status[locale]}>{t.nav.status}</a></li>
+          <li><a href={ROUTES.api[locale]}>API</a></li>
+        </ul>
+      </nav>
+      <div>
+        <h2>{t.footer.data}</h2>
+        <ul>
+          <li><a href={`${API_ORIGIN}/v2/latest`}>/v2/latest</a></li>
+          <li><a href={`${API_ORIGIN}/v2/evolution.csv`}>/v2/evolution.csv</a></li>
+          <li><a href="/llms.txt">llms.txt</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>{t.footer.follow}</h2>
+        <ul>
+          <li><a href={SOCIAL.x} rel="me noopener">X / Twitter</a></li>
+          <li><a href={SOCIAL.instagram} rel="me noopener">Instagram</a></li>
+          <li><a href={SOCIAL.facebook} rel="me noopener">Facebook</a></li>
+          <li><a href={SOCIAL.github} rel="noopener">GitHub</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="fine">
+      {t.footer.disclaimer}{' '}
+      {t.footer.madeBy} <a href={AUTHOR.url}>{AUTHOR.name}</a> · <a href={SOCIAL.github}>{t.footer.license}</a>
+    </p>
+  </div>
+</footer>

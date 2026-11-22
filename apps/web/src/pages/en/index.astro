@@ -1,0 +1,11 @@
+---
+import { cachePage, LIVE } from '../../lib/cache.ts';
+import { loadHome } from '../../lib/pages.ts';
+import HomeView from '../../views/HomeView.astro';
+
+export const prerender = false;
+const data = await loadHome();
+cachePage(Astro, LIVE, data.snapshot.updatedAt);
+---
+
+<HomeView locale="en" data={data} />

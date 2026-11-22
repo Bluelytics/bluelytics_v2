@@ -63,9 +63,10 @@ packages/
   db/         D1 migrations + typed repository functions
   scrapers/   source adapters: pure parsers + fetchers + fixtures
   social/     card templates (HTML/CSS), renderers, Buffer client, captions
-  contract/   golden responses captured from the legacy API, OpenAPI spec, parity checker
+  contract/   golden responses captured from the legacy API, OpenAPI spec (parity checker: tools/)
 infra/        Pulumi program
-tools/        backfill, id sync, local previews (run with tsx)
+tools/        backfill, parity checker, id sync, local previews (run with tsx)
+scripts/      wrangler-deploy.mjs: the apps' `deploy` wrapper (drops the `--` pnpm forwards)
 assets/brand/ logo.svg, logo-dark.svg, logo-mono.svg (traced from the 1024px app icon)
 docs/         ARCHITECTURE.md, MIGRATION.md, DECISIONS.md, research/, legacy/
 legacy/       imported legacy repos (reference only)
@@ -139,7 +140,10 @@ Social rule (`shouldPost`), evaluated per network inside 10:00–18:59 ART on we
 - Idempotency: `social_posts` has `UNIQUE(network, event_key)`; insert `pending` before calling Buffer,
   then update to `sent`/`failed`. A failed post is retried at most twice on later runs. Update keys are
   `update-<day>-<sell>[-after-<sent_at of the last sent update post>]`, so runs that see the same last
-  post share a key but a return to an earlier sell on the same day is a new post. A `pending` row
+  post share a key but a return to an earlier sell on the same day is a new post. With `SOCIAL_ENABLED`
+  off, `dry_run` rows stand in for `sent` ones (cooldowns and baselines, so the shadow rows show what live
+  posting would do) and keys end in `-dry`; once enabled only `sent` rows count and `-dry` rows never block
+  or seed a live post. A `pending` row
   older than 15 minutes (its run died) is recorded as a failed attempt and follows the retry rule.
 
 ## 5. D1 schema (`packages/db/migrations`)
@@ -212,7 +216,7 @@ Routes (exact, case-sensitive, no trailing slash): `/`, `/v2/latest`, `/v2/alert
   `>= 10000` → everything.
 - `/v2/historical?day=`: strict `YYYY-MM-DD`; Saturday/Sunday → Friday (`0000-01-01`/`02`, whose
   Friday would be in year −1, → "day not found" without a lookup, as legacy); D1 point lookup on
-  `daily_rates`, cached in memory (past days forever, today 60 s); "not found" keyed on blue sell
+  `daily_rates`, cached in memory (past days 1 h, today 60 s); "not found" keyed on blue sell
   missing/zero, as legacy.
 - JSONP only on `/v2/latest` and `/json/last_price`: `callback(` + body-with-`\n` + `);`.
 - `?pretty` (any value): two-space indented variant produced by a token-level pretty-printer that keeps
@@ -288,12 +292,13 @@ Currencies: `fawazahmed0` (jsDelivr + pages.dev mirror), fallback `frankfurter_v
 - `buffer/`: minimal GraphQL client (`fetch`, no SDK): `listChannels()`, `createImagePost({channelId,
   text, imageUrl, altText, service, draft?})`, `getPost(id)`, `deletePost(id)`. Handles HTTP 200 with
   `errors[]`, typed mutation errors (`... on MutationError { message }`), 429 + `Retry-After`.
-  Instagram needs `metadata: { instagram: { type: post, shouldShareToFeed: true } }` (`type: story`
+  Instagram needs `metadata: { instagram: { type: post, shouldShareToFeed: true } }` (`type: story, shouldShareToFeed: false`
   for stories); X needs no metadata. Input shapes come from Buffer's own schema, saved as
   `docs/research/buffer-schema.graphql` (introspection works without a key); `docs/research/buffer-api.md`
   explains usage, limits and error handling.
-- `captions.ts`: per-network text in Spanish with correct accents; site URL on X/Facebook, hashtags on
-  Instagram.
+- `captions.ts`: per-network text in Spanish with correct accents; site URL on Facebook, hashtags on
+  Instagram. X carries no URL or bare domain (decision 2026-11-22: X bills posts with a URL in the text at
+  the higher rate, and the domain is printed on the card), only `#DólarBlue`.
 
 Config: secret `BUFFER_API_KEY`; var `BUFFER_CHANNELS` = JSON `{"twitter":"<channelId>","instagram":"<channelId>"}`
 (only listed networks are posted to; the account currently has Instagram and Twitter connected).

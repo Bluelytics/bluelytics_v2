@@ -1,0 +1,178 @@
+---
+// The public API contract (docs/legacy/legacy-frontend.md §5, corrected against the live API).
+import Base from '../layouts/Base.astro';
+import { API_ORIGIN } from '../config.ts';
+import { ROUTES, type Locale } from '../i18n/routes.ts';
+import { pick } from '../i18n/ui.ts';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const es = locale === 'es';
+const L = (spanish: string, english: string): string => pick(locale, spanish, english);
+
+const rate = (name: string) => [
+  { field: 'value_buy', text: L(`Valor de compra del ${name}`, `${name} buy value`) },
+  { field: 'value_avg', text: L(`Promedio entre compra y venta del ${name}`, `${name} average of buy and sell`) },
+  { field: 'value_sell', text: L(`Valor de venta del ${name}`, `${name} sell value`) },
+];
+const latestFields = [
+  { field: 'oficial', children: rate(L('dólar oficial', 'Official dollar')) },
+  { field: 'blue', children: rate(L('dólar blue', 'Blue dollar')) },
+  { field: 'oficial_euro', children: rate(L('euro oficial', 'Official euro')) },
+  { field: 'blue_euro', children: rate(L('euro blue', 'Blue euro')) },
+  { field: 'last_update', text: L('Momento de la última actualización del dólar blue (ISO 8601, hora argentina, -03:00)', 'Time of the last blue dollar update (ISO 8601, Argentine time, -03:00)') },
+];
+const evolutionFields = [
+  { field: 'date', text: L('Día de la cotización (AAAA-MM-DD)', 'Day of the rate (YYYY-MM-DD)') },
+  { field: 'source', text: L('Tipo de cambio: Oficial o Blue', 'Exchange rate type: Oficial (government rate) or Blue (informal market)') },
+  { field: 'value_sell', text: L('Valor de venta: lo que pide quien vende dólares', 'Sell (ask) value: what sellers ask for a dollar') },
+  { field: 'value_buy', text: L('Valor de compra: lo que ofrece quien compra dólares', 'Buy (bid) value: what buyers offer for a dollar') },
+];
+const currencyFields = [
+  { field: 'code', text: L('Código ISO 4217 de la moneda', 'ISO 4217 currency code') },
+  { field: 'name', text: L('Nombre de la moneda (en castellano)', 'Currency name (in Spanish)') },
+  { field: 'value', text: L('Unidades de esa moneda por cada dólar estadounidense', 'Units of that currency per US dollar') },
+];
+const bindings = [
+  { tech: 'Laravel (PHP)', name: 'fedeisas/laravel-dolar-blue', href: 'https://github.com/fedeisas/laravel-dolar-blue' },
+  { tech: 'NodeJS (JavaScript)', name: 'matiu/dolar-blue', href: 'https://github.com/matiu/dolar-blue' },
+  { tech: 'Odoo (Python)', name: 'morrillo/currency_usd_update', href: 'https://github.com/morrillo/currency_usd_update' },
+];
+const latestExample = `{"oficial":{"value_avg":1574.50,"value_sell":1601.00,"value_buy":1548.00},
+ "blue":{"value_avg":1652.50,"value_sell":1670.00,"value_buy":1635.00},
+ "oficial_euro":{"value_avg":1712.00,"value_sell":1741.00,"value_buy":1683.00},
+ "blue_euro":{"value_avg":1796.00,"value_sell":1815.00,"value_buy":1777.00},
+ "last_update":"2026-11-20T19:45:51.758024-03:00"}`;
+const evolutionExample = `[{"date":"2026-11-20","source":"Oficial","value_sell":1595.00,"value_buy":1543.00},
+ {"date":"2026-11-20","source":"Blue","value_sell":1665.00,"value_buy":1615.00},
+ …]`;
+const csvExample = `day,type,value_buy,value_sell
+2026-11-20,Oficial,1543.00,1595.00
+2026-11-20,Blue,1615.00,1665.00`;
+const title = L('API del dólar blue: JSON gratuito y sin autenticación | Bluelytics', 'Blue dollar API: free JSON, no authentication | Bluelytics');
+const description = L(
+  'Documentación de la API pública de Bluelytics: dólar blue y oficial actuales, valor de un día, histórico completo en JSON y CSV, y cotizaciones de monedas. Libre, sin registro.',
+  'Documentation of the Bluelytics public API: current blue and official dollar, a single day, the full history as JSON and CSV, and currency rates. Free, no sign-up.',
+);
+---
+
+<Base locale={locale} title={title} description={description} paths={ROUTES.api} current="api" crumbs={[{ name: 'API', path: ROUTES.api[locale] }]}>
+  <div class="page-head">
+    <h1>{L('API JSON del dólar blue', 'Blue dollar JSON API')}</h1>
+    <p>
+      {L('Si no sos desarrollador, podés ignorar esta página: ', 'If you are not a developer you can skip this page: ')}
+      <a href={ROUTES.home[locale]}>{L('ver la cotización de hoy', 'see today’s rates')}</a>.
+    </p>
+  </div>
+
+  <div class="prose api">
+    <p>
+      {
+        L(
+          'La API es de uso libre, no requiere autenticación y responde JSON simple. Los valores se actualizan cada 5 minutos de lunes a viernes de 7 a 20 h (hora argentina). Todas las respuestas permiten CORS desde cualquier origen; los números siempre tienen dos decimales.',
+          'The API is free to use, needs no authentication and answers plain JSON. Values update every 5 minutes, Monday to Friday 7:00–20:00 Argentine time. Every response allows CORS from any origin; numbers always have two decimals.',
+        )
+      }
+    </p>
+
+    <h2 id="latest">{L('Últimos valores', 'Latest values')}</h2>
+    <p><a href={`${API_ORIGIN}/v2/latest`}><code>GET {API_ORIGIN}/v2/latest</code></a></p>
+    <p>
+      {L('Parámetros opcionales:', 'Optional parameters:')} <code>?callback=nombre</code>
+      {L('devuelve JSONP (por ejemplo para un widget; jQuery lo agrega solo);', 'returns JSONP (for a widget, for example; jQuery adds it automatically);')} <code>?pretty</code>
+      {L('devuelve el JSON indentado.', 'returns indented JSON.')}
+    </p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th scope="col">{L('Atributo', 'Attribute')}</th><th scope="col" class="text-left">{L('Descripción', 'Description')}</th></tr></thead>
+        <tbody>
+          {
+            latestFields.map((item) =>
+              'children' in item && item.children ? (
+                item.children.map((child) => (
+                  <tr>
+                    <th scope="row"><code>{item.field}.{child.field}</code></th>
+                    <td class="text-left wrap-cell">{child.text}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <th scope="row"><code>{item.field}</code></th>
+                  <td class="text-left wrap-cell">{'text' in item ? item.text : ''}</td>
+                </tr>
+              ),
+            )
+          }
+        </tbody>
+      </table>
+    </div>
+    <pre><code>{latestExample}</code></pre>
+
+    <h2 id="historical">{L('Valor de un día específico', 'Value for a specific day')}</h2>
+    <p><a href={`${API_ORIGIN}/v2/historical?day=2023-08-01`}><code>GET {API_ORIGIN}/v2/historical?day=AAAA-MM-DD</code></a></p>
+    <p>
+      {
+        L(
+          'Devuelve oficial y blue de ese día (value_buy, value_avg, value_sell), sin euro ni last_update. Sábados y domingos devuelven el viernes anterior. Un día sin datos responde 404.',
+          'Returns the official and blue values of that day (value_buy, value_avg, value_sell), with no euro and no last_update. Saturdays and Sundays return the previous Friday. A day without data answers 404.',
+        )
+      }
+    </p>
+
+    <h2 id="evolution-json">{L('Toda la historia (JSON)', 'All history (JSON)')}</h2>
+    <p><a href={`${API_ORIGIN}/v2/evolution.json`}><code>GET {API_ORIGIN}/v2/evolution.json</code></a></p>
+    <p>
+      {
+        L(
+          'Una lista con dos objetos por día (Oficial y Blue), del más reciente al más antiguo; incluye fines de semana. El parámetro opcional ?days=N devuelve solo los primeros N objetos (filas, no días: ?days=10 son 5 días).',
+          'A list with two objects per day (Oficial and Blue), newest first; weekends included. The optional ?days=N parameter returns only the first N objects (rows, not days: ?days=10 is 5 days).',
+        )
+      }
+    </p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th scope="col">{L('Atributo de cada objeto', 'Attribute of each item')}</th><th scope="col" class="text-left">{L('Descripción', 'Description')}</th></tr></thead>
+        <tbody>{evolutionFields.map((f) => <tr><th scope="row"><code>{f.field}</code></th><td class="text-left wrap-cell">{f.text}</td></tr>)}</tbody>
+      </table>
+    </div>
+    <pre><code>{evolutionExample}</code></pre>
+
+    <h2 id="evolution-csv">{L('Toda la historia (CSV)', 'All history (CSV)')}</h2>
+    <p><a href={`${API_ORIGIN}/v2/evolution.csv`}><code>GET {API_ORIGIN}/v2/evolution.csv</code></a></p>
+    <p>{L('Los mismos datos en CSV (columnas day, type, value_buy, value_sell). También acepta ?days=N (filas).', 'The same data as CSV (columns day, type, value_buy, value_sell). Also accepts ?days=N (rows).')}</p>
+    <pre><code>{csvExample}</code></pre>
+
+    <h2 id="currency">{L('Cotización de otras monedas', 'Other currencies')}</h2>
+    <p><a href={`${API_ORIGIN}/data/json/currency.json`}><code>GET {API_ORIGIN}/data/json/currency.json</code></a></p>
+    <p>{L('Lista de monedas con su valor frente al dólar estadounidense, actualizada una vez por día.', 'Currencies with their value against the US dollar, refreshed once a day.')}</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th scope="col">{L('Atributo de cada objeto', 'Attribute of each item')}</th><th scope="col" class="text-left">{L('Descripción', 'Description')}</th></tr></thead>
+        <tbody>{currencyFields.map((f) => <tr><th scope="row"><code>{f.field}</code></th><td class="text-left wrap-cell">{f.text}</td></tr>)}</tbody>
+      </table>
+    </div>
+
+    <h2 id="v1">{L('API anterior (v1)', 'Old API (v1)')}</h2>
+    <p><a href={`${API_ORIGIN}/json/last_price`}><code>GET {API_ORIGIN}/json/last_price</code></a></p>
+    <p>{L('Lista de dos objetos (oficial y blue) con date, source, value_avg, value_sell y value_buy. Se mantiene por compatibilidad; para código nuevo usá /v2/latest.', 'A list of two objects (oficial and blue) with date, source, value_avg, value_sell and value_buy. Kept for compatibility; use /v2/latest in new code.')}</p>
+
+    <h2 id="bindings">{L('Bibliotecas', 'Bindings')}</h2>
+    <p>{L('Bibliotecas de terceros que usan la API de Bluelytics:', 'Third-party libraries for the Bluelytics API:')}</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th scope="col">{L('Tecnología', 'Technology')}</th><th scope="col" class="text-left">URL</th></tr></thead>
+        <tbody>{bindings.map((b) => <tr><th scope="row">{b.tech} (API v1)</th><td class="text-left"><a href={b.href}>{b.name}</a></td></tr>)}</tbody>
+      </table>
+    </div>
+
+    <h2 id="widget">Widget</h2>
+    <p>{L('Para mostrar la cotización en tu sitio, pegá esto donde quieras que aparezca:', 'To show the rates on your site, paste this where it should appear:')}</p>
+    <pre><code>{`<script src="https://bluelytics.com.ar/embed.js" async></script>`}</code></pre>
+    <p class="dim">
+      {L('En inglés: agregá data-lang="en" al script. Vista previa:', 'In English: add data-lang="en" to the script. Preview:')} <a href={es ? '/widget' : '/widget?lang=en'}>/widget</a>
+    </p>
+  </div>
+</Base>

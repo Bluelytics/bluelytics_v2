@@ -1,0 +1,17 @@
+---
+import { CLOSED, cachePage, LIVE, notFound } from '../../../../lib/cache.ts';
+import { currentYear } from '../../../../lib/data.ts';
+import { parseDayParams, parseMonth, parseYear } from '../../../../lib/history.ts';
+import { loadHistoryDay } from '../../../../lib/history-pages.ts';
+import HistoryDayView from '../../../../views/HistoryDayView.astro';
+
+export const prerender = false;
+const year = parseYear(Astro.params.year, currentYear());
+const month = parseMonth(Astro.params.month);
+const day = year === null || month === null ? null : parseDayParams(year, month, Astro.params.day);
+const data = day === null ? null : await loadHistoryDay(day);
+if (data === null) return notFound(Astro);
+cachePage(Astro, data.closed ? CLOSED : LIVE);
+---
+
+<HistoryDayView locale="es" data={data} />

@@ -3,10 +3,16 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "exports": "./src/index.ts",
+  "main": "src/index.ts",
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run",
+    "preview": "pulumi preview --diff",
+    "up": "pulumi up"
+  },
+  "dependencies": {
+    "@pulumi/cloudflare": "6.24.0",
+    "@pulumi/pulumi": "3.277.0"
   },
   "devDependencies": {
     "@types/node": "catalog:",

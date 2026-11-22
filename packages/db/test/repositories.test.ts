@@ -27,6 +27,7 @@ import {
   getState,
   getTicksBetween,
   insertAlert,
+  insertAlertUnlessRecent,
   insertObservationsStatements,
   insertPendingPost,
   insertRowsStatements,
@@ -354,6 +355,16 @@ describe('alerts', () => {
     const latest = await getLatestAlerts(local.db);
     expect(latest.current).toEqual({ ...inserted, pushStatus: 'sent' });
     expect(latest.previous?.id).toBe(1885);
+  });
+
+  it('inserts an alert only when no alert exists since the given instant (overlapping runs)', async () => {
+    await local.db.prepare("INSERT INTO alerts (id, alert_at, buy, sell) VALUES (1885, '2026-11-20T20:00:54.374497Z', 1635, 1670)").run();
+    const alert = { alertAt: '2026-11-23T13:05:00.000Z', buy: 1650, sell: 1690, pushStatus: 'pending' };
+    const first = await insertAlertUnlessRecent(local.db, alert, '2026-11-23T12:55:00.000Z');
+    expect(first?.id).toBe(1886);
+    // A concurrent run on an earlier scheduled minute sees the alert inside its own cooldown.
+    expect(await insertAlertUnlessRecent(local.db, { ...alert, alertAt: '2026-11-23T13:04:00.000Z' }, '2026-11-23T12:54:00.000Z')).toBeNull();
+    expect(await insertAlertUnlessRecent(local.db, { ...alert, alertAt: '2026-11-23T13:16:00.000Z' }, '2026-11-23T13:06:00.000Z')).toMatchObject({ id: 1887 });
   });
 });
 

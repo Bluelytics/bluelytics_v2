@@ -1,0 +1,165 @@
+---
+import RangeChart from '../components/RangeChart.astro';
+import RateHero from '../components/RateHero.astro';
+import RateTile from '../components/RateTile.astro';
+import Base from '../layouts/Base.astro';
+import { ROUTES, type Locale } from '../i18n/routes.ts';
+import { pick, UI } from '../i18n/ui.ts';
+import { formatPercent, formatPesos, formatPesosHundredths } from '../lib/format.ts';
+import type { HomeData } from '../lib/pages.ts';
+import { exchangeRateNode } from '../lib/seo.ts';
+import { ogVersion } from '../lib/snapshot.ts';
+
+interface Props {
+  locale: Locale;
+  data: HomeData;
+}
+
+const { locale, data } = Astro.props;
+const { snapshot, series, extras } = data;
+const { blue, oficial } = snapshot;
+const t = UI[locale];
+const es = locale === 'es';
+
+const title = blue
+  ? pick(locale, `Dólar blue hoy: ${formatPesos(blue.sell, locale)} venta · ${formatPesos(blue.buy, locale)} compra | Bluelytics`, `Blue dollar today: ${formatPesos(blue.sell, locale)} sell · ${formatPesos(blue.buy, locale)} buy | Bluelytics`)
+  : pick(locale, 'Dólar blue hoy | Bluelytics', 'Blue dollar today | Bluelytics');
+const description = blue
+  ? pick(
+      locale,
+      `Cotización del dólar blue hoy en Argentina: compra ${formatPesos(blue.buy, locale)}, venta ${formatPesos(blue.sell, locale)}. Dólar oficial, euro blue, brecha e histórico desde 2011, actualizado cada 5 minutos.`,
+      `Blue dollar rate in Argentina today: buy ${formatPesos(blue.buy, locale)}, sell ${formatPesos(blue.sell, locale)}. Official dollar, blue euro, exchange gap and history since 2011, updated every 5 minutes.`,
+    )
+  : t.footer.tagline;
+
+const graph = [
+  ...(blue ? [exchangeRateNode({ name: t.blue, buy: blue.buy, sell: blue.sell })] : []),
+  ...(oficial ? [exchangeRateNode({ name: t.oficial, buy: oficial.buy, sell: oficial.sell })] : []),
+];
+
+const EXTRA_ORDER = ['mep', 'ccl', 'cripto', 'tarjeta', 'mayorista'] as const;
+const EXTRA_NAMES: Record<(typeof EXTRA_ORDER)[number], string> = {
+  mep: pick(locale, 'Dólar MEP', 'MEP dollar'),
+  ccl: pick(locale, 'Contado con liqui', 'CCL dollar'),
+  cripto: pick(locale, 'Dólar cripto', 'Crypto dollar'),
+  tarjeta: pick(locale, 'Dólar tarjeta', 'Card dollar'),
+  mayorista: pick(locale, 'Dólar mayorista', 'Wholesale dollar'),
+};
+const otherRates = EXTRA_ORDER.flatMap((code) => {
+  const rate = extras.find((extra) => extra.code === code && extra.sellCents !== null);
+  return rate?.sellCents != null ? [{ code, name: EXTRA_NAMES[code], sellCents: rate.sellCents, buyCents: rate.buyCents }] : [];
+});
+
+const amounts = [1, 10, 100, 500, 1000];
+---
+
+<Base locale={locale} title={title} description={description} paths={ROUTES.home} current="home" dateModified={snapshot.updatedAt} ogVersion={ogVersion(snapshot)} graph={graph}>
+  <RateHero locale={locale} title={pick(locale, 'Dólar blue hoy', 'Blue dollar today')} rate={blue} move={snapshot.blueMove} previousDay={snapshot.previousDay} updatedAt={snapshot.updatedAt}>
+    {
+      series.days.length > 1 && (
+        <RangeChart locale={locale} mode="rates" data={series} small label={pick(locale, 'Dólar blue y oficial, último mes', 'Blue and official dollar, last month')} />
+      )
+    }
+  </RateHero>
+
+  <section class="section" aria-labelledby="others">
+    <h2 id="others" class="sr-only">{pick(locale, 'Otras cotizaciones', 'Other rates')}</h2>
+    <div class="grid tiles">
+      {oficial && <RateTile locale={locale} href={ROUTES.official[locale]} label={t.oficial} value={formatPesos(oficial.sell, locale)} move={snapshot.oficialMove} foot={`${t.buy} ${formatPesos(oficial.buy, locale)}`} />}
+      {blue && blue.euroSell > 0 && <RateTile locale={locale} href={ROUTES.euro[locale]} label={t.euroBlue} value={formatPesos(blue.euroSell, locale)} foot={`${t.buy} ${formatPesos(blue.euroBuy, locale)}`} />}
+      {snapshot.gap !== null && <RateTile locale={locale} href={ROUTES.gap[locale]} label={pick(locale, 'Brecha cambiaria', 'Exchange gap')} value={formatPercent(snapshot.gap, locale)} foot={pick(locale, 'blue sobre oficial, venta', 'blue over official, sell')} />}
+    </div>
+  </section>
+
+  {
+    otherRates.length > 0 && (
+      <section class="section" aria-labelledby="extras">
+        <div class="section-head">
+          <h2 id="extras">{pick(locale, 'Otros tipos de dólar', 'Other dollar rates')}</h2>
+          <p class="dim">{pick(locale, 'Referencia publicada por Ámbito. Valores de venta.', 'Reference values published by Ámbito. Sell prices.')}</p>
+        </div>
+        <div class="chips-row">
+          {otherRates.map((rate) => (
+            <div class="mini">
+              <span class="label">{rate.name}</span>
+              <span class="num">{formatPesosHundredths(rate.sellCents, locale)}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  {
+    blue && (
+      <section class="section split">
+        <div>
+          <div class="section-head">
+            <h2>{pick(locale, 'Dólares a pesos', 'Dollars to pesos')}</h2>
+            <a href={ROUTES.calculator[locale]}>{pick(locale, 'Abrir la calculadora', 'Open the calculator')} →</a>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">USD</th>
+                  <th scope="col" class="num">{pick(locale, 'Si comprás', 'If you buy')}</th>
+                  <th scope="col" class="num">{pick(locale, 'Si vendés', 'If you sell')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {amounts.map((amount) => (
+                  <tr>
+                    <th scope="row" class="num">{formatPesos(amount, locale).replace('$', 'US$')}</th>
+                    <td class="num">{formatPesos(amount * blue.sell, locale)}</td>
+                    <td class="num">{formatPesos(amount * blue.buy, locale)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p class="dim">{pick(locale, 'Al precio del dólar blue: comprás a precio de venta y vendés a precio de compra.', 'At the blue dollar rate: you buy at the sell price and sell at the buy price.')}</p>
+        </div>
+        <div class="prose faq">
+          <h2>{pick(locale, 'Preguntas frecuentes', 'Questions')}</h2>
+          {
+            es ? (
+              <>
+                <h3>¿Qué es el dólar blue?</h3>
+                <p>Es el precio del dólar estadounidense en el mercado informal de Argentina, fuera de los bancos y casas de cambio autorizadas. Se lo llama "blue" desde que existen restricciones para comprar dólares al precio oficial.</p>
+                <h3>¿Cómo se calcula el valor que muestra Bluelytics?</h3>
+                <p>Cada 5 minutos, en días hábiles de 7 a 20 h, consultamos varios sitios públicos (Ámbito, DolarHoy, El Cronista e Infodolar) y publicamos la mediana de los valores actualizados. <a href={ROUTES.about.es}>Más detalles</a>.</p>
+                <h3>¿Cuál es la diferencia entre compra y venta?</h3>
+                <p>La compra es lo que te pagan por cada dólar que vendés; la venta es lo que pagás por cada dólar que comprás. El promedio es el punto medio entre ambas.</p>
+              </>
+            ) : (
+              <>
+                <h3>What is the blue dollar?</h3>
+                <p>It is the price of the US dollar on Argentina's informal market, outside banks and licensed exchange houses. It is called "blue" since buying dollars at the official rate became restricted.</p>
+                <h3>How is the Bluelytics value computed?</h3>
+                <p>Every 5 minutes on weekdays from 7:00 to 20:00 (Buenos Aires time) we read several public websites (Ámbito, DolarHoy, El Cronista and Infodolar) and publish the median of the fresh values. <a href={ROUTES.about.en}>More details</a>.</p>
+                <h3>What is the difference between buy and sell?</h3>
+                <p>Buy is what you are paid for each dollar you sell; sell is what you pay for each dollar you buy. The average is the midpoint of both.</p>
+              </>
+            )
+          }
+        </div>
+      </section>
+    )
+  }
+  {blue === null && <p class="muted">{t.noData}</p>}
+</Base>
+
+<script>
+  import { legacyHashTarget } from '../lib/legacy-hash.ts';
+
+  let stored: string | null = null;
+  try {
+    stored = localStorage.getItem('NG_TRANSLATE_LANG_KEY');
+  } catch {
+    // Storage disabled: the Spanish pages are the default.
+  }
+  const target = legacyHashTarget(location.hash, stored);
+  if (target !== null && target !== location.pathname) location.replace(target);
+  else if (target !== null) history.replaceState(null, '', location.pathname + location.search);
+</script>

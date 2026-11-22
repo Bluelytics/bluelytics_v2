@@ -1,0 +1,58 @@
+---
+// The page's main quote: sell is the hero number (neutral colour), the move is a chip with arrow and sign.
+import type { RatePair } from '@bluelytics/core';
+import type { Locale } from '../i18n/routes.ts';
+import { UI } from '../i18n/ui.ts';
+import { formatDateTime, formatDay, formatPesos, formatPesosHundredths } from '../lib/format.ts';
+import { averageOf, type Move } from '../lib/series.ts';
+import Delta from './Delta.astro';
+
+interface Props {
+  locale: Locale;
+  title: string;
+  rate: RatePair | null;
+  move?: Move | null;
+  previousDay?: string | null;
+  updatedAt: string | null;
+}
+
+const { locale, title, rate, move = null, previousDay = null, updatedAt } = Astro.props;
+const t = UI[locale];
+---
+
+<section class="card hero" aria-labelledby="hero-title">
+  <div class="hero-head">
+    <h1 id="hero-title">{title}</h1>
+    {
+      updatedAt && (
+        <p class="dim" style="margin:0">
+          {t.updated}: <time datetime={updatedAt}>{formatDateTime(updatedAt, locale)}</time>
+        </p>
+      )
+    }
+  </div>
+  {
+    rate ? (
+      <div class="quotes">
+        <div class="quote quote-main">
+          <span class="label">{t.sell}</span>
+          <div class="row">
+            <span class="value num">{formatPesos(rate.sell, locale)}</span>
+            <Delta move={move} locale={locale} note={previousDay ? t.vsPrevious(formatDay(previousDay, locale, 'short')) : undefined} />
+          </div>
+        </div>
+        <div class="quote">
+          <span class="label">{t.buy}</span>
+          <span class="value num">{formatPesos(rate.buy, locale)}</span>
+        </div>
+        <div class="quote">
+          <span class="label">{t.average}</span>
+          <span class="value num">{formatPesosHundredths(averageOf(rate), locale)}</span>
+        </div>
+      </div>
+    ) : (
+      <p class="muted">{t.noData}</p>
+    )
+  }
+  <slot />
+</section>

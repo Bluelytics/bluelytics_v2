@@ -1,0 +1,77 @@
+---
+import RangeChart from '../components/RangeChart.astro';
+import RateHero from '../components/RateHero.astro';
+import RateTile from '../components/RateTile.astro';
+import Base from '../layouts/Base.astro';
+import { ROUTES, type Locale } from '../i18n/routes.ts';
+import { pick, UI } from '../i18n/ui.ts';
+import { formatPercent, formatPesos } from '../lib/format.ts';
+import type { LiveData } from '../lib/pages.ts';
+import { exchangeRateNode } from '../lib/seo.ts';
+import { ogVersion } from '../lib/snapshot.ts';
+
+interface Props {
+  locale: Locale;
+  data: LiveData;
+}
+
+const { locale, data } = Astro.props;
+const { snapshot, series } = data;
+const { blue, oficial } = snapshot;
+const t = UI[locale];
+
+const title = oficial
+  ? pick(locale, `Dólar oficial hoy: ${formatPesos(oficial.sell, locale)} venta · ${formatPesos(oficial.buy, locale)} compra | Bluelytics`, `Official dollar today: ${formatPesos(oficial.sell, locale)} sell · ${formatPesos(oficial.buy, locale)} buy | Bluelytics`)
+  : pick(locale, 'Dólar oficial hoy | Bluelytics', 'Official dollar today | Bluelytics');
+const description = pick(
+  locale,
+  'Cotización del dólar oficial hoy en Argentina (Banco Nación, minorista): compra, venta, variación diaria y evolución del último año comparada con el dólar blue.',
+  "Today's official US dollar rate in Argentina (Banco Nación, retail): buy, sell, daily change and the last year compared with the blue dollar.",
+);
+---
+
+<Base
+  locale={locale}
+  title={title}
+  description={description}
+  paths={ROUTES.official}
+  current="official"
+  crumbs={[{ name: t.nav.official, path: ROUTES.official[locale] }]}
+  dateModified={oficial?.updatedAt ?? null}
+  ogVersion={ogVersion(snapshot)}
+  graph={oficial ? [exchangeRateNode({ name: t.oficial, buy: oficial.buy, sell: oficial.sell })] : []}
+>
+  <RateHero locale={locale} title={pick(locale, 'Dólar oficial hoy', 'Official dollar today')} rate={oficial} move={snapshot.oficialMove} previousDay={snapshot.previousDay} updatedAt={oficial?.updatedAt ?? null}>
+    <div class="hero-side prose">
+      <p class="muted">
+        {
+          pick(
+            locale,
+            'Precio minorista del dólar en bancos, sin impuestos. Tomamos el valor de Ámbito y, si no está disponible, el del Banco Nación.',
+            'Retail price of the dollar at banks, before taxes. We use the value published by Ámbito and fall back to Banco Nación.',
+          )
+        }
+      </p>
+    </div>
+  </RateHero>
+
+  <section class="section">
+    <div class="grid tiles">
+      {blue && <RateTile locale={locale} href={ROUTES.home[locale]} label={t.blue} value={formatPesos(blue.sell, locale)} move={snapshot.blueMove} foot={`${t.buy} ${formatPesos(blue.buy, locale)}`} />}
+      {oficial && oficial.euroSell > 0 && <RateTile locale={locale} label={t.euroOficial} value={formatPesos(oficial.euroSell, locale)} foot={`${t.buy} ${formatPesos(oficial.euroBuy, locale)}`} />}
+      {snapshot.gap !== null && <RateTile locale={locale} href={ROUTES.gap[locale]} label={pick(locale, 'Brecha con el blue', 'Gap to the blue rate')} value={formatPercent(snapshot.gap, locale)} />}
+    </div>
+  </section>
+
+  {
+    series.days.length > 1 && (
+      <section class="section card">
+        <div class="section-head">
+          <h2>{pick(locale, 'Oficial y blue', 'Official and blue')}</h2>
+          <a href={ROUTES.evolution[locale]}>{t.nav.evolution} →</a>
+        </div>
+        <RangeChart locale={locale} mode="rates" data={series} presets range="1y" label={pick(locale, 'Dólar oficial y blue, precio de venta', 'Official and blue dollar, sell price')} />
+      </section>
+    )
+  }
+</Base>

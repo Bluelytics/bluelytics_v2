@@ -63,4 +63,4 @@ are expected, or an inconsistent `value_avg`, throws.
 Inserting these rows (`@bluelytics/db`) and rendering them (`@bluelytics/core`) reproduces the
 corresponding goldens byte for byte; `@bluelytics/db/testing` `seedFromGoldens` does exactly that.
 
-The OpenAPI document and the parity checker (`pnpm parity`) will live here too; they are not written yet.
+The parity checker (`pnpm parity`) lives in `tools/src/parity` and compares two deployments against these goldens' shapes; the OpenAPI document is not written yet.

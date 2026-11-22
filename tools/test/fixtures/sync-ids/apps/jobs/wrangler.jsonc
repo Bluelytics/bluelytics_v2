@@ -1,0 +1,6 @@
+{
+  "name": "bluelytics-jobs",
+  /* bindings */
+  "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "bluelytics-public" }],
+  "d1_databases": [{ "binding": "DB", "database_name": "bluelytics", "database_id": "11111111-2222-4333-8444-555555555555" }]
+}

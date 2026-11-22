@@ -1,0 +1,13 @@
+# Example stack configuration (no secrets). Copy the values with `pulumi config set` (README), do not
+# rename this file to Pulumi.<stack>.yaml by hand. The API token is a secret: set it with
+#   pulumi config set --secret cloudflare:apiToken
+# or export CLOUDFLARE_API_TOKEN.
+config:
+  bluelytics:accountId: 0123456789abcdef0123456789abcdef
+  bluelytics:zoneId: fedcba9876543210fedcba9876543210
+  bluelytics:zoneName: bluelytics.com.ar
+  bluelytics:webHostname: bluelytics.com.ar
+  bluelytics:apiHostname: api.bluelytics.com.ar
+  bluelytics:mediaHostname: media.bluelytics.com.ar
+  bluelytics:apiMode: worker
+  bluelytics:manageRulesets: "false"

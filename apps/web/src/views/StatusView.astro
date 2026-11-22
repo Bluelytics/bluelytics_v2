@@ -1,0 +1,89 @@
+---
+import type { SourceHealth } from '@bluelytics/db';
+import Base from '../layouts/Base.astro';
+import { ROUTES, type Locale } from '../i18n/routes.ts';
+import { pick, UI } from '../i18n/ui.ts';
+import { formatAgo, formatDateTime, formatPercent, formatPesosHundredths } from '../lib/format.ts';
+import type { Snapshot } from '../lib/snapshot.ts';
+
+interface Props {
+  locale: Locale;
+  snapshot: Snapshot;
+  health: SourceHealth[];
+  now: string;
+}
+
+const { locale, snapshot, health, now } = Astro.props;
+const t = UI[locale];
+const NAMES: Record<string, string> = {
+  ambito: 'Ámbito',
+  ambito_oficial: pick(locale, 'Ámbito (oficial)', 'Ámbito (official)'),
+  dolarhoy: 'DolarHoy',
+  cronista: 'El Cronista',
+  infodolar: 'Infodolar',
+  lanacion: 'La Nación',
+  infobae: 'Infobae',
+  bna: 'Banco Nación',
+  criptoya: 'CriptoYa',
+  ambito_extras: pick(locale, 'Ámbito (otros dólares)', 'Ámbito (other rates)'),
+};
+const KIND: Record<string, string> = { blue: 'Blue', oficial: pick(locale, 'Oficial', 'Official'), extra: pick(locale, 'Otros', 'Other') };
+const sorted = [...health].sort((a, b) => a.kind.localeCompare(b.kind) || a.source.localeCompare(b.source));
+const title = pick(locale, 'Estado de las fuentes | Bluelytics', 'Source status | Bluelytics');
+const description = pick(
+  locale,
+  'Estado de cada fuente que consulta Bluelytics para calcular el dólar blue y oficial: últimas lecturas, errores y disponibilidad en las últimas 24 horas.',
+  'Health of every source Bluelytics reads to compute the blue and official dollar: latest readings, errors and availability over the last 24 hours.',
+);
+---
+
+<Base locale={locale} title={title} description={description} paths={ROUTES.status} current="status" crumbs={[{ name: t.nav.status, path: ROUTES.status[locale] }]} dateModified={snapshot.updatedAt}>
+  <div class="page-head">
+    <h1>{pick(locale, 'Estado de las fuentes', 'Source status')}</h1>
+    <p>
+      {snapshot.updatedAt ? <>{pick(locale, 'Último valor publicado', 'Last published value')}: <time datetime={snapshot.updatedAt}>{formatDateTime(snapshot.updatedAt, locale)}</time> ({formatAgo(snapshot.updatedAt, now, locale)}). </> : null}
+      {pick(locale, 'Lecturas de las últimas 24 horas. Una fuente solo vota si leyó bien en los últimos 30 minutos.', 'Readings over the last 24 hours. A source only votes if it read successfully within the last 30 minutes.')}
+    </p>
+  </div>
+  {
+    sorted.length === 0 ? (
+      <p class="muted">{pick(locale, 'No hubo lecturas en las últimas 24 horas (fuera del horario de mercado no se consultan las fuentes).', 'No readings in the last 24 hours (sources are not read outside market hours).')}</p>
+    ) : (
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">{pick(locale, 'Fuente', 'Source')}</th>
+              <th scope="col" class="text-left">{pick(locale, 'Tipo', 'Kind')}</th>
+              <th scope="col" class="num">{pick(locale, 'Éxito', 'Success')}</th>
+              <th scope="col" class="num">{pick(locale, 'Última lectura correcta', 'Last good reading')}</th>
+              <th scope="col" class="num">{pick(locale, 'Compra / venta', 'Buy / sell')}</th>
+              <th scope="col" class="text-left">{pick(locale, 'Último error', 'Last error')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sorted.map((h) => {
+              const state = h.consecutiveFailures === 0 ? 'ok' : h.consecutiveFailures >= 6 ? 'fail' : 'warn';
+              return (
+                <tr>
+                  <th scope="row">
+                    <span class:list={['status-dot', state]} aria-hidden="true" />
+                    {NAMES[h.source] ?? h.source}
+                  </th>
+                  <td class="text-left">{KIND[h.kind] ?? h.kind}</td>
+                  <td class="num">{h.runs > 0 ? formatPercent(h.okRuns / h.runs, locale, 0) : '–'}</td>
+                  <td class="num">{h.lastOkAt ? formatAgo(h.lastOkAt, now, locale) : '–'}</td>
+                  <td class="num">{h.lastBuyCents !== null && h.lastSellCents !== null ? `${formatPesosHundredths(h.lastBuyCents, locale)} / ${formatPesosHundredths(h.lastSellCents, locale)}` : '–'}</td>
+                  <td class="text-left dim">{h.consecutiveFailures > 0 && h.lastError ? h.lastError : ''}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    )
+  }
+  <p class="dim section">
+    {pick(locale, 'Cómo se combinan las fuentes:', 'How sources are combined:')} <a href={ROUTES.about[locale]}>{t.nav.about}</a>.
+  </p>
+</Base>

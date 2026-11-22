@@ -1,0 +1,99 @@
+---
+import RangeChart from '../components/RangeChart.astro';
+import Base from '../layouts/Base.astro';
+import { ROUTES, type Locale } from '../i18n/routes.ts';
+import { pick, UI } from '../i18n/ui.ts';
+import { formatInteger, formatPercent, formatPesos, formatPesosHundredths } from '../lib/format.ts';
+import type { LiveData } from '../lib/pages.ts';
+import { ogVersion } from '../lib/snapshot.ts';
+
+interface Props {
+  locale: Locale;
+  data: LiveData;
+}
+
+const { locale, data } = Astro.props;
+const { snapshot, series } = data;
+const { blue, oficial, gap } = snapshot;
+const t = UI[locale];
+const diff = blue && oficial ? blue.sell - oficial.sell : null;
+const amount = 200;
+
+const title =
+  gap !== null
+    ? pick(locale, `Brecha cambiaria hoy: ${formatPercent(gap, locale)} entre dólar blue y oficial | Bluelytics`, `Exchange gap today: ${formatPercent(gap, locale)} between blue and official dollar | Bluelytics`)
+    : pick(locale, 'Brecha cambiaria hoy | Bluelytics', 'Exchange gap today | Bluelytics');
+const description = pick(
+  locale,
+  'Brecha cambiaria entre el dólar blue y el dólar oficial hoy, en porcentaje y en pesos, con su evolución histórica desde 2011.',
+  'The gap between the blue and the official dollar today, in percent and in pesos, with its history since 2011.',
+);
+---
+
+<Base locale={locale} title={title} description={description} paths={ROUTES.gap} current="gap" crumbs={[{ name: t.nav.gap, path: ROUTES.gap[locale] }]} dateModified={snapshot.updatedAt} ogVersion={ogVersion(snapshot)}>
+  <section class="card hero" aria-labelledby="hero-title">
+    <div class="hero-head">
+      <h1 id="hero-title">{pick(locale, 'Brecha cambiaria hoy', 'Exchange gap today')}</h1>
+    </div>
+    {
+      gap !== null && diff !== null && blue && oficial ? (
+        <>
+          <div class="quotes">
+            <div class="quote quote-main">
+              <span class="label">{pick(locale, 'Blue sobre oficial', 'Blue over official')}</span>
+              <span class="value num">{formatPercent(gap, locale)}</span>
+            </div>
+            <div class="quote">
+              <span class="label">{pick(locale, 'Diferencia por dólar', 'Difference per dollar')}</span>
+              <span class="value num">{formatPesos(diff, locale)}</span>
+            </div>
+            <div class="quote">
+              <span class="label">{pick(locale, 'Blue / oficial (venta)', 'Blue / official (sell)')}</span>
+              <span class="value num small-value">
+                {formatInteger(blue.sell, locale)} / {formatInteger(oficial.sell, locale)}
+              </span>
+            </div>
+          </div>
+          <bl-gap class="gap-calc" data-diff={String(diff)} data-locale={locale}>
+            <label class="field">
+              <span>{pick(locale, '¿Cuántos dólares querés comparar?', 'How many dollars to compare?')}</span>
+              <input class="input" inputmode="decimal" autocomplete="off" value={formatInteger(amount, locale)} />
+            </label>
+            <p class="gap-out">
+              {pick(locale, 'Diferencia en pesos', 'Difference in pesos')}: <strong class="num" data-output aria-live="polite">{formatPesosHundredths(amount * diff * 100, locale)}</strong>
+            </p>
+          </bl-gap>
+        </>
+      ) : (
+        <p class="muted">{t.noData}</p>
+      )
+    }
+  </section>
+
+  {
+    series.days.length > 1 && (
+      <section class="section card">
+        <h2>{pick(locale, 'Evolución de la brecha', 'Gap over time')}</h2>
+        <RangeChart locale={locale} mode="gap" data={series} presets range="1y" label={pick(locale, 'Brecha entre dólar blue y oficial, en porcentaje', 'Gap between blue and official dollar, in percent')} />
+      </section>
+    )
+  }
+
+  <section class="section prose">
+    <h2>{pick(locale, '¿Cómo se calcula?', 'How is it computed?')}</h2>
+    <p>
+      {
+        pick(
+          locale,
+          'La brecha es cuánto más caro está el dólar blue que el oficial: (venta blue ÷ venta oficial − 1) × 100. Usamos los precios de venta, los mismos en el gráfico y en el valor de hoy.',
+          'The gap is how much more expensive the blue dollar is than the official one: (blue sell ÷ official sell − 1) × 100. Sell prices are used both for today’s value and for the chart.',
+        )
+      }
+    </p>
+  </section>
+</Base>
+
+<script>
+  import { defineGapCalculator } from '../client/calculator.ts';
+  defineGapCalculator();
+</script>

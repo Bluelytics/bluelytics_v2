@@ -1,0 +1,45 @@
+---
+import Calculator from '../components/Calculator.astro';
+import Base from '../layouts/Base.astro';
+import { ROUTES, type Locale } from '../i18n/routes.ts';
+import { pick, UI } from '../i18n/ui.ts';
+import { formatDateTime } from '../lib/format.ts';
+import { calcRates, ogVersion, type Snapshot } from '../lib/snapshot.ts';
+
+interface Props {
+  locale: Locale;
+  snapshot: Snapshot;
+}
+
+const { locale, snapshot } = Astro.props;
+const t = UI[locale];
+const title = pick(locale, 'Convertir dólares a pesos: calculadora dólar blue y oficial | Bluelytics', 'Convert dollars to pesos: blue and official dollar calculator | Bluelytics');
+const description = pick(
+  locale,
+  'Calculadora para convertir dólares o euros a pesos argentinos (y pesos a dólares) al valor del dólar blue o del dólar oficial de hoy.',
+  'Convert US dollars or euros to Argentine pesos (and back) at today’s blue or official rate.',
+);
+---
+
+<Base locale={locale} title={title} description={description} paths={ROUTES.calculator} current="calculator" crumbs={[{ name: t.nav.calculator, path: ROUTES.calculator[locale] }]} dateModified={snapshot.updatedAt} ogVersion={ogVersion(snapshot)}>
+  <div class="page-head">
+    <h1>{pick(locale, 'Convertir dólares a pesos', 'Convert dollars to pesos')}</h1>
+    <p>
+      {pick(locale, 'Escribí en cualquiera de los dos campos.', 'Type in either field.')}
+      {snapshot.updatedAt && <>{' '}{t.updated}: <time datetime={snapshot.updatedAt}>{formatDateTime(snapshot.updatedAt, locale)}</time>.</>}
+    </p>
+  </div>
+  <Calculator locale={locale} rates={calcRates(snapshot)} />
+  <section class="section prose">
+    <h2>{pick(locale, '¿Qué precio usar?', 'Which price should I use?')}</h2>
+    <p>
+      {
+        pick(
+          locale,
+          'Si vas a comprar dólares, mirá el precio de venta; si vas a vender, el de compra. El promedio sirve como referencia general y es el que usa la calculadora por defecto.',
+          'If you are buying dollars, look at the sell price; if you are selling, the buy price. The average is a general reference and the calculator’s default.',
+        )
+      }
+    </p>
+  </section>
+</Base>

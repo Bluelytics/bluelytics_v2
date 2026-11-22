@@ -1,0 +1,27 @@
+---
+// A compact quote that links to the page about it.
+import type { Locale } from '../i18n/routes.ts';
+import type { Move } from '../lib/series.ts';
+import Delta from './Delta.astro';
+
+interface Props {
+  locale: Locale;
+  href?: string;
+  label: string;
+  value: string;
+  move?: Move | null;
+  foot?: string;
+}
+
+const { locale, href, label, value, move = null, foot } = Astro.props;
+const Tag = href ? 'a' : 'div';
+---
+
+<Tag class="card tile" href={href}>
+  <span class="label">{label}</span>
+  <span class="value num">{value}</span>
+  <span class="tile-foot">
+    <Delta move={move} locale={locale} />
+    {foot && <span>{foot}</span>}
+  </span>
+</Tag>

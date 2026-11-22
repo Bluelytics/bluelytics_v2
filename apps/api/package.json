@@ -5,8 +5,13 @@
   "type": "module",
   "exports": "./src/index.ts",
   "scripts": {
-    "typecheck": "tsc -p tsconfig.json",
-    "test": "vitest run --passWithNoTests"
+    "dev": "wrangler dev --local",
+    "deploy": "node ../../scripts/wrangler-deploy.mjs",
+    "db:migrate:local": "wrangler d1 migrations apply bluelytics --local",
+    "db:migrate:remote": "wrangler d1 migrations apply bluelytics --remote",
+    "typecheck": "tsc -p tsconfig.src.json && tsc -p tsconfig.json",
+    "test": "vitest run",
+    "bench": "tsx bench/cpu.ts"
   },
   "dependencies": {
     "@bluelytics/core": "workspace:*",
@@ -14,7 +19,13 @@
   },
   "devDependencies": {
     "@bluelytics/contract": "workspace:*",
+    "@cloudflare/workers-types": "catalog:",
+    "@types/node": "catalog:",
+    "esbuild": "0.28.2",
+    "miniflare": "catalog:",
+    "tsx": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "wrangler": "catalog:"
   }
 }

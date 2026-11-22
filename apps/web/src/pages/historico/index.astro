@@ -1,0 +1,11 @@
+---
+import { cachePage, SLOW } from '../../lib/cache.ts';
+import { loadHistoryIndex } from '../../lib/history-pages.ts';
+import HistoryIndexView from '../../views/HistoryIndexView.astro';
+
+export const prerender = false;
+const data = await loadHistoryIndex();
+cachePage(Astro, SLOW, data.days.at(-1)?.day ?? null);
+---
+
+<HistoryIndexView locale="es" data={data} />

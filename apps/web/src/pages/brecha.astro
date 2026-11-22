@@ -1,0 +1,11 @@
+---
+import { cachePage, LIVE } from '../lib/cache.ts';
+import { loadYearPage } from '../lib/pages.ts';
+import GapView from '../views/GapView.astro';
+
+export const prerender = false;
+const data = await loadYearPage();
+cachePage(Astro, LIVE, data.snapshot.updatedAt);
+---
+
+<GapView locale="es" data={data} />

@@ -1,0 +1,65 @@
+---
+import DaysTable from '../components/DaysTable.astro';
+import Pager from '../components/Pager.astro';
+import RangeChart from '../components/RangeChart.astro';
+import Base from '../layouts/Base.astro';
+import { historyPath, historyPaths, type Locale } from '../i18n/routes.ts';
+import { pick, UI } from '../i18n/ui.ts';
+import { formatDay, formatMonth, formatPesos, monthName } from '../lib/format.ts';
+import type { HistoryMonthData } from '../lib/history-pages.ts';
+import { summarize, toSeries } from '../lib/series.ts';
+
+interface Props {
+  locale: Locale;
+  data: HistoryMonthData;
+}
+
+const { locale, data } = Astro.props;
+const { year, month } = data;
+const t = UI[locale];
+const name = formatMonth(year, month, locale);
+const summary = summarize(data.days);
+const title = pick(locale, `Dólar blue en ${name}: cotización día por día | Bluelytics`, `Blue dollar in ${name}: day-by-day rates | Bluelytics`);
+const description = summary
+  ? pick(
+      locale,
+      `Cotización del dólar blue y oficial en ${name}, día por día. Cierre del mes ${formatPesos(summary.last.blue?.sell ?? 0, locale)}, mínimo ${formatPesos(summary.minSell, locale)} (${formatDay(summary.minDay, locale, 'short')}), máximo ${formatPesos(summary.maxSell, locale)} (${formatDay(summary.maxDay, locale, 'short')}).`,
+      `Blue and official dollar rates in ${name}, day by day. Month close ${formatPesos(summary.last.blue?.sell ?? 0, locale)}, low ${formatPesos(summary.minSell, locale)} (${formatDay(summary.minDay, locale, 'short')}), high ${formatPesos(summary.maxSell, locale)} (${formatDay(summary.maxDay, locale, 'short')}).`,
+    )
+  : title;
+const monthLink = (key: string | null) => {
+  if (key === null) return null;
+  const y = Number(key.slice(0, 4));
+  const m = Number(key.slice(5, 7));
+  return { href: historyPath(locale, { year: y, month: m }), label: formatMonth(y, m, locale) };
+};
+---
+
+<Base
+  locale={locale}
+  title={title}
+  description={description}
+  paths={historyPaths({ year, month })}
+  current="history"
+  crumbs={[
+    { name: t.nav.history, path: historyPath(locale) },
+    { name: String(year), path: historyPath(locale, { year }) },
+    { name: monthName(month, locale), path: historyPath(locale, { year, month }) },
+  ]}
+>
+  <div class="page-head">
+    <h1>{pick(locale, `Dólar blue en ${name}`, `Blue dollar in ${name}`)}</h1>
+    <p>{description}</p>
+  </div>
+  {
+    data.days.length > 1 && (
+      <section class="card">
+        <RangeChart locale={locale} mode="rates" data={toSeries(data.days)} range="1m" label={pick(locale, `Dólar blue y oficial en ${name}`, `Blue and official dollar in ${name}`)} />
+      </section>
+    )
+  }
+  <section class="section">
+    <DaysTable locale={locale} days={data.days} />
+    <Pager previous={monthLink(data.previous)} next={monthLink(data.next)} label={pick(locale, 'Otros meses', 'Other months')} />
+  </section>
+</Base>

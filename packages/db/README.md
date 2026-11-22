@@ -59,6 +59,7 @@ import { createLocalD1, seedFromGoldens } from '@bluelytics/db/testing'; // Node
 | `getLastTickAtOrBefore(db, at): Promise<Tick \| null>` | Previous close for an empty alert window. |
 | `getPreviousClose(db, day, tipo = 'Blue'): Promise<DailyRow \| null>` | Newest Mon–Fri `daily_rates` row strictly before `day` (Monday → Friday). |
 | `insertAlert(db, { alertAt, buy, sell, pushStatus? }): Promise<AlertRow>` | Record the alert first; returns it with its id (continues the legacy sequence). |
+| `insertAlertUnlessRecent(db, alert, since): Promise<AlertRow \| null>` | Same, in one statement, only when no alert exists at or after `since`; `null` = an overlapping run already recorded one. |
 | `setAlertPushStatus(db, id, status)` | Store the push outcome. |
 | `getLatestAlerts(db): Promise<{ current, previous }>` | The two newest alerts (`/v2/alerts`). |
 | `insertAlertsStatements(db, alerts)` | Insert alerts with explicit ids (backfill). |

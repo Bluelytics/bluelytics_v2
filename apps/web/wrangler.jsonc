@@ -1,0 +1,49 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "bluelytics-web",
+  // Gateway (not cached) in front of the cached Astro entrypoint `Site`: see src/worker.ts.
+  "main": "./src/worker.ts",
+  "compatibility_date": "2026-11-22",
+  "compatibility_flags": ["nodejs_compat"],
+  "upload_source_maps": true,
+  "workers_dev": false,
+  "preview_urls": false,
+  // docs/MIGRATION.md 1.1: only the shadow hostname until the cutover (step 4.9). A custom_domain route on a
+  // hostname that already has a DNS record replaces that record without asking: never add one for
+  // bluelytics.com.ar. The production entry is a plain zone route on the existing proxied record.
+  "routes": [
+    { "pattern": "v2.bluelytics.com.ar", "custom_domain": true }
+    // Cutover (MIGRATION.md 4.9) adds the production zone route here and keeps the shadow entry. The guide
+    // holds the exact entry, so the 1.1 grep guard lists only routes that are live.
+  ],
+  "assets": {
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    // Every page, including prerendered ones, passes the gateway so that non-production hosts get
+    // `X-Robots-Tag: noindex`. Fingerprinted build assets skip it.
+    "run_worker_first": ["/*", "!/_astro/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "bluelytics",
+      // Placeholder: `pnpm infra:sync-ids` writes the id of the Pulumi-managed database here.
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "../../packages/db/migrations"
+    }
+  ],
+  "vars": {
+    // Responses on any other host carry `X-Robots-Tag: noindex` (shadow host, previews, localhost).
+    "PRODUCTION_HOSTNAME": "bluelytics.com.ar",
+    // Public R2 custom domain (Pulumi `bluelytics:mediaHostname`): Open Graph images live at og/*.jpg.
+    "MEDIA_ORIGIN": "https://media.bluelytics.com.ar"
+  },
+  // Workers Cache: the Astro adapter turns it on (cacheCloudflare()); only the `Site` entrypoint is cached,
+  // so the host-dependent headers added by the gateway never end up in a shared cache entry.
+  "cache": { "enabled": true },
+  "exports": {
+    "default": { "type": "worker", "cache": { "enabled": false } },
+    "Site": { "type": "worker", "cache": { "enabled": true } }
+  },
+  "observability": { "enabled": true, "head_sampling_rate": 0.05 }
+}

@@ -1,0 +1,54 @@
+---
+// One row per day: blue and official buy/sell, the blue move against the previous row, and the gap.
+import { historyPath, dayPeriod, type Locale } from '../i18n/routes.ts';
+import { pick } from '../i18n/ui.ts';
+import { formatDayNumeric, formatPercent, formatPesos, formatSignedPercent, weekdayName } from '../lib/format.ts';
+import { gapRatio, move, type DayRates } from '../lib/series.ts';
+
+interface Props {
+  locale: Locale;
+  days: DayRates[];
+  /** The day before the first row, for the first row's move. */
+  before?: DayRates | null;
+}
+
+const { locale, days, before = null } = Astro.props;
+const dash = '–';
+const rows = days.map((d, i) => {
+  const previous = i === 0 ? before : days[i - 1];
+  return { d, change: d.blue ? move(d.blue.sell, previous?.blue?.sell) : null, gap: gapRatio(d.blue?.sell, d.oficial?.sell) };
+});
+---
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">{pick(locale, 'Día', 'Day')}</th>
+        <th scope="col" class="num">{pick(locale, 'Blue compra', 'Blue buy')}</th>
+        <th scope="col" class="num">{pick(locale, 'Blue venta', 'Blue sell')}</th>
+        <th scope="col" class="num">{pick(locale, 'Var.', 'Chg.')}</th>
+        <th scope="col" class="num">{pick(locale, 'Oficial compra', 'Official buy')}</th>
+        <th scope="col" class="num">{pick(locale, 'Oficial venta', 'Official sell')}</th>
+        <th scope="col" class="num">{pick(locale, 'Brecha', 'Gap')}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {
+        rows.map(({ d, change, gap }) => (
+          <tr>
+            <th scope="row">
+              <a href={historyPath(locale, dayPeriod(d.day))}>{formatDayNumeric(d.day, locale)}</a> <span class="dim">{weekdayName(d.day, locale).slice(0, 3)}</span>
+            </th>
+            <td class="num">{d.blue ? formatPesos(d.blue.buy, locale) : dash}</td>
+            <td class="num">{d.blue ? formatPesos(d.blue.sell, locale) : dash}</td>
+            <td class:list={['num', change?.direction]}>{change ? formatSignedPercent(change.ratio, locale) : dash}</td>
+            <td class="num">{d.oficial ? formatPesos(d.oficial.buy, locale) : dash}</td>
+            <td class="num">{d.oficial ? formatPesos(d.oficial.sell, locale) : dash}</td>
+            <td class="num">{gap === null ? dash : formatPercent(gap, locale)}</td>
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+</div>

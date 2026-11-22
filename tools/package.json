@@ -6,13 +6,19 @@
   "exports": "./src/index.ts",
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run",
+    "backfill": "tsx src/backfill/main.ts",
+    "parity": "tsx src/parity/main.ts",
+    "cards:preview": "tsx src/cards-preview.ts",
+    "buffer:channels": "tsx src/buffer-channels.ts",
+    "infra:sync-ids": "tsx src/sync-ids.ts"
   },
   "dependencies": {
     "@bluelytics/contract": "workspace:*",
     "@bluelytics/core": "workspace:*",
     "@bluelytics/db": "workspace:*",
-    "@bluelytics/social": "workspace:*"
+    "@bluelytics/social": "workspace:*",
+    "jsonc-parser": "3.3.1"
   },
   "devDependencies": {
     "@types/node": "catalog:",

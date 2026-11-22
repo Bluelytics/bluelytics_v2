@@ -1,0 +1,11 @@
+---
+import { cachePage, LIVE } from '../../lib/cache.ts';
+import { loadHealth, loadSnapshot, nowIso } from '../../lib/data.ts';
+import StatusView from '../../views/StatusView.astro';
+
+export const prerender = false;
+const [snapshot, health] = await Promise.all([loadSnapshot(), loadHealth()]);
+cachePage(Astro, LIVE);
+---
+
+<StatusView locale="en" snapshot={snapshot} health={health} now={nowIso()} />

@@ -1,0 +1,112 @@
+---
+import Delta from '../components/Delta.astro';
+import Pager from '../components/Pager.astro';
+import RangeChart from '../components/RangeChart.astro';
+import Base from '../layouts/Base.astro';
+import { API_ORIGIN } from '../config.ts';
+import { dayPeriod, historyPath, historyPaths, type Locale } from '../i18n/routes.ts';
+import { pick, UI } from '../i18n/ui.ts';
+import { formatDay, formatPercent, formatPesos, formatPesosHundredths, monthName, weekdayName } from '../lib/format.ts';
+import type { HistoryDayData } from '../lib/history-pages.ts';
+import { averageOf, gapRatio, move, summarize, toSeries } from '../lib/series.ts';
+
+interface Props {
+  locale: Locale;
+  data: HistoryDayData;
+}
+
+const { locale, data } = Astro.props;
+const { day, rates, previous, next } = data;
+const t = UI[locale];
+const { year, month } = dayPeriod(day);
+const long = formatDay(day, locale);
+const blueMove = rates.blue ? move(rates.blue.sell, previous?.blue?.sell) : null;
+const oficialMove = rates.oficial ? move(rates.oficial.sell, previous?.oficial?.sell) : null;
+const gap = gapRatio(rates.blue?.sell, rates.oficial?.sell);
+const monthSummary = summarize(data.month);
+const title = rates.blue
+  ? pick(locale, `Dólar blue el ${long}: ${formatPesos(rates.blue.sell, locale)} venta | Bluelytics`, `Blue dollar on ${long}: ${formatPesos(rates.blue.sell, locale)} sell | Bluelytics`)
+  : pick(locale, `Dólar oficial el ${long} | Bluelytics`, `Official dollar on ${long} | Bluelytics`);
+const description = pick(
+  locale,
+  `Cotización del dólar blue y oficial el ${weekdayName(day, locale)} ${long}: ${rates.blue ? `blue ${formatPesos(rates.blue.buy, locale)} compra, ${formatPesos(rates.blue.sell, locale)} venta` : 'sin valor blue'}${rates.oficial ? `; oficial ${formatPesos(rates.oficial.buy, locale)} / ${formatPesos(rates.oficial.sell, locale)}` : ''}.`,
+  `Blue and official dollar rates on ${weekdayName(day, locale)}, ${long}: ${rates.blue ? `blue ${formatPesos(rates.blue.buy, locale)} buy, ${formatPesos(rates.blue.sell, locale)} sell` : 'no blue value'}${rates.oficial ? `; official ${formatPesos(rates.oficial.buy, locale)} / ${formatPesos(rates.oficial.sell, locale)}` : ''}.`,
+);
+const note = previous ? t.vsPrevious(formatDay(previous.day, locale, 'short')) : undefined;
+const dayLink = (d: { day: string } | null) => (d === null ? null : { href: historyPath(locale, dayPeriod(d.day)), label: formatDay(d.day, locale, 'short') });
+const kinds = [
+  { key: 'blue', name: t.blue, pair: rates.blue, change: blueMove },
+  { key: 'oficial', name: t.oficial, pair: rates.oficial, change: oficialMove },
+] as const;
+---
+
+<Base
+  locale={locale}
+  title={title}
+  description={description}
+  paths={historyPaths(dayPeriod(day))}
+  current="history"
+  crumbs={[
+    { name: t.nav.history, path: historyPath(locale) },
+    { name: String(year), path: historyPath(locale, { year }) },
+    { name: monthName(month, locale), path: historyPath(locale, { year, month }) },
+    { name: String(dayPeriod(day).day), path: historyPath(locale, dayPeriod(day)) },
+  ]}
+>
+  <div class="page-head">
+    <h1>{pick(locale, `Dólar blue el ${long}`, `Blue dollar on ${long}`)}</h1>
+    <p>{pick(locale, `Cierre del ${weekdayName(day, locale)}: último valor publicado ese día.`, `${weekdayName(day, locale)} close: the last value published that day.`)}</p>
+  </div>
+  <div class="grid">
+    {
+      kinds.map(({ name, pair, change }) =>
+        pair ? (
+          <section class="card day-card">
+            <h2 class="label">{name}</h2>
+            <div class="quotes">
+              <div class="quote">
+                <span class="label">{t.buy}</span>
+                <span class="value num">{formatPesos(pair.buy, locale)}</span>
+              </div>
+              <div class="quote">
+                <span class="label">{t.sell}</span>
+                <span class="value num">{formatPesos(pair.sell, locale)}</span>
+              </div>
+            </div>
+            <div class="tile-foot">
+              <Delta move={change} locale={locale} note={note} />
+            </div>
+            <span class="dim">
+              {t.average} {formatPesosHundredths(averageOf(pair), locale)}
+            </span>
+          </section>
+        ) : null,
+      )
+    }
+  </div>
+  <section class="section prose">
+    <ul>
+      {gap !== null && <li>{pick(locale, 'Brecha entre blue y oficial:', 'Gap between blue and official:')} <strong>{formatPercent(gap, locale)}</strong></li>}
+      {
+        monthSummary && (
+          <li>
+            {pick(locale, `En ${monthName(month, locale)} el blue osciló entre`, `In ${monthName(month, locale)} the blue rate ranged from`)} <strong>{formatPesos(monthSummary.minSell, locale)}</strong> ({formatDay(monthSummary.minDay, locale, 'short')}) {pick(locale, 'y', 'to')}{' '}
+            <strong>{formatPesos(monthSummary.maxSell, locale)}</strong> ({formatDay(monthSummary.maxDay, locale, 'short')}).
+          </li>
+        )
+      }
+      <li>
+        {pick(locale, 'Este día en la API:', 'This day in the API:')} <a href={`${API_ORIGIN}/v2/historical?day=${day}`}><code>/v2/historical?day={day}</code></a>
+      </li>
+    </ul>
+  </section>
+  {
+    data.window.length > 1 && (
+      <section class="section card">
+        <h2>{pick(locale, 'Un mes antes y después', 'One month either side')}</h2>
+        <RangeChart locale={locale} mode="rates" data={toSeries(data.window)} range="3m" focus={day} label={pick(locale, `Dólar blue y oficial alrededor del ${long}`, `Blue and official dollar around ${long}`)} />
+      </section>
+    )
+  }
+  <Pager previous={dayLink(previous)} next={dayLink(next)} label={pick(locale, 'Días cercanos', 'Nearby days')} />
+</Base>

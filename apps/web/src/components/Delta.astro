@@ -1,0 +1,37 @@
+---
+// Colour is never the only cue: an arrow and a sign go with every move (social-channels-specs §6.4).
+import type { Locale } from '../i18n/routes.ts';
+import { formatSignedInteger, formatSignedPercent } from '../lib/format.ts';
+import type { Move } from '../lib/series.ts';
+
+interface Props {
+  move: Move | null;
+  locale: Locale;
+  note?: string | undefined;
+}
+
+const { move, locale, note } = Astro.props;
+---
+
+{
+  move && (
+    <span class="chip-wrap">
+      <span class:list={['chip', move.direction]}>
+        {move.direction === 'up' && (
+          <svg viewBox="0 0 10 10" aria-hidden="true">
+            <path d="M5 1 9.5 9h-9z" />
+          </svg>
+        )}
+        {move.direction === 'down' && (
+          <svg viewBox="0 0 10 10" aria-hidden="true">
+            <path d="M5 9 .5 1h9z" />
+          </svg>
+        )}
+        <span class="num">
+          {formatSignedInteger(move.delta, locale)} ({formatSignedPercent(move.ratio, locale, 2)})
+        </span>
+      </span>
+      {note && <span class="chip-note"> {note}</span>}
+    </span>
+  )
+}

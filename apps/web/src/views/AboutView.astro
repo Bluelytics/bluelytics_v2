@@ -1,0 +1,70 @@
+---
+import Base from '../layouts/Base.astro';
+import { AUTHOR, SOCIAL } from '../config.ts';
+import { ROUTES, type Locale } from '../i18n/routes.ts';
+import { pick, UI } from '../i18n/ui.ts';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = UI[locale];
+const es = locale === 'es';
+const title = pick(locale, 'Acerca de Bluelytics: cómo calculamos el dólar blue | Bluelytics', 'About Bluelytics: how the blue dollar is computed | Bluelytics');
+const description = pick(
+  locale,
+  'Qué es Bluelytics, de qué fuentes toma la cotización del dólar blue y oficial, cómo combina los valores y quién lo hace. Proyecto de código abierto desde 2014.',
+  'What Bluelytics is, which sources the blue and official dollar come from, how the values are combined and who makes it. Open source since 2014.',
+);
+---
+
+<Base locale={locale} title={title} description={description} paths={ROUTES.about} current="about" crumbs={[{ name: t.nav.about, path: ROUTES.about[locale] }]}>
+  <div class="prose">
+    {
+      es ? (
+        <>
+          <h1>Acerca de Bluelytics</h1>
+          <p>Bluelytics publica la cotización del dólar blue y del dólar oficial en Argentina desde 2014, con su historia completa desde 2011 y una API pública y gratuita.</p>
+          <p>Bluelytics no compra ni vende divisas y no tiene contacto con ninguna "cueva": únicamente toma los valores disponibles en otros sitios públicos y los publica acá. Es información de referencia, no asesoramiento financiero.</p>
+          <h2>Cómo se calcula</h2>
+          <ul>
+            <li>Cada 5 minutos, de lunes a viernes de 7 a 20 h (hora argentina), leemos Ámbito, DolarHoy, El Cronista (o Infobae, que publica el mismo dato) e Infodolar.</li>
+            <li>Una fuente vota solo si la leímos bien en los últimos 30 minutos y su valor es razonable: descartamos diferencias entre compra y venta mayores al 10 % y saltos de más del 15 % que ninguna otra fuente confirma.</li>
+            <li>Publicamos la mediana de compra y la de venta, redondeadas al peso. Si hay menos de tres fuentes disponibles se suma La Nación, y como último recurso CriptoYa.</li>
+            <li>El dólar oficial es el de Ámbito y, si no está disponible, el del Banco Nación. El euro se calcula a partir del dólar con la cotización euro/dólar del día.</li>
+            <li>El valor de cada día en el histórico es el último publicado ese día (el cierre).</li>
+          </ul>
+          <p>
+            El estado de cada fuente se puede ver en <a href={ROUTES.status.es}>Estado</a>.
+          </p>
+          <h2>Quién lo hace</h2>
+          <p>
+            Bluelytics fue creado por <a href={AUTHOR.url}>{AUTHOR.name}</a>. El código es libre (AGPL-3.0) y está en <a href={SOCIAL.github}>GitHub</a>. Para novedades seguí a Bluelytics en <a href={SOCIAL.x}>X</a>, <a href={SOCIAL.instagram}>Instagram</a> o <a href={SOCIAL.facebook}>Facebook</a>.
+          </p>
+        </>
+      ) : (
+        <>
+          <h1>About Bluelytics</h1>
+          <p>Bluelytics has published the blue and official US dollar rates in Argentina since 2014, with the full history since 2011 and a free public API.</p>
+          <p>Bluelytics does not buy or sell currency and has no contact with any informal exchange house: it only collects the values available on other public websites and publishes them here. It is reference information, not financial advice.</p>
+          <h2>How it is computed</h2>
+          <ul>
+            <li>Every 5 minutes, Monday to Friday 7:00–20:00 Argentine time, we read Ámbito, DolarHoy, El Cronista (or Infobae, which publishes the same feed) and Infodolar.</li>
+            <li>A source only votes if it was read successfully within the last 30 minutes and its value is sane: spreads above 10 % and jumps above 15 % that no other source confirms are discarded.</li>
+            <li>We publish the median buy and the median sell, rounded to whole pesos. With fewer than three sources available La Nación joins in, and CriptoYa as a last resort.</li>
+            <li>The official rate is Ámbito’s, falling back to Banco Nación. Euro values are derived from the dollar with the day’s euro/dollar rate.</li>
+            <li>Each day in the history is the last value published that day (the close).</li>
+          </ul>
+          <p>
+            The health of each source is on the <a href={ROUTES.status.en}>Status</a> page.
+          </p>
+          <h2>Who makes it</h2>
+          <p>
+            Bluelytics was created by <a href={AUTHOR.url}>{AUTHOR.name}</a>. The code is free software (AGPL-3.0) on <a href={SOCIAL.github}>GitHub</a>. Follow Bluelytics on <a href={SOCIAL.x}>X</a>, <a href={SOCIAL.instagram}>Instagram</a> or <a href={SOCIAL.facebook}>Facebook</a> for updates.
+          </p>
+        </>
+      )
+    }
+  </div>
+</Base>

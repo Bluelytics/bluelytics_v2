@@ -1,0 +1,11 @@
+---
+import { cachePage, LIVE } from '../lib/cache.ts';
+import { loadEuro } from '../lib/pages.ts';
+import EuroView from '../views/EuroView.astro';
+
+export const prerender = false;
+const data = await loadEuro();
+cachePage(Astro, LIVE, data.snapshot.updatedAt);
+---
+
+<EuroView locale="es" data={data} />

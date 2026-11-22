@@ -1,0 +1,73 @@
+---
+// Two-way converter. The default conversion is rendered on the server; src/client/calculator.ts makes it live.
+import type { Locale } from '../i18n/routes.ts';
+import { UI } from '../i18n/ui.ts';
+import { toPesosHundredths, type CalcRates } from '../lib/calc.ts';
+import { formatHundredths, formatPesosHundredths } from '../lib/format.ts';
+
+interface Props {
+  locale: Locale;
+  rates: CalcRates;
+}
+
+const { locale, rates } = Astro.props;
+const t = UI[locale];
+const es = locale === 'es';
+const amount = 100;
+const rate = rates.blue.usd?.average ?? 0;
+const kinds = [
+  { value: 'buy', label: t.buy },
+  { value: 'average', label: t.average },
+  { value: 'sell', label: t.sell },
+] as const;
+---
+
+<bl-calc class="card form-grid" data-rates={JSON.stringify(rates)} data-locale={locale}>
+  <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr))">
+    <fieldset class="field">
+      <legend>{es ? 'Cotización' : 'Rate'}</legend>
+      <div class="seg">
+        <label><input type="radio" name="tipo" value="blue" checked /><span>Blue</span></label>
+        <label><input type="radio" name="tipo" value="oficial" /><span>{es ? 'Oficial' : 'Official'}</span></label>
+      </div>
+    </fieldset>
+    <fieldset class="field">
+      <legend>{es ? 'Moneda' : 'Currency'}</legend>
+      <div class="seg">
+        <label><input type="radio" name="moneda" value="usd" checked /><span>USD</span></label>
+        <label><input type="radio" name="moneda" value="eur" /><span>EUR</span></label>
+      </div>
+    </fieldset>
+    <fieldset class="field">
+      <legend>{es ? 'Precio' : 'Price'}</legend>
+      <div class="seg">
+        {
+          kinds.map((kind) => (
+            <label>
+              <input type="radio" name="precio" value={kind.value} checked={kind.value === 'average'} />
+              <span>{kind.label}</span>
+            </label>
+          ))
+        }
+      </div>
+    </fieldset>
+  </div>
+  <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr))">
+    <div class="field">
+      <label for="calc-foreign" data-foreign-label>{es ? 'Dólares (USD)' : 'Dollars (USD)'}</label>
+      <input class="input" id="calc-foreign" name="foreign" inputmode="decimal" autocomplete="off" value={formatHundredths(amount * 100, locale)} />
+    </div>
+    <div class="field">
+      <label for="calc-ars">{es ? 'Pesos argentinos (ARS)' : 'Argentine pesos (ARS)'}</label>
+      <input class="input" id="calc-ars" name="ars" inputmode="decimal" autocomplete="off" value={formatHundredths(toPesosHundredths(amount, rate), locale)} />
+    </div>
+  </div>
+  <p class="result" data-result aria-live="polite">
+    1 USD = {formatPesosHundredths(rate, locale)} · {es ? 'dólar blue, promedio entre compra y venta' : 'blue dollar, average of buy and sell'}
+  </p>
+</bl-calc>
+
+<script>
+  import { defineCalculator } from '../client/calculator.ts';
+  defineCalculator();
+</script>
