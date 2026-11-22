@@ -1,0 +1,1 @@
+\COPY currency_map FROM 'currency_map.csv' DELIMITER ',' CSV;

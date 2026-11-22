@@ -1,0 +1,1 @@
+\COPY currency_values FROM 'currency_values.csv' DELIMITER ',' CSV;
