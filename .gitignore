@@ -33,3 +33,9 @@ out/
 coverage/
 .pulumi-local/
 *.tsbuildinfo
+
+# durable agent scratch space (survives /tmp wipes)
+.work/
+packages/social/design/.scratch/
+packages/social/design/final/out/*.html
+packages/social/design/final/out-extra/

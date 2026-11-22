@@ -1,0 +1,483 @@
+[
+ {
+  "variant": "c-chart",
+  "dir": "/tmp/claude-1000/-home-sicarul-dev-bluelytics/c994ac69-6f88-493d-ac11-54fc62a21d9d/scratchpad/build/cards/c-chart/",
+  "concept": "Data-forward and close to a trading app. The number is the headline and the chart is the second voice. The 30-day blue sell is a large brand-blue area chart under the numbers, on a faint graph-paper dot texture that only appears around the plot. The chart labels itself: a value tag on the last point, hollow markers with values at the month's high and low, faint rules at week boundaries, and the period written in the axis row. The last segment (previous close to now) takes the up or down colour, so the chart repeats the change chip. The weekly card is a small table with a line running through it: a 'previo' column for last week's close, then Monday to Friday, each with its close above and weekday plus date below. Days with no close stay in the frame, hatched, so a two-day week looks deliberate. Fonts are Archivo (prose and figures, tabular) and Chivo Mono (chart notes only), both from Omnibus-Type in Buenos Aires.",
+  "fonts": [
+   "Archivo 600/700/800 (OFL, @fontsource/archivo 5.3.0, latin WOFF2)",
+   "Chivo Mono 500/600 (OFL, @fontsource/chivo-mono 5.3.0, latin WOFF2)"
+  ],
+  "fontPayloadKB": 65.3,
+  "iterations": 4,
+  "harnessProblems": [],
+  "selfCritique": [
+   "Resumed from an interrupted attempt. card.mjs still had unfilled __LOGO_BLUE__/__LOGO_GREEN__ placeholders, so I inlined the logo paths from assets/brand/logo-dark.svg. fonts/, fonts.mjs and build-fonts.mjs were complete, so I kept them.",
+   "The harness's _contact.jpg and _thumbs.jpg come out with every cell blank: Chrome will not load file:// images into a page set with setContent (about:blank). The other variants probably have the same problem. I left the harness alone and added sheets.sh, which uses ImageMagick to write out/_review.jpg (all 22 cards) and out/_review125.jpg (portrait cards at 125 px). Those are the sheets I reviewed.",
+   "Fixes made after looking at the renders: dark rectangles behind the mín/máx chart labels; the mono timestamp sitting too close to the mono axis row (the timestamp is now Archivo, with a larger gap); 'previo' crowding 'lun 23' in narrow weekly charts; the brand name appearing twice on the OG card, which also had no period cue (it now has one lockup with the domain and a '30 días' label); the weekly landscape plot squeezed to about 80 px (the date range now sits on the kicker line and the padding is tighter); in landscape-big, the 'COMPRA' label nearly touching '$ 12.350' (values step down a size when they have five digits).",
+   "Still weak: the weekly landscape plot is short, with about 110 px of vertical travel, because the hero, chip and four-row ledger take the top half. A small weekly move reads as a gentle slope. That is honest, but it is not dramatic.",
+   "Still weak: in both story kinds the bottom ~350 px is only background (the gradient, dot texture and a soft glow), kept clear on purpose for Instagram's reply bar. Outside Instagram it can look unfinished.",
+   "Still weak: in weekShort the green area fill under only two points reads a little like a block, and the dotted connector from 'previo' crosses three hatched days. It is honest, but it carries more ink than the data does.",
+   "Still weak: the OG chart has no labels apart from '30 días', so the scale is not stated there. The 4 % minimum range keeps it from exaggerating.",
+   "Checks: at 125 px the hero number is readable on every card, and up versus down is clear from the solid chip colour, the arrow and the chart's last segment. Down cards look as good as up cards because the main line stays brand blue and only the chip, the last segment and the tag turn red. The 'big' cards fit five digits by sizing the hero to its column. The y-axis is never zero-based, with a floor of 4 % of the price (2 % on weekly), and every chart prints its range: last-value tag plus máx/mín, or the daily values on weekly cards.",
+   "Hero fitting uses hard-coded Archivo 800 advance widths. Changing the font means updating those constants."
+  ]
+ },
+ {
+  "variant": "a-terminal",
+  "dir": "/tmp/claude-1000/-home-sicarul-dev-bluelytics/c994ac69-6f88-493d-ac11-54fc62a21d9d/scratchpad/build/cards/a-terminal/",
+  "concept": "Terminal Calm: a restrained, premium market-data card on a near-black blue canvas (#0A0E14) with a faint brand-blue glow in the top-left corner. One neutral white Geist 700 hero number with a muted 60% \"$\" is the only loud element. Direction lives only in a tinted pill (arrow + sign + $ + %), the sparkline and its end dot. Mono uppercase labels and the Geist Mono timestamp give the Bloomberg lineage. Hairline rules replace boxes, and every block is placed by cap top or baseline on an 8 px grid. Each medium gets its own layout: landscape is two columns (number | chart) for the X timeline; portrait is a stacked column with a full-width chart band and a 3-column stats row; story keeps the hero block inside y 270–1248 with a 288 px hero and key/value rows; OG shows title, hero, pill, a small sparkline and the domain. Charts are honest: not zero-based, but with a minimum span (4% of price for 30 days, 2% for the week) so noise is not exaggerated. Dotted guides show the real min/max values and a caption gives the period (\"30 ruedas · 12 oct – 20 nov\"). The weekly chart uses fixed lun–vie slots, so a two-day week shows ghosted missing days instead of a stretched line.",
+  "fonts": [
+   "Geist 500 (Fontsource 5.3.0, latin WOFF2, OFL)",
+   "Geist 600",
+   "Geist 700",
+   "Geist Mono 500"
+  ],
+  "fontPayloadKB": 49,
+  "iterations": 4,
+  "harnessProblems": [],
+  "selfCritique": [
+   "Resumed from a partial earlier attempt (card.mjs, fonts and renders existed, no README). Kept the base, then did four look-and-fix rounds: (1) weekly header restructured to 'RESUMEN SEMANAL · DÓLAR BLUE' plus the date range, more space under weekday labels, missing-day dashes removed (they read as minus signs), OG given a sparkline column; (2) weekly landscape chart aligned to the hero cap line, OG caption attached to its chart, story hero raised to 288 px; (3) minimum chart span added after the flat OG showed a 1.2% range as a violent zigzag; (4) five-digit portrait stats shrunk one step because '$ 12.350 $ 10.250' was nearly touching.",
+   "The harness's own _contact.jpg/_thumbs.jpg render as blank images: they point the browser at file:// URLs from about:blank, which Chrome blocks. I did not modify the harness. sheets.mjs in my directory rebuilds _contact.jpg, _thumbs.jpg and a 3-across _grid.jpg with the images inlined, and those are what I reviewed.",
+   "125 px test: the hero number and the green/red pill are clearly readable in the portrait grid. The arrow itself is only a couple of pixels there, so up/down at thumbnail size depends on colour plus the sign; the full-size cards always carry arrow + sign.",
+   "OG sparkline is narrow (~250 px plot in a 1200 image). It works as texture and trend but is close to decoration. The domain sits alone bottom-right, which is calm but slightly disconnected.",
+   "Story: everything above y=270 and below y=1580 is empty by design (Instagram UI chrome). Viewed outside Instagram it feels bottom-light. The layout is essentially the portrait stack scaled up, not a truly distinct composition.",
+   "The weekly chart's dotted previous-week line can run through data points when they are close to it (weekDown: mié 1.675 = previous close). Legible but slightly busy.",
+   "Pill colour encodes change vs the reference (previous close/week), and the line colour follows it. In weekShort the line goes down within the week while the pill is green: that is correct, but some readers may find it surprising.",
+   "Untested: six-digit prices, a 1-point week (code path exists, not rendered), non-Mon–Fri week patterns (falls back to evenly spaced points)."
+  ]
+ },
+ {
+  "variant": "b-editorial",
+  "dir": "/tmp/claude-1000/-home-sicarul-dev-bluelytics/c994ac69-6f88-493d-ac11-54fc62a21d9d/scratchpad/build/cards/b-editorial/",
+  "concept": "\"Editorial Bold\": one huge neutral hero number set in Chivo Black (OFL, a Buenos Aires foundry), on a deep brand-blue to near-black field crossed by a tapered blade borrowed from the logo's swept strokes. The blade carries the move. On up cards it climbs from the left edge through the hero and exits the top, with a green sliver and a cool teal glow at the top. On down cards it drops from the top edge and falls into the right edge behind the slab, with a red sliver and a muted wine dusk at the bottom. So the whole card changes character, while the number stays white and the card never turns into a wall of red. The delta is a solid slab with its free end cut on the diagonal of the move, carrying an SVG arrow, the sign and the percent. The layout is asymmetric: in landscape a wide main column (hero, chart) sits beside a narrow sidebar (slab, stats), and portrait and story use one column. The blade paths are routed per size and direction so a sliver only crosses the hero or empty space, never small text.",
+  "fonts": [
+   "Chivo 500 (latin WOFF2, Fontsource chivo@5.3.0, OFL-1.1)",
+   "Chivo 700",
+   "Chivo 900"
+  ],
+  "fontPayloadKB": 44.3,
+  "iterations": 5,
+  "harnessProblems": [],
+  "selfCritique": [
+   "An earlier interrupted attempt existed. I kept its Chivo pipeline, logo module and layouts, and over 5 render rounds fixed: down blades whose red sliver crossed the stats, the domain and the caption; blade heads ending visibly inside the canvas; slivers running behind the RESUMEN SEMANAL tag; a weekly value label colliding with the line; and an exaggerated weekly scale.",
+   "The harness contact sheets (_contact.jpg, _thumbs.jpg) render as empty boxes because they load file:// images from an about:blank page. I could not modify the harness, so I reviewed with my own tools/sheets.mjs, which writes out/_review-contact.jpg and out/_review-thumbs.jpg. The harness should be fixed.",
+   "At 125 px the hero number is clearly readable, and up vs down is clear from the green/red slab, the sliver colour and the glow. The 'vs. cierre anterior' caption and the chart labels are illegible at that size, as expected.",
+   "The down blade in landscape is a shallower, straighter sash than the dramatic up arc. It has to thread between the RESUMEN SEMANAL tag and the slab, so down cards feel calmer than up cards. That is defensible but asymmetric.",
+   "weekShort (two days): Mon–Wed are dim dashes and the left 60% of the chart is empty. It looks intentional, but the composition is lopsided.",
+   "The 30-day sparkline is still min–max scaled. It carries labelled MÁX/MÍN guides and a period label ('ÚLTIMAS 30 RUEDAS · 13 OCT – 23 NOV'), but it has no minimum span, so a very flat month would look jumpy. Only the weekly chart has the 2% minimum span.",
+   "Positioning uses hand-tuned Chivo metrics, and blade paths are fixed per size and direction, so a new canvas or font needs re-tuning. The width of the slab next to the portrait caption is estimated, not measured.",
+   "Story: the spec puts nothing essential above y=270 or below y=1580. The bottom 340 px is only a gradient (with the wine dusk on down cards), and the top zone holds only the blade.",
+   "Not covered by the scenarios: weeks that cross a year (a long weekly kicker), and the 'flat' direction on update and weekly cards (only og-flat is rendered; it shows a grey level blade and a 'sin cambios' slab).",
+   "Leftover exploration from the earlier attempt remains in _specimen/; it is not used by card.mjs."
+  ]
+ },
+ {
+  "lens": "ART DIRECTION: modern, premium, distinctive (screenshot-worthy vs generic AI dark dashboard); composition, type craft, colour, brand use, family consistency, down/odd-data handling",
+  "scores": [
+   {
+    "variant": "b-editorial",
+    "score": 8,
+    "strengths": [
+     "The only one of the three with a real visual idea. The tapered blade comes from the logo's swept strokes and carries the direction (climbing green sliver with a teal glow on up cards, falling red sliver with a wine dusk on down cards), so the whole card changes mood while the number stays white. You recognise it as bluelytics from the thumbnail alone (update-landscape-up vs update-landscape-down, og-og-up).",
+     "Chivo Black hero has the most scale contrast and character of the three. The heavy tabular numerals feel editorial rather than like a UI, and the local foundry is a nice brand story. og-og-big and og-og-up are the most shareable images in the whole set.",
+     "Down days look designed, not alarming: update-story-down and weekly-portrait-weekDown use a red slab and a thin red sliver over a dusky field, with no wall of red.",
+     "The delta slab with a diagonal cut echoes the blade and reads as one system. Portrait and story (update-portrait-up, update-portrait-big) are confident single-column layouts with a clear hierarchy: hero, slab, chart, stats.",
+     "Family consistency is strong across update, weekly and OG. The white 'RESUMEN SEMANAL' tag clearly marks the weekly kind (weekly-landscape-weekUp)."
+    ],
+    "weaknesses": [
+     "The README says the blade never crosses small text, but the renders show otherwise. In weekly-story-weekShort the green sliver cuts through '2026' in 'DÓLAR BLUE · 10 – 11 DIC 2026'. In update-landscape-down the edge of the blue blade runs behind 'vs. cierre anterior'. In og-og-flat the grey sliver crosses the '$' glyph.",
+     "The chart's end dot collides with the period caption: in update-story-down and update-landscape-down the red dot sits on the 'V' of '23 NOV'.",
+     "Landscape is the most crowded composition in the set (update-landscape-up/-big, weekly-landscape-*). The slab wraps to two lines with an awkward hanging indent ('+0,90%' indented under '+$ 15'). Only about 80 px separates the hero from 'MÁX', the timestamp sits about 20 px under the axis caption, and the sliver runs straight through the hero's counters. Too many loud things compete at once.",
+     "Wide-tracked bold caps are used for every label (DÓLAR BLUE, MÁX/MÍN, ÚLTIMAS 30 RUEDAS, COMPRA…). With nothing quieter, the secondary tier gets shouty.",
+     "The chart line is always light blue and only the end dot carries the direction colour. That is fine, but on up cards it means the brand blue, the teal glow and the green sliver all compete.",
+     "b-editorial/out/_thumbs.jpg and _contact.jpg render as broken image placeholders. This is a harness or contact-sheet problem, not a card problem, but the sheets need regenerating before anyone reviews them."
+    ],
+    "ideasWorthStealing": [
+     "A brand-derived blade or sliver whose direction and tint carry the move",
+     "A delta slab with its free end cut on the diagonal of the move",
+     "Up and down changing the atmosphere of the whole card (teal top glow vs wine bottom dusk) while the hero stays neutral",
+     "A white tag that marks the weekly kind"
+    ]
+   },
+   {
+    "variant": "a-terminal",
+    "score": 7,
+    "strengths": [
+     "The most refined craft. Margins are disciplined, the 8 px rhythm is real, hairline rules replace boxes, and the Geist Mono labels and timestamp sit well against the Geist 700 hero (update-landscape-up, update-portrait-big). Nothing in any render looks broken.",
+     "Uses colour with the most restraint. Direction lives only in the tinted pill, the chart stroke and the end dot, so down cards (update-story-down, weekly-portrait-weekDown) look calm and premium.",
+     "Very consistent across sizes. Each medium has a sensible layout (two columns in landscape, a key/value list in story). og-og-flat handles 'sin cambios' gracefully with a neutral pill and a blue line.",
+     "The muted 60% '$' is a nice typographic detail."
+    ],
+    "weaknesses": [
+     "Too safe for 'surprise me'. This is the canonical Vercel/Linear dark fintech card: near-black, a faint corner glow, a tinted pill, a green area sparkline. Nothing about it says bluelytics apart from the logo, and the brand blue barely appears (only the corner glow).",
+     "The hierarchy is timid outside the hero. The stats row (COMPRA/OFICIAL/BRECHA) is set almost as large as the pill, so the middle of update-landscape-up feels flat.",
+     "Geist 700 at this size crowds the '1' and the period in '1.650' and '1.680' (update-story-down, weekly-story-weekShort). It reads '1.6' tight.",
+     "The short-week weekly (weekly-story-weekShort) shows a two-point line with three blank slots of faint dotted guides. It is honest but looks empty rather than intentional.",
+     "In og-og-flat the '1.680' and '1.660' axis labels nearly touch, and the flat chart floats with dead fill below it."
+    ],
+    "ideasWorthStealing": [
+     "A minimum chart span (4% over 30 days, 2% for a week) so noise is not exaggerated",
+     "Mono timestamp and domain as a quiet technical footer",
+     "A muted '$' at 60% opacity",
+     "Story key/value rows with hairline rules"
+    ]
+   },
+   {
+    "variant": "c-chart",
+    "score": 6,
+    "strengths": [
+     "Has the best weekly concept of the three. The week reads as a small table with a 'previo' column and a cell per day, each with its close and date. In weekly-story-weekShort the missing days are hatched and a dotted connector runs from 'previo', so a two-day week looks deliberate rather than broken. weekly-portrait-weekDown is legible and dramatic.",
+     "The chart labels itself well: a value tag on the last point, a hollow marker at the high or low, a last segment in the change colour, and the period written into the axis row (update-landscape-down).",
+     "The Archivo hero is big and clean, and the solid filled chip reads instantly at feed size."
+    ],
+    "weaknesses": [
+     "Reads most like a generic trading-app or AI dashboard screenshot. Rounded bordered stat panels, a dot-grid texture and a solid pill chip are all default UI vocabulary, with no brand idea beyond the blue stroke.",
+     "In portrait the chart takes over (update-portrait-up, update-portrait-big). The hero, chip and stats are jammed into the top 40% with tight gaps (chip about 20 px under the hero), then a huge area chart follows. It feels like an app screen rather than a composed poster.",
+     "The OG composition is unbalanced (og-og-up, og-og-big, og-og-flat). A small chart is pushed into the bottom-right corner with a large void above it, and the end-dot halo nearly touches the right edge.",
+     "Small collisions: in update-portrait-big the 'mín 11.810' label butts against the end of the plot area. In landscape the stats box and the hero block do not share a top or baseline.",
+     "The mono chart notes ('30 días hábiles', 'previo', 'lun 16') at wide tracking look like a code font dropped into a UI. They are less refined than A's mono usage.",
+     "c-chart/out/_thumbs.jpg and _contact.jpg render as broken image placeholders (a harness issue)."
+    ],
+    "ideasWorthStealing": [
+     "Weekly as a day-cell table with a 'previo' column and hatched empty days, plus a dotted connector from the previous close across the gap",
+     "Colouring only the last chart segment (previous close to now) in the up or down colour",
+     "A value tag on the last point and a hollow marker at the period high or low"
+    ]
+   }
+  ],
+  "ranking": [
+   "b-editorial",
+   "a-terminal",
+   "c-chart"
+  ],
+  "recommendation": "Ship b-editorial. It is the only one that answers \"surprise me\" with a brand-derived idea, and it is the one people would screenshot. Fix these before launch:\n\n1. Re-route the blades so they really never cross small text. Fix weekly-story-weekShort (the sliver cuts through '2026'), update-landscape-down (the blade edge runs behind 'vs. cierre anterior') and og-og-flat (the grey sliver crosses '$'). Add an automated check that tests each blade path against the bounding boxes of all text smaller than the hero.\n\n2. Stop the chart's end dot from colliding with the caption row (update-story-down, update-landscape-down). Either move the period caption below the plot with a gap of at least 24 px, or inset the plot's right edge.\n\n3. Calm the landscape layout. Put the delta slab on one line ('▲ +$ 15 | +0,90%') as in portrait, or right-align both lines with no hanging indent. Add about 16–24 px between the hero and 'MÁX' and between the axis caption and the timestamp. Consider a thinner, more transparent blade in landscape so it only grazes the hero instead of slicing through its counters.\n\n4. Add a quieter label tier. Keep the bold wide-tracked caps for 'DÓLAR BLUE · VENTA' and the stat keys. Set chart notes (MÁX, MÍN, ÚLTIMAS 30 RUEDAS) in a lighter weight with less tracking, perhaps in a mono like A's, so not everything shouts.\n\nGraft from c-chart:\n- Its weekly treatment for short weeks: hatched empty-day cells and a dotted connector from a 'previo' close. Use it in place of B's em-dash placeholders, and add the previous week's close as a ghost point.\n- Its colouring of the last chart segment in the change colour on the 30-day chart. This ties the light-blue line to the slab.\n\nGraft from a-terminal:\n- Its minimum-span rule for chart honesty.\n- Its mono timestamp and domain footer. It would give B's busy footer a quieter, more technical register.\n\nAlso regenerate _thumbs.jpg and _contact.jpg for b-editorial and c-chart. Both currently show broken image placeholders."
+ },
+ {
+  "lens": "In-feed performance and robustness. I built feed mock-ups with playwright-core and Chrome: X timeline at 375 pt in dark and light themes, an Instagram 3-column 3:4 centre-cropped profile grid, a story with Instagram chrome overlaid (top 250 px, bottom 340 px), and WhatsApp and Slack link previews at 300 px. I also ran 40 extra stress renders per variant through each renderCardHtml: a 6-digit price (125.625), a +1 peso move, a −6.99% crash, a 3-point series, a 1-point series, a fully flat series, negative brecha (oficial above blue), a one-day week, a 6-digit week, a crash week and a flat week. Everything is in /tmp/claude-1000/-home-sicarul-dev-bluelytics/c994ac69-6f88-493d-ac11-54fc62a21d9d/scratchpad/build/cards/_judge-feed/ (x-dark.jpg, x-light.jpg, ig-grid-*.jpg, story-*.jpg, og-preview.jpg, stress-*-update.jpg, stress-*-weekly.jpg, stress/<variant>/*.jpg; scripts are stress.mjs and mock.mjs). Side note: the harness _contact.jpg and _thumbs.jpg for b-editorial and c-chart contain only broken images, because file:// images do not load from setContent. That is a harness problem, not a fault in the variants; a-terminal regenerated its sheets with its own script.",
+  "scores": [
+   {
+    "variant": "c-chart",
+    "score": 8,
+    "strengths": [
+     "Most robust of the three. No hard break in any of the 40 stress renders: the 6-digit hero fits in landscape, portrait, story and og (stress/c-chart/update-story-sixDigit.jpg, og-og-sixDigit.jpg); the weekly table holds six-digit day values in its columns (weekly-portrait-wSix.jpg); the one-point series reads '1 día hábil' with correct singular grammar; the one-day week keeps lun–jue as hatched '–' columns plus a 'previo' anchor, so it looks deliberate (weekly-*-wOneDay.jpg).",
+     "The solid filled green or red change chip is the most legible direction signal at 375 pt on both X themes (x-dark.jpg, x-light.jpg) and at 300 px in WhatsApp and Slack (og-preview.jpg); the grey 'sin cambios' chip in og-og-flat is also clearly readable.",
+     "Repeating the end value as a coloured tag on the chart (1.675 / 1.650) gives a second, glanceable read of the price and direction in the X timeline.",
+     "The OG card has the least small print: logo, title, hero, chip and an unlabeled sparkline, which suits chat previews.",
+     "Negative brecha (−1,5%), a +1 peso move (+0,06%) and a −6,99% crash all format correctly."
+    ],
+    "weaknesses": [
+     "Instagram 3:4 grid crop (ig-grid-c-chart.jpg): content runs edge to edge with the 64 px gutter, so after the ~34 px side crop the '$' of the hero, the left accent bar and the chart's first-point marker sit right at the cell edge. It is the tightest of the three.",
+     "The chart is min-max scaled, so a 5.7% 30-day range fills about 500 px of height in update-portrait-big.jpg and stress/c-chart/update-portrait-tiny.jpg; noise looks steeper than in a-terminal, which enforces a minimum span.",
+     "Weekly landscape (weekly-landscape-weekUp.jpg) and the X weekly post are the densest cards: the 'previo' value and the Chivo Mono day labels are small and low-contrast at 375 pt.",
+     "In the OG sparkline, the '30 días' label and the dim blue line almost disappear at 300 px (og-preview.jpg). That is harmless, but the chart adds little there.",
+     "Across the grid, update cells are dominated by the large blue area chart, so up and down posts read the same blue colour; only the chip and the last segment differ."
+    ],
+    "ideasWorthStealing": [
+     "Weekly table: a 'previo' column plus hatched missing-day columns, which survives one-day and two-day weeks.",
+     "A value tag on the last point, coloured by direction.",
+     "Writing the period on the axis ('12 oct — 30 días hábiles — 20 nov') instead of a separate caption.",
+     "Singular/plural handling ('1 día hábil')."
+    ]
+   },
+   {
+    "variant": "b-editorial",
+    "score": 6.5,
+    "strengths": [
+     "Strongest scroll-stopper in every feed. The blade plus the solid diagonal-cut slab give each post a distinct silhouette on both X dark and X light (x-dark.jpg, x-light.jpg), and up versus down are obvious even in the IG grid (ig-grid-b-editorial.jpg).",
+     "Most coherent Instagram profile: the shared blue field and blade read as one brand, and the 'RESUMEN SEMANAL' white tag makes weekly posts easy to spot in the grid.",
+     "Largest OG hero at 300 px (og-preview.jpg) and no small print. The 6-digit hero shrinks to fit in every size instead of clipping (stress/b-editorial/og-og-sixDigit.jpg, update-story-sixDigit.jpg).",
+     "Story layout keeps all essentials between the IG chrome bars (story-update-story-down.jpg)."
+    ],
+    "weaknesses": [
+     "6-digit stats collide: in stress/b-editorial/weekly-story-wSix.jpg and weekly-portrait-wSix.jpg the stats row runs together as '$ 125.625$ 102.25022,9%'; in update-landscape-sixDigit.jpg 'COMPRA' and 'OFICIAL' touch '$ 124.350' and '$ 102.250', and the slab extends to about x=1570, inside the 64 px safe margin.",
+     "The blade does cross small text, contrary to the README: the green sliver cuts through 'DIC 2026' in out/weekly-story-weekShort.jpg (visible in story-weekly-story-weekShort.jpg) and through 'SEPT 2027' in stress weekly-story-wSix. It also crosses every hero number (update-landscape-up.jpg, og-og-big.jpg, og-og-flat.jpg, where the grey blade slices '1.675').",
+     "The blade carries the same drama for a +1 peso move (+0,06%) as for +4,96% (stress og-og-tiny.jpg against og-og-big.jpg), so trivial moves look like events. Only the slab text differs.",
+     "One-point series: the chart area is an empty field with a lone dot and no min/max or caption (stress update-portrait-onePt.jpg).",
+     "In update-story-down.jpg the red end dot sits on the 'NOV' of the period caption."
+    ],
+    "ideasWorthStealing": [
+     "Solid filled delta slab with a diagonal cut, which reads best at thumbnail size.",
+     "Shrinking the hero to fit width for long numbers.",
+     "A weekly tag that sets weekly posts apart in the grid."
+    ]
+   },
+   {
+    "variant": "a-terminal",
+    "score": 6,
+    "strengths": [
+     "The calmest and most honest charts: minimum span (4% / 2%) and dotted min/max guides, so a +1 peso day is not exaggerated (stress update-landscape-tiny.jpg).",
+     "Very coherent Instagram grid (ig-grid-a-terminal.jpg): consistent placement, readable hero in every 3:4 cell, generous inner margins, and nothing important cropped.",
+     "Story keeps every element between the chrome bars, with large key/value rows (story-update-story-down.jpg).",
+     "A flat series renders as a neutral blue line, the crash ends in a clear vertical drop, and negative brecha formats correctly (−1,5%)."
+    ],
+    "weaknesses": [
+     "Lowest feed contrast. On X dark the #0A0E14 card almost merges with the black timeline, and direction lives only in a small tinted pill (x-dark.jpg). The Geist Mono labels and timestamp are near-illegible at 375 pt.",
+     "6-digit prices break three layouts: in stress/a-terminal/update-story-sixDigit.jpg the hero '125.625' runs off the right edge (the harness check confirms text outside the canvas); in og-og-sixDigit.jpg the hero runs into the sparkline; in weekly-landscape-wSix.jpg the day labels fuse into '118.000119.250121.500123.375125.625'. weekly-story-wSix also overflows.",
+     "Grammar bug: a one-point series renders '1 ruedas' (stress update-*-onePt.jpg, og-og-onePt.jpg).",
+     "The OG card carries small print (min/max sparkline values and '30 ruedas') that is unreadable at 300 px, against the 'no small print' rule (og-preview.jpg). The 'sin cambios' grey pill is low-contrast.",
+     "In the one-day week (weekly-*-wOneDay.jpg) only a single dot floats in the chart area, so the chart reads as nearly empty."
+    ],
+    "ideasWorthStealing": [
+     "Minimum chart span (a percentage of the price) so small moves are not exaggerated; c-chart should adopt it.",
+     "Fixed lun–vie slots with ghosted missing days.",
+     "Dotted guides with the real min/max values."
+    ]
+   }
+  ],
+  "ranking": [
+   "c-chart",
+   "b-editorial",
+   "a-terminal"
+  ],
+  "recommendation": "Ship c-chart. It is the only variant that survived every stress case without overlap, clipping or broken text, and its filled change chip is the most legible direction signal in X (dark and light) and in chat previews. Changes before launch: (1) Widen the side gutter on portrait cards to about 96 px, or keep critical content within x 100–980, so the Instagram 3:4 centre crop no longer cuts the '$', the accent bar and the first chart marker at the cell edge. (2) Borrow a-terminal's minimum vertical span for the 30-day chart (about 4% of the price) so a 5% month and a +1 peso day do not fill the whole plot. (3) In the X landscape weekly card, enlarge or brighten the 'previo' value and the mono day labels; they are too faint at 375 pt. (4) Optionally borrow b-editorial's flavour cheaply: tint the background glow or the area fill by direction so up and down posts differ more in the IG grid. If the owner prefers b-editorial's look ('surprise me'), it needs real fixes first: auto-shrink or wrap the stats row for 6-digit values (weekly story/portrait collide), keep the slab inside the 64 px safe area, reroute the blade so it never crosses the weekly date label (it cuts 'DIC 2026' in weekly-story-weekShort, the baseline render), and scale the blade's intensity by the size of the move. a-terminal needs a fit-to-width hero (it clips off the story canvas at 6 digits), collision-aware weekly day labels, a '1 rueda' singular, and more contrast against black timelines."
+ },
+ {
+  "lens": "Legibility, accessibility and spec conformance. Measured, not guessed: I made my own 125 px thumbnail sheets, sampled WCAG contrast from the JPEG pixels of every text run in all 66 renders, measured text bounding boxes by loading out/*.html in headless Chrome (playwright-core), checked ink extents at the safe-area edges, checked the es-AR strings with NBSP markers, and ran card.mjs on extra edge cases: a week across a month boundary, a week across a year boundary, a one-day week and a one-point update. I did not modify the variants; all scripts are in /tmp/claude-1000/-home-sicarul-dev-bluelytics/c994ac69-6f88-493d-ac11-54fc62a21d9d/scratchpad/judge-legib/. Note: out/_thumbs.jpg and out/_contact.jpg in b-editorial and c-chart are blank sheets of broken-image placeholders (both 27,242 / 91,400 bytes, identical). Only a-terminal shipped valid sheets.",
+  "scores": [
+   {
+    "variant": "a-terminal",
+    "score": 8,
+    "strengths": [
+     "Cleanest safe-area conformance of the three. Measured ink stays inside the 64/56/270-1580/48 bounds in every size, using 80 px effective insets (e.g. the update-landscape-up footer ink ends at y=825, limit 836).",
+     "es-AR formatting is exact everywhere: '+$ 15', '−1,49%' with U+2212, '21,8%', '8 sept 2027, 19:35 (ART)', '23 – 27 nov 2026'. It is the only variant that forces useGrouping:'always', so 4-digit grouping does not depend on the locale's minimumGroupingDigits. Cross-year range renders correctly as '28 dic 2026 – 1 ene 2027'.",
+     "Most honest charts. Minimum span is 4% (30 days) or 2% (week), so update-portrait-up does not exaggerate a 5.4% move. Real min/max values are on dotted guides ('1.730 / 1.650'), there is a period caption ('30 ruedas · 13 oct – 23 nov'), and the weekly chart has a 'cierre semana anterior · $ 1.675' reference line.",
+     "Two-day week (weekly-story-weekShort) keeps fixed lun–vie slots with ghosted missing days and no fake connecting line.",
+     "Text contrast: all body labels are 5.3–8.6:1. Down-chip text on its red tint measures 5.55:1 (update-landscape-down). Strokes: up 10.2:1, down 6.4:1 on #0A0E14.",
+     "Contract: plain ESM, no node: imports or scripts, 0 external requests, 50 KB of WOFF2, both OFL licences present, README 38 lines."
+    ],
+    "weaknesses": [
+     "Weakest thumbnail direction cue. The chip is a dark tinted pill with coloured text, so at 125 px (chip text is about 3.4 px tall in update-landscape-up) direction is carried mostly by the sparkline colour. See _thumbs.jpg next to b and c, whose solid chips read as colour blocks.",
+     "Smallest landscape hero at thumbnail size: weekly-landscape-weekUp cap height is about 11.7 px at 125 px wide (b: 18 px).",
+     "Ghosted missing-weekday labels ('lun/mar/mié' in weekly-*-weekShort) measure 3.28:1. That passes only the large-text threshold (they are 32–34 px), so it is acceptable but borderline.",
+     "OG cards carry chart value labels (32 px) and a '30 ruedas' caption, which goes against the contract's 'no small print' for og (og-og-up, og-og-flat).",
+     "Edge case: a one-point series renders a degenerate caption '1 rueda · 20 nov – 20 nov'."
+    ],
+    "ideasWorthStealing": [
+     "useGrouping:'always' for es-AR integers",
+     "Minimum chart span (4% for 30 days, 2% for the week) plus dotted guides labelled with the real min/max",
+     "Previous-week close drawn as a labelled reference line on the weekly chart"
+    ]
+   },
+   {
+    "variant": "b-editorial",
+    "score": 7,
+    "strengths": [
+     "Best thumbnail legibility. Hero cap height at 125 px is 18 px in landscape and 25 px in portrait and story, the largest of the three. The solid slab (dark ink on green/red) plus the climbing or falling blade give direction even without colour.",
+     "Highest text contrast. The minimum sampled ratio over all renders is 4.86:1 (ghost 'MIÉ' in weekly-story-weekShort), with 0 runs under 4.5. Slab ink measures 9.9:1 on up, 6.3:1 on down and 9.4:1 on flat.",
+     "OG is the cleanest link preview: no small print (minimum 38 px), title, hero, slab, logo and domain only.",
+     "Formatting correct, including '29 JUL – 8 SEPT', '28 DIC 2026 – 1 ENE 2027' and the NBSP after '$'. Charts label MÁX/MÍN with real values and give the period ('ÚLTIMAS 30 RUEDAS · 13 OCT – 23 NOV').",
+     "Smallest font payload (44 KB, one family) with the OFL licence present."
+    ],
+    "weaknesses": [
+     "Safe-area intrusions in landscape. In update-landscape-* and weekly-landscape-*, the logo ink starts at y=60 (limit 64) and the footer ink ends at y=843–844 (limit 836), about 8 px into the margin. In portrait the footer ink ends at y=1296 (limit 1294), and in story the caption box reaches x=1019 (limit 1016).",
+     "The blade breaks its own rule ('a sliver never crosses small text'). In weekly-story-weekShort the green sliver cuts through 'DIC 2026' in the 'DÓLAR BLUE · 10 – 11 DIC 2026' label.",
+     "The red end-dot halo overlaps 'NOV' in the period caption in update-story-down and update-landscape-down.",
+     "White hero over the lighter blade area drops to about 3.9:1 (#F4F8FC on #1C7FD6). The hero is huge, so it still passes, but the figure-ground is busier than in a or c.",
+     "The 4-digit grouping relies on es-AR CLDR defaults (no useGrouping:'always'). It works on Node 24 / ICU 78, but it is fragile.",
+     "Shipped out/_thumbs.jpg and out/_contact.jpg are blank, so the variant was never checked at 125 px with the harness."
+    ],
+    "ideasWorthStealing": [
+     "Solid direction slab with dark ink (about 10:1) as the thumbnail-proof direction cue",
+     "OG without any small print",
+     "A non-colour direction cue (shape or geometry), so direction does not rely on red/green"
+    ]
+   },
+   {
+    "variant": "c-chart",
+    "score": 6.5,
+    "strengths": [
+     "The weekly table is the most explicit about dates: a 'previo' column and per-day 'lun 16 … vie 20' labels with values. Missing days are hatched with '—' (weekly-story-weekShort), so a two-day week is unambiguous.",
+     "Solid chips with dark ink (9.8:1 up, 6.4:1 down, 10.1:1 flat) read well at thumbnail size, and the value tag on the last point repeats the direction.",
+     "Formatting correct for the main scenarios ('$ 1.650', '−1,49%', '8 sept 2027, 19:35 (ART)', '30 nov – 4 dic 2026').",
+     "Only 2 sampled text runs below 4.5:1 (date digits on the highlighted 'vie' column, 4.49:1). Everything else is at least 5.3:1."
+    ],
+    "weaknesses": [
+     "Least honest charts. The plot always spans the data range and is tall: in update-portrait-up and update-story-down a 5.4% 30-day move fills about 480 px, and in weekly-portrait-weekDown a 30-peso (1.8%) range is drawn as a near-full-height crash. The minimum is labelled, but the shape exaggerates.",
+     "In weekly-*-weekShort a dotted line from 'previo' crosses three hatched no-data days, which suggests interpolated values.",
+     "The OG caption says '30 días', but the series is 30 trading days (the update card correctly says '30 días hábiles'). The 30 px caption is also small print on OG.",
+     "Year-boundary bug in the edge test: a week 28 dic 2026 – 1 ene 2027 renders as '28 dic – 1 ene 2027', with no start year.",
+     "Landscape footer ink reaches y=837 (limit 836, 1 px). Landscape weekly hero cap height is about 11.9 px at 125 px, the smallest alongside a.",
+     "Font payload is the largest (67 KB, still well under 250 KB). Shipped out/_thumbs.jpg and out/_contact.jpg are blank."
+    ],
+    "ideasWorthStealing": [
+     "Weekday plus date labels ('lun 16') with a 'previo' column on the weekly card",
+     "Value tag on the last chart point in the chip colour",
+     "Hatched no-data slots with '—'"
+    ]
+   }
+  ],
+  "ranking": [
+   "a-terminal",
+   "b-editorial",
+   "c-chart"
+  ],
+  "recommendation": "Ship a-terminal. It is the only variant with no measured safe-area intrusion, exact es-AR formatting including year-crossing weeks and forced grouping, and charts that do not exaggerate small moves. Before shipping, make these changes. (1) Fix the thumbnail direction cue: change the tinted pill to a solid fill with dark ink, using c's onUp/onDown tokens (#04160C on #2FD67B is 9.8:1; #200606 on #FF5D5D is 6.4:1) or b's slabInk #03121F, and keep the arrow and sign. (2) Raise the landscape hero (240 px update, 208 px weekly) towards b's 300–320 px, so the cap height at 125 px goes from about 12–13 px to about 17–18 px. (3) Graft c's weekly x-labels with dates ('lun 16 … vie 20') and keep a's ghosted slots, but brighten the ghost labels from #566376 (3.2:1) to about #6B7A90 (at least 4.5:1). (4) Remove the small chart value labels and the '30 ruedas' caption from OG, following b's no-small-print OG. (5) Guard the one-point caption ('1 rueda · 20 nov – 20 nov' should read just '20 nov'). If the owner prefers b-editorial's look, it needs these fixes first: bring the landscape logo and footer inside 64 px (currently y=60 and y=844), the portrait footer inside 56 px, and the story caption inside x=1016; reroute the weekly-story blade so it does not cross 'DIC 2026'; keep the end-dot halo clear of the period caption; and add useGrouping:'always'. c-chart needs a minimum chart span, 'días hábiles' on OG and a year-boundary fix before it is shippable. Separately, the harness sheets for b and c are blank and should be regenerated before anyone judges them from _thumbs.jpg."
+ },
+ {
+  "dir": "/tmp/claude-1000/-home-sicarul-dev-bluelytics/c994ac69-6f88-493d-ac11-54fc62a21d9d/scratchpad/build/cards/final/",
+  "base": "b-editorial",
+  "summary": "I built the final version on b-editorial, the highest-scoring variant, which the art-direction judge recommended shipping, and kept its art direction: a white Chivo Black hero, the brand blade and the diagonal-cut slab.\n\ncard.mjs is rewritten as one self-contained ESM module. The logo is now inlined and logo.mjs is gone. Design tokens live in one `TOKENS` object.\n\n**The blade.** I replaced the hand-tuned blade paths with a deterministic router. Every layout registers the boxes of its small text, the logo, the tag and the chart. The router then searches routes near the preferred one, trying thinner blades if needed, and can also leave through the right edge. It keeps the first route where the sliver touches nothing and the blade's edge cuts no text; only the hero digits and the opaque slab may be crossed. If no clean route exists, the sliver is dropped. Sliver thickness, opacity and the glow scale with the square root of the move, so a +1 peso day is quiet and a 7% move is loud.\n\n**Layout and type.**\n- Landscape is calmer. The slab is a two-row block with a tall arrow, aligned top and bottom with the hero, so the hanging indent is gone. The vertical rhythm has more room.\n- There is now a quieter label tier in Chivo Mono (same foundry, so it stays one family). It is used for chart notes, axis values, day labels, \"vs. cierre anterior\", and the timestamp and domain footer.\n- The 30-day chart shows its period above the plot and the real max and min on dotted guides, with values in a right-hand gutter. The end dot can no longer collide with a caption. The last segment is drawn in the move colour, and the chart never spans less than 4% of the price. A one-point series shows just \"20 nov\".\n- The weekly chart is a day-cell table: a \"previo\" column (last week's close as a ghost point plus a dotted reference level), then lun–vie with \"lun 16\" labels. Days without a close are hatched and never bridged by a line, and the chart never spans less than 2%.\n- Hero, stat values and weekly value labels shrink to fit, so 6-digit prices work everywhere.\n- Margins are 80 px in landscape and 72 px in portrait and story; all ink is inside the safe areas, which are now measured. Grouping is forced with `useGrouping: 'always'`.\n\n**Exports.** Besides `renderCardHtml`: `computeCardFacts`, `cardAltText` (one Spanish sentence, at most 420 characters), the formatters (pesos, signed pesos, percent, brecha, timestamp, date range with a prose option), `plainText` and `TOKENS`.\n\n**Checks.** `extra-scenarios.mjs` and `render-extra.mjs` produce 50 stress renders in `out-extra/` with checks for safe areas, text overlap, a chart dot touching text, the blade crossing text, NaN, and alt-text length; `--main` also checks the harness matrix. The harness is clean, and `render-extra --main` reports no layout problems. I looked at every render at full size, the 125 px thumbnails and the 3:4 Instagram grid crop over three-plus rounds.\n\n**Still weak.**\n- On tall up cards the blade mostly lives in the top-right corner, and on some weekly story cards it bends into a bowl under the slab. Less dramatic than b-editorial's original, but honest.\n- The landscape weekly plot band is shallow (about 80–100 px), so the value labels dominate.\n- Mono notes at 34 px read wide.\n- Text widths come from a measured glyph table rather than live measurement, so changing the font means re-running `tools/metrics.mjs`.",
+  "grafted": [
+   "a-terminal: minimum chart span (4% of the price over 30 days, 2% for the week) with dotted guides at the real min and max",
+   "a-terminal: a quiet mono register for the timestamp and domain footer and for chart notes, set in Chivo Mono so it stays in the Chivo family",
+   "a-terminal: es-AR grouping forced with useGrouping:'always'",
+   "c-chart: weekly day-cell table with a 'previo' column (the previous week's close as a ghost point and a dotted reference level), hatched days without a close, and 'lun 16' labels",
+   "c-chart: the last chart segment (previous close to now) drawn in the move colour",
+   "b/feed judge: blade intensity scaled to the size of the move; hero and stat values fit to width"
+  ],
+  "judgeIssuesFixed": [
+   "Blade crossing small text (weekly-story-weekShort '2026', update-landscape-down 'vs. cierre anterior', og-og-flat '$'): fixed by the router, which avoids all registered text, plus an automated check in the browser",
+   "Chart end dot colliding with the period caption: the caption is now above the plot and the values sit in a right-hand gutter; checked automatically",
+   "Crowded landscape: the two-row slab with a tall arrow has no hanging indent and is aligned top and bottom with the hero; there is more space between rows and an 80 px inset",
+   "Everything set in shouting caps: added a quiet tier in Chivo Mono (sentence case, no tracking, muted colour)",
+   "Safe-area intrusions (landscape logo and footer, portrait footer, story caption): all ink is now inside the safe areas, measured",
+   "6-digit stats colliding: values shrink to fit their column or row; the slab shrinks to fit",
+   "The same blade drama for +1 peso and +5%: sliver, opacity and glow now scale with the move",
+   "One-point series: shows a dot, a guide with its value and just the date, never '1 rueda · 20 nov – 20 nov'",
+   "Week ranges across a year: correct range ('28 dic 2026 – 1 ene 2027') and the kicker shrinks to fit",
+   "Grouping relying on CLDR defaults: useGrouping is now 'always'",
+   "Broken _contact.jpg and _thumbs.jpg: tools/sheets.mjs rebuilds them with inlined images, plus _grid.jpg (the 3:4 crop)",
+   "A non-zero move rounding to '+0,00%': formatPercent adds decimals instead (+0,001%)",
+   "Chart honesty: the minimum span is applied to both charts"
+  ],
+  "judgeIssuesNotFixed": [
+   "The blade still passes behind the hero digits: kept on purpose as the signature; the sliver is thinner on small moves",
+   "On tall up cards and some weekly story cards the routed blade sits mostly in a corner or bends under the slab, so it is less dramatic than the original b-editorial",
+   "The landscape weekly plot is shallow (about 80–100 px tall)",
+   "The white hero over the lightest part of the blade still measures about 3.9:1; it passes for text this large but is busier than on a plain field",
+   "c-chart's broken sheets were not regenerated: outside my directory"
+  ],
+  "exports": [
+   "renderCardHtml",
+   "computeCardFacts",
+   "cardAltText",
+   "formatNumber",
+   "formatPesos",
+   "formatSignedPesos",
+   "formatPercent",
+   "formatGap",
+   "formatTimestamp",
+   "formatDateRange",
+   "plainText",
+   "TOKENS"
+  ],
+  "harnessProblems": [
+   "The harness _contact.jpg and _thumbs.jpg come out as broken-image placeholders, because setContent pages cannot load file:// images. tools/sheets.mjs overwrites them with inlined images after each harness run.",
+   "The harness itself reports no problems for final. render-extra.mjs --main reports no layout problems over the 22 harness renders and the 50 extra renders."
+  ],
+  "fonts": [
+   "Chivo 700 (OFL, Fontsource 5.3.0)",
+   "Chivo 900 (OFL, Fontsource 5.3.0)",
+   "Chivo Mono 500 (OFL, Fontsource 5.3.0)"
+  ],
+  "fontPayloadKB": 40.1
+ },
+ {
+  "lens": "fresh-eyes visual critic",
+  "verdict": "ship-after-fixes",
+  "summary": "Yes. This is a modern, premium dark design that the owner should be glad to post. The huge white Chivo Black hero, the soft-blue superior \"$\" and the solid diagonal-cut slab with dark ink read as editorial rather than as a template. The quiet Chivo Mono label tier gives the cards a clear three-level hierarchy, and the 125 px thumbnails and the 3:4 grid crop still show the hero number and the direction colour. I looked at all 22 renders at full size, plus _thumbs.jpg, _grid.jpg, the out-extra contact sheet and 8 extras at full size. Every number I checked is right: the deltas, the percentages, the brecha (including the negative one), the chart max and min, the weekly comparison with the previous week, and the dates. All 1600x900 content sits about 80 px inside the edges, the og content sits within y 75–560 (inside the 1200x600 band), and story content sits within y 290–1560 (inside the spec's 270 px top keep-out and its practical limit of about y 1580). I saw no gradient banding, no halos around text, no clipped lines or end dots, and no problems with the logo. I found no blockers. What keeps it from feeling finished: (1) on down cards in portrait and story, the blade ends in a visible blunt, scissor-cut stub just inside the right edge, and on up cards it is a long sweep, so down days look weaker; (2) the weekly chart has value labels larger than the line's movement, labels sitting on the dotted reference line, and labels nearly touching when prices have 6 digits; (3) the vertical rhythm shifts: when the hero shrinks for 6-digit prices, a gap opens under the logo, and on story cards the footer is crowded against the stats while about 360 px at the bottom stays empty. The three changes that would improve it most are listed in the first three findings.",
+  "findings": [
+   {
+    "severity": "major",
+    "title": "Down-card blade ends in a blunt cut stub inside the canvas (portrait and story)",
+    "evidence": "update-story-down.jpg and weekly-story-weekDown.jpg: the blue blade stops at about (1020–1080, 895–912) with a hard straight cut across it, so it reads as a ribbon cut with scissors (crop: _verify-fresheyes/tip-story-down.png). The same happens on update-portrait-down.jpg at about (1045–1080, 700–722) (_verify-fresheyes/tip-portrait-down.png) and on weekly-portrait-weekDown.jpg at about (1050, 520). On up cards the blade sweeps across the hero and leaves the canvas cleanly, so down days look like the weak version of the design. Landscape down is fine because the cut is hidden at the edge.",
+    "suggestedFix": "Never let the blade's end cap be visible: extend the path past the canvas edge, or taper it to a point (or to the sliver's width) where it ends. Better still, give down cards a mirror of the up route: a descending sweep from top-left to bottom-right that crosses the hero digits, so both directions get the same drama."
+   },
+   {
+    "severity": "major",
+    "title": "Weekly chart: value labels overpower a flat line and sit on the dotted reference line",
+    "evidence": "weekly-landscape-weekUp.jpg: six bold labels of about 40 px sit over a line that rises only about 50 px across the whole plot band, so the labels are the chart. weekly-landscape-weekDown.jpg and weekly-portrait-weekDown.jpg: the 'previo' dotted reference line runs into the baselines of '1.660' and '1.650' (it is knocked out behind them, but the labels look like they sit on it; crops _verify-fresheyes/wd-labels.png and wpd-labels.png). weekly-landscape-wSix.jpg: '117.500 118.000 119.250 121.500 123.375' are separated by only about 20–25 px, so they nearly run together.",
+    "suggestedFix": "Make the point labels quiet: Chivo Mono in muted colour, with only the last value in bold white. When labels collide, keep only the first, last, min and max. Make the landscape plot band about 140 px tall and put labels above or below the point, away from the reference line. Draw the last weekly segment in the move colour, as the 30-day chart already does."
+   },
+   {
+    "severity": "major",
+    "title": "Vertical rhythm is inconsistent: the kicker drops when the hero shrinks, and story stats crowd the footer",
+    "evidence": "6-digit renders: the kicker moves from y≈168 to y≈217 (update-landscape-sixDigit, weekly-landscape-wSix) and from about y 418 to 470 on story (weekly-story-wSix), which opens a 100–150 px gap under the logo that standard cards do not have. On every update-story-*: the stats end at about y 1470 and the footer sits at about y 1545 (about 45 px apart), while portrait leaves about 120 px there and the story keeps about 360 px of empty gradient below 1560. The story looks pushed up rather than composed.",
+    "suggestedFix": "Anchor the kicker to the logo row, not to the hero's cap height, and let any shrink space go below the hero. On story, split the empty space evenly between the blocks (or pin the footer at about y 1580) so the gap from the stats to the footer matches portrait."
+   },
+   {
+    "severity": "minor",
+    "title": "'vs. cierre anterior' / 'vs. semana anterior' wraps onto two ragged lines in portrait and story",
+    "evidence": "All portrait and story renders show 'vs. cierre' / 'anterior' as a two-line block beside the slab, and its right edge moves as the slab width changes (x≈840 against x≈1003 on weekly-story-wSix, where it sits on the blade).",
+    "suggestedFix": "Put the note on a single line under the slab (left-aligned with it), or shorten it to 'vs. cierre ant.' or 'vs. ayer' in portrait and story."
+   },
+   {
+    "severity": "minor",
+    "title": "Weekly and update cards look the same at thumbnail size",
+    "evidence": "_thumbs.jpg and _grid.jpg: at 125 px, the only thing that tells a weekly card from an update card is the small white 'RESUMEN SEMANAL' tag in the top-right corner. Hero, slab and chart band have the same silhouette.",
+    "suggestedFix": "Give weekly a stronger cue that survives a thumbnail: for example, make the tag a larger block level with the kicker, or put 'SEMANA' or the week range in the slab."
+   },
+   {
+    "severity": "minor",
+    "title": "A one-point series leaves a large empty chart area",
+    "evidence": "update-portrait-onePt.jpg: about 300 px of empty field with a single dotted line and one dot, which reads as missing data or a broken render.",
+    "suggestedFix": "When n=1, collapse the chart band (or replace it with a single mono line such as 'primera rueda · 20 nov') and give the space back to the stats."
+   },
+   {
+    "severity": "minor",
+    "title": "Narrow gutters in the story weekly stat row",
+    "evidence": "weekly-story-weekUp.jpg: '$ 1.675' under MÁXIMO ends at about x 515 with the divider at 540, and '$ 1.601' ends at about x 750 with the next divider at 775. Four columns at that size leave about 25 px gutters.",
+    "suggestedFix": "Use at least 36 px of padding around the dividers, or drop the dividers and rely on spacing."
+   },
+   {
+    "severity": "minor",
+    "title": "The wine glow on down cards looks muddy in the bottom-right corner",
+    "evidence": "update-portrait-down.jpg, update-story-down.jpg and update-landscape-crash.jpg: the #3A2148 dusk glow reads as a brownish-mauve patch against the navy after JPEG compression rather than as a deliberate red tone.",
+    "suggestedFix": "Make the glow cooler and lower in opacity (more crimson than mauve, about 60% of the current alpha), or tie it visually to the red sliver."
+   }
+  ]
+ },
+ {
+  "lens": "correctness-and-portability",
+  "verdict": "ship-after-fixes",
+  "summary": "I found no blockers. I recomputed every number on all 22 standard renders independently from scenarios.mjs and compared them with the text in out/*.html. Everything matches: delta, percent, brecha, compra/oficial, the 30-day caption (\"12 oct – 20 nov\", \"13 oct – 23 nov\", \"29 jul – 8 sept\"), min/max (1.585/1.675, 1.650/1.730, 11.810/12.480), week ranges, weekday labels (lun 16…vie 20, lun 23…vie 27, lun 7…vie 11 with 7–9 hatched) and timestamps (18:45Z→15:45, 14:05Z→11:05, 22:35Z→19:35 on 8 sept, 21:59Z→18:59, 21:00Z→18:00). Each out/*.html is byte-identical to a fresh render.\n\nAlt text is correct for every scenario. It is 106–258 characters long, uses Subió/Bajó/\"Sin cambios\" correctly, has an ASCII minus and reads \"hora de Argentina\".\n\nProperty test: 600 random CardData inputs (prices 500–250.000, moves of ±15 %, ±1 peso and 0, series of 1–30 points including flat ones, weeks of 1–5 days with gaps across month and year ends, brecha down to about −33 %, UTC hours 00–03 that roll back to the previous day in Argentina). None threw. With the font base64 stripped, none produced NaN, undefined, Infinity, null or [object in the HTML, none produced a NaN SVG path, none produced a script tag or URL, and repeat renders were identical. An exact BigInt oracle (percent with adaptive decimals, brecha, ART timestamp, weekday labels, year-crossing ranges, min/max, compra) agreed on all 600 apart from the intended brecha decimal escalation.\n\nChrome check: I rendered 35 of the hardest cases with playwright-core. All were scroll-free, every font loaded, no request was external, every text rect was inside the canvas and the safe areas, and no text overlapped other text, the slab, the logo or the tag. One \"hero × slab\" hit (case 454) was a false positive from my approximate ink box; the screenshot is clean.\n\nPortability:\n- esbuild 0.25.0 (`--bundle --format=esm --platform=neutral`): 96,152 B, 57,778 B gzip -9 (minified: 84,526 B, 55,532 B gzip).\n- No `node:`, no top-level await, no Date.now/Math.random/fetch/process.\n- I ran the bundle under workerd with wrangler 4.166.0 `dev --local` on Node 24. Wrangler 4 needs Node ≥ 22.12, so the system Node 20 cannot run it. The SHA-256 of all 22 matrix renders and the alt text are identical to Node, and `Intl.supportedLocalesOf('es-AR')` returns `['es-AR']`.\n\nLicences: the three WOFF2 files (Chivo 700/900, Chivo Mono 500, 41 KB in total) match the base64 in fonts.mjs byte for byte, both OFL-1.1 texts are in fonts/, and no commercial font is used. The generated HTML contains no URL of any kind, not even an xmlns.\n\nThe issues are a wrong \"sin cambios\" claim when prevSell is missing, a heavy CPU cost from the blade router (up to about 140–270 ms per render), and a few minor ones. Scripts and screenshots are in /tmp/claude-1000/-home-sicarul-dev-bluelytics/c994ac69-6f88-493d-ac11-54fc62a21d9d/scratchpad/build/cards/_verify-correctness/ (texts.mjs, alt.mjs, gen.mjs, prop.mjs, oracle.mjs, chrome.mjs, timing*.mjs, edge.mjs, worker/, shots/).",
+  "findings": [
+   {
+    "severity": "major",
+    "title": "A missing prevSell is shown as \"sin cambios\" on the card and in the alt text",
+    "evidence": "In computeCardFacts (card.mjs:90-93), when prevSell is undefined, null or 0, prevSell becomes null, deltaAbs becomes 0 and direction becomes 'flat'. Random case 283 (update/story, prevSell undefined) renders a grey \"= sin cambios\" slab with \"vs. cierre anterior\" (screenshot _verify-correctness/shots/283-update-story.jpg). cardAltText says \"Sin cambios respecto del cierre anterior.\" The weekly card also loses its 'previo' column but still says \"sin cambios … vs. semana anterior\". This asserts a fact the card does not have: the first post after an outage, or a missing previous close, would publish a false \"unchanged\".",
+    "suggestedFix": "Give computeCardFacts a separate direction: 'unknown' (or hasRef: false). With no reference, omit the slab and the versus note, or render a neutral \"sin referencia\" chip, and drop the move sentence from the alt text. Alternatively, make renderCardHtml throw on a missing prevSell so the caller cannot post it."
+   },
+   {
+    "severity": "major",
+    "title": "The blade router costs 130–270 ms of CPU per render, too much for a Workers Free-plan invocation",
+    "evidence": "Node 20 (warm V8): weekly-portrait-weekUp takes 141.6 ms, weekly-story-weekUp 143.1 ms, weekly-story-weekShort 134.8 ms and weekly-portrait-weekShort 130.8 ms. Over the 600 random cases p50 is 1.8 ms, p90 127.8 ms, p99 259 ms and the maximum 269 ms (weekly landscape with 6-digit prices). Under workerd, the first request that renders the 22-card matrix took 651 ms. Cause: routeBlade can test up to 3×19×19×2 = 2,166 candidates, each running Liang–Barsky on 2×65-point polylines against every obstacle, with no bounding-box prefilter. The output is still correct and deterministic, and a Paid plan (30 s default) runs it fine. The Free plan's 10 ms CPU limit would fail on most weekly cards, which matters given the 'lowest cost' goal in the spec.",
+    "suggestedFix": "Reject obstacles with a cheap bounding-box test before the segment tests, and test coarse (16-point) ribbons first, refining only the survivors. Or precompute the route per (kind, size, direction, hero-digit-count) into a small table and keep the search as a fallback. Aim for ≤ 10 ms on the worst case and add a timing assertion to render-extra."
+   },
+   {
+    "severity": "minor",
+    "title": "Brecha grows extra decimals near zero, breaking the 'one decimal' rule",
+    "evidence": "formatGap reuses formatPercent's 'never print 0,0' escalation. formatGap(0.00035) gives '0,04%' and formatGap(0.00001) gives '0,001%'. Random case 155 renders \"BRECHA 0,04%\" while the contract says brecha has one decimal. A brecha near zero is plausible (it was about 1–5 % in 2025–26).",
+    "suggestedFix": "Pass a flag that turns the escalation off for brecha and print '0,0%', or show '≈ 0%'."
+   },
+   {
+    "severity": "minor",
+    "title": "The weekly alt text with one trading day repeats min and max",
+    "evidence": "For a one-day week: \"Mínimo de la semana $ 1.675, máximo $ 1.675.\" The update alt text already skips its range sentence when min === max; the weekly path does not.",
+    "suggestedFix": "When f.points < 2 or f.min === f.max, drop the min/max sentence, or say 'Un solo cierre en la semana'."
+   },
+   {
+    "severity": "minor",
+    "title": "The og alt text has no final period, and alt texts keep abbreviated months",
+    "evidence": "og alt: \"… respecto del cierre anterior. bluelytics.com.ar\". The domain is appended as a bare fragment with no period. Prose dates use 'nov', 'sept' and 'dic' (\"del 16 al 20 nov 2026\"), which screen readers read as abbreviations.",
+    "suggestedFix": "Write 'Fuente: bluelytics.com.ar.' Use a month: 'long' formatter for the plain/prose variants (\"20 de noviembre de 2026\")."
+   },
+   {
+    "severity": "minor",
+    "title": "The sparkline caption repeats the month when the range stays inside one month",
+    "evidence": "spark() formats both ends with fDayMonth, so a 12-point series reads \"12 ruedas · 15 dic – 30 dic\", while the weekly kicker uses formatDateRange (\"10 – 11 dic 2026\"). It also never shows the year across a year end (\"17 dic – 3 ene\"). All standard renders are correct.",
+    "suggestedFix": "Build the caption with formatDateRange without the year, or add a year option, so it collapses the same way."
+   },
+   {
+    "severity": "info",
+    "title": "Workers portability confirmed: workerd output is byte-identical to Node",
+    "evidence": "esbuild 0.25.0 with --bundle --format=esm --platform=neutral gives 96,152 B (57,778 B gzip -9); minified 84,526 B (55,532 B gzip). The bundle has no node: imports, no top-level await, no Date.now/Math.random/fetch/process, and only `new Date(iso)` on input. In wrangler 4.166.0 `dev --local` (run with Node 24.22.3, because the system Node 20.20.2 is rejected by wrangler 4), the SHA-256 of all 22 matrix renders and the alt text match Node, and Intl es-AR is supported. 600 random renders were deterministic (same input, identical string)."
+   },
+   {
+    "severity": "info",
+    "title": "Numbers, labels, dates and licences verified",
+    "evidence": "Independent recomputation for all 22 standard renders matched (for example big: +$ 590, +4,96% from 590/11890 = 0.049622, brecha 21,8% from 12480/10250, '8 sept 2027, 19:35 (ART)'; flat 21:59Z gives 18:59; weekShort is jue 10/vie 11 with lun 7–mié 9 hatched). 600/600 random cases agreed with a BigInt half-up oracle for the percent. Fonts are Chivo and Chivo Mono (Omnibus-Type, SIL OFL 1.1); fonts/OFL-Chivo.txt and fonts/OFL-ChivoMono.txt are present, the embedded base64 equals the WOFF2 files, and the payload is 41,088 B. The generated HTML contains no external URL."
+   }
+  ]
+ }
+]
