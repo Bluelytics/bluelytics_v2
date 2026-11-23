@@ -132,6 +132,20 @@ Owner decisions and read-only findings from the first session. Re-check them onl
   (db.t4g.micro, private, automated snapshots kept 3 days). Logs in CloudWatch `/ecs/bluelytics-scraper` and
   `/ecs/bluelytics-scraper-currencies`. The legacy scraper fix was deployed on 2026-11-22 (image
   `sha256:caedf503…`); the previous image is tagged `rollback-2024-09-03` in ECR.
+- **Mobile app retired for now** (owner, 2026-11-22; to be revived later). Push alerts stay off:
+  `PUSH_ENABLED` remains `"false"` after cutover, `FIREBASE_SERVICE_ACCOUNT_JSON` keeps its placeholder, and
+  the Firebase steps (1.8, the real key in 4.10, the mobile check in Phase 5) are skipped. The FCM topic
+  `dolar` simply stops receiving messages when legacy is switched off.
+- **Progress, 2026-11-22/23:** Phase 1 done (Pulumi Cloud stack `magiquear/prod`; D1 `ea1ea06c-…`; shadow
+  hosts live). Phase 2: backfill done (9,365 rows, alerts to 1885, `PRE_SHADOW_LAST=1885`, remote
+  `sqlite_sequence` writable); strict parity 25/27, the two `/json/last_price` differences being the
+  `LEGACY_V1_BLUE_BUG` decision; 2.3 rehearsal passed; jobs Worker live at
+  `bluelytics-jobs.pabloseibelt.workers.dev` (admin host) with both flags off; Buffer draft test passed for
+  both channels and the real Buffer key was swapped for a placeholder; shadow website checks passed.
+  `ADMIN_TOKEN` lives in `~/dev/bluelytics/.env`. A manual RDS snapshot
+  `bluelytics-pre-v2-migration-2026-11-22` exists; the VPN endpoint in the old `.ovpn` no longer exists, so
+  the full `pg_dump` of 0.10 needs another route (a one-off task inside AWS) before Phase 6.
+- **Website:** `/evolucion` was merged into `/historico` (301 redirect); drop it from any page lists.
 
 ---
 
