@@ -113,7 +113,6 @@ describe('fetchAll', () => {
       ['cronista', 'blue', true, 165500, 167500, '2026-11-20T21:25:13.970Z', null],
       ['infodolar', 'blue', true, 165500, 167500, '2026-11-20T21:00:00.000Z', null],
       ['lanacion', 'blue', true, 161505, 166500, null, null],
-      ['infobae', 'blue', true, 165500, 167500, '2026-11-20T19:05:16.000Z', null],
       ['bna', 'oficial', true, 155000, 160000, '2026-11-20T20:03:00.000Z', null],
       // criptoya's timestamp is its poll time (Sunday), ahead of this Friday run by more than 6 hours.
       ['criptoya', 'blue', false, null, null, null, expect.stringMatching(/^parse\.stale: .*in the future/)],
@@ -135,7 +134,6 @@ describe('fetchAll', () => {
       cronista: 8000,
       infodolar: 8000,
       lanacion: 8000,
-      infobae: 8000,
       bna: 20000,
       criptoya: 8000,
     });

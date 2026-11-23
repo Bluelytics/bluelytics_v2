@@ -7,7 +7,7 @@ import { readFileSync } from 'node:fs';
 import type { D1DatabaseLike } from '@bluelytics/db';
 import { createLocalD1, seedFromGoldens } from '@bluelytics/db/testing';
 import type { Source } from '@bluelytics/scrapers';
-import { TICK_SOURCES } from '@bluelytics/scrapers';
+import { infobae, TICK_SOURCES } from '@bluelytics/scrapers';
 import type { Renderer, Viewport } from '@bluelytics/social';
 import type { Deps, LogLevel } from '../../src/deps.ts';
 import type { Env, MediaBucket } from '../../src/env.ts';
@@ -22,7 +22,9 @@ export const fixture = (name: string): string => readFileSync(new URL(name, FIXT
 export type Quote = { buy: number; sell: number } | 'down';
 
 /** Real ids, kinds and URLs; the body is `{"buy":…,"sell":…}` so a scenario can set any price. Parsers are tested in scrapers. */
-export const SCRIPTED_SOURCES: readonly Source[] = TICK_SOURCES.map((source) => ({
+// infobae is not in production's TICK_SOURCES (blocked from Cloudflare) but stays scripted here so the
+// Cronista-substitute logic keeps its tests.
+export const SCRIPTED_SOURCES: readonly Source[] = [...TICK_SOURCES, infobae].map((source) => ({
   ...source,
   format: 'json',
   parse(text: string) {
