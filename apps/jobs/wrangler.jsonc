@@ -26,7 +26,7 @@
   "vars": {
     // Flags are on only for the exact string "true". Shadow mode = both "false" (MIGRATION.md 1.5, 4.10).
     "PUSH_ENABLED": "false",
-    "SOCIAL_ENABLED": "false",
+    "SOCIAL_ENABLED": "true",
     // "worker" | "static-first" (Phase 7: also copy the fixed bodies to R2 api/… and purge them).
     "API_MODE": "worker",
     // Keep equal to apps/api/wrangler.jsonc; this Worker renders the bodies, so its value decides.
