@@ -44,7 +44,7 @@ any time; it never touches a remote database.
 |---|---|---|
 | `/` | `/en` | SSR, 60 s / 240 s |
 | `/dolar-oficial`, `/euro-blue`, `/brecha`, `/calculadora`, `/estado` | `/en/official-dollar`, `/en/blue-euro`, `/en/gap`, `/en/calculator`, `/en/status` | SSR, 60 s |
-| `/evolucion`, `/historico` | `/en/evolution`, `/en/history` | SSR, 300 s / 3600 s |
+| `/historico` (hub: interactive chart, downloads, yearly table; `/evolucion` 301s here) | `/en/history` (`/en/evolution` 301s here) | SSR, 3600 s |
 | `/historico/YYYY[/MM[/DD]]` | `/en/history/…` | SSR; closed periods 1 day / 7 days, current ones 60–300 s; no data → 404 (never cached at the edge) |
 | `/api`, `/acerca` | `/en/api`, `/en/about` | prerendered |
 | `/sitemap.xml` (index), `/sitemap-pages.xml`, `/sitemap-history.xml` | | SSR, 1 h; hand-written with real `lastmod` and `xhtml:link` alternates |

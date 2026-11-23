@@ -3,7 +3,7 @@ import RangeChart from '../components/RangeChart.astro';
 import RateHero from '../components/RateHero.astro';
 import RateTile from '../components/RateTile.astro';
 import Base from '../layouts/Base.astro';
-import { ROUTES, type Locale } from '../i18n/routes.ts';
+import { historyPath, ROUTES, type Locale } from '../i18n/routes.ts';
 import { pick, UI } from '../i18n/ui.ts';
 import { formatPercent, formatPesos } from '../lib/format.ts';
 import type { LiveData } from '../lib/pages.ts';
@@ -68,7 +68,7 @@ const description = pick(
       <section class="section card">
         <div class="section-head">
           <h2>{pick(locale, 'Oficial y blue', 'Official and blue')}</h2>
-          <a href={ROUTES.evolution[locale]}>{t.nav.evolution} →</a>
+          <a href={historyPath(locale)}>{t.nav.history} →</a>
         </div>
         <RangeChart locale={locale} mode="rates" data={series} presets range="1y" label={pick(locale, 'Dólar oficial y blue, precio de venta', 'Official and blue dollar, sell price')} />
       </section>

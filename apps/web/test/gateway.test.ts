@@ -6,6 +6,15 @@ import { cacheableRequest, finalizeResponse, legacyResponse } from '../src/lib/g
 const LEGACY_POLICY_SHA256 = 'afe012bdca471faf087ba0b562a90a06b4f8db17ec764f64803f05e76085034b';
 
 describe('gateway', () => {
+  it('moves the retired evolution pages to the history hub with a 301', () => {
+    for (const [from, to] of [['/evolucion', '/historico'], ['/en/evolution', '/en/history'], ['/evolucion/', '/historico']]) {
+      const response = legacyResponse(new Request(`https://bluelytics.com.ar${from}`));
+      expect(response?.status).toBe(301);
+      expect(response?.headers.get('Location')).toBe(to);
+    }
+    expect(legacyResponse(new Request('https://bluelytics.com.ar/historico'))).toBeNull();
+  });
+
   it('marks every non-production host noindex', () => {
     const page = () => new Response('ok', { headers: { 'Content-Type': 'text/html' } });
     const shadow = finalizeResponse(new Request('https://v2.bluelytics.com.ar/'), page(), 'bluelytics.com.ar');

@@ -50,13 +50,26 @@ interface WranglerResult {
 
 const tail = (text: string): string => (text.length > 2_000 ? `…${text.slice(-2_000)}` : text).trim();
 
-function parseResults(stdout: string, what: string): WranglerResult[] {
+/**
+ * With `--remote --file`, wrangler prints upload progress ("├ Checking if file needs uploading", …) on stdout
+ * before the JSON array even under `--json`. Parse the whole output first, then from the first line that
+ * starts with `[`.
+ */
+export function parseResults(stdout: string, what: string): WranglerResult[] {
   let parsed: unknown;
-  try {
-    parsed = JSON.parse(stdout);
-  } catch {
-    throw new CliError(`${what}: wrangler did not print JSON:\n${tail(stdout)}`);
+  const start = stdout.search(/^\[/m);
+  const candidates = start > 0 ? [stdout, stdout.slice(start)] : [stdout];
+  let ok = false;
+  for (const text of candidates) {
+    try {
+      parsed = JSON.parse(text);
+      ok = true;
+      break;
+    } catch {
+      // try the next candidate
+    }
   }
+  if (!ok) throw new CliError(`${what}: wrangler did not print JSON:\n${tail(stdout)}`);
   if (!Array.isArray(parsed)) throw new CliError(`${what}: unexpected wrangler output:\n${tail(stdout)}`);
   return parsed as WranglerResult[];
 }

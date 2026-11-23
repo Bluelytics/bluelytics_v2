@@ -16,7 +16,6 @@ export const ROUTES = {
   euro: { es: '/euro-blue', en: '/en/blue-euro' },
   gap: { es: '/brecha', en: '/en/gap' },
   calculator: { es: '/calculadora', en: '/en/calculator' },
-  evolution: { es: '/evolucion', en: '/en/evolution' },
   history: { es: '/historico', en: '/en/history' },
   api: { es: '/api', en: '/en/api' },
   about: { es: '/acerca', en: '/en/about' },
@@ -29,10 +28,10 @@ export type RouteId = keyof typeof ROUTES;
 export type LocalizedPaths = Readonly<Record<Locale, string>>;
 
 /** Header navigation, in order. */
-export const NAV: readonly RouteId[] = ['home', 'official', 'euro', 'gap', 'calculator', 'evolution', 'history', 'api'];
+export const NAV: readonly RouteId[] = ['home', 'official', 'euro', 'gap', 'calculator', 'history', 'api'];
 
 /** Pages whose content depends on the published rates (their sitemap `lastmod` is the last rate change). */
-export const LIVE_ROUTES: readonly RouteId[] = ['home', 'official', 'euro', 'gap', 'calculator', 'evolution', 'history', 'status'];
+export const LIVE_ROUTES: readonly RouteId[] = ['home', 'official', 'euro', 'gap', 'calculator', 'history', 'status'];
 
 export function routePath(id: RouteId, locale: Locale): string {
   return ROUTES[id][locale];
@@ -83,3 +82,9 @@ export function historyPaths(period?: HistoryPeriod): LocalizedPaths {
 export function dayPeriod(day: string): Required<HistoryPeriod> {
   return { year: Number(day.slice(0, 4)), month: Number(day.slice(5, 7)), day: Number(day.slice(8, 10)) };
 }
+
+/** Retired pages and where they live now (301 from the gateway). `/evolucion` merged into `/historico`. */
+export const MOVED: Readonly<Record<string, string>> = {
+  '/evolucion': ROUTES.history.es,
+  '/en/evolution': ROUTES.history.en,
+};

@@ -7,12 +7,12 @@ import { ROUTES, type Locale, type RouteId } from '../i18n/routes.ts';
 const LEGACY_ROUTES: Readonly<Record<string, RouteId>> = {
   '': 'home',
   calculator: 'calculator',
-  evolution: 'evolution',
+  evolution: 'history',
   gap: 'gap',
   api: 'api',
   about: 'about',
-  analysis: 'evolution',
-  forecast: 'evolution',
+  analysis: 'history',
+  forecast: 'history',
   wordcloud: 'home',
   dolar: 'home',
 };

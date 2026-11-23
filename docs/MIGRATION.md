@@ -1266,7 +1266,7 @@ Website mechanism: the same kind of route on the existing proxied apex record (s
 
    ```sh
    W=https://bluelytics.com.ar
-   for p in / /en /dolar-oficial /euro-blue /brecha /calculadora /evolucion /historico /api /acerca /estado \
+   for p in / /en /dolar-oficial /euro-blue /brecha /calculadora /historico /api /acerca /estado \
             /privacy.html /sitemap.xml /robots.txt /favicon.ico /images/logo.png /index.html /no-such-page; do
      printf '%-20s %s\n' "$p" "$(curl -sS -o /dev/null -w '%{http_code}' "$W$p")"
    done

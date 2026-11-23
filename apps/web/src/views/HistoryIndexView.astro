@@ -1,12 +1,14 @@
 ---
 import RangeChart from '../components/RangeChart.astro';
 import Base from '../layouts/Base.astro';
+import { API_ORIGIN } from '../config.ts';
 import { historyPath, historyPaths, ROUTES, type Locale } from '../i18n/routes.ts';
 import { pick, UI } from '../i18n/ui.ts';
 import { formatDay, formatPesos, formatSignedPercent } from '../lib/format.ts';
 import type { HistoryIndexData } from '../lib/history-pages.ts';
 import { datasetNode } from '../lib/seo.ts';
-import { groupByPeriod, summarize, toSeries } from '../lib/series.ts';
+import { groupByPeriod, summarize } from '../lib/series.ts';
+import { ogVersion } from '../lib/snapshot.ts';
 
 interface Props {
   locale: Locale;
@@ -15,6 +17,7 @@ interface Props {
 
 const { locale, data } = Astro.props;
 const t = UI[locale];
+const { snapshot, series } = data;
 const first = data.days[0]?.day;
 const last = data.days.at(-1)?.day;
 const years = groupByPeriod(data.days, 4)
@@ -23,11 +26,11 @@ const years = groupByPeriod(data.days, 4)
     return summary === null ? [] : [{ year: Number(key), summary }];
   })
   .reverse();
-const title = pick(locale, 'Dólar blue histórico: cotización día por día desde 2011 | Bluelytics', 'Historical blue dollar: day-by-day rates since 2011 | Bluelytics');
+const title = pick(locale, 'Dólar blue histórico: evolución y cotización día por día desde 2011 | Bluelytics', 'Blue dollar history: evolution chart and day-by-day rates since 2011 | Bluelytics');
 const description = pick(
   locale,
-  'Histórico del dólar blue y oficial en Argentina: cotización de compra y venta de cada día desde 2011, organizada por año y por mes.',
-  'History of the blue and official dollar in Argentina: buy and sell rates for every day since 2011, by year and month.',
+  'Evolución e histórico del dólar blue y oficial en Argentina: gráfico desde 2011, resumen anual, cotización de compra y venta de cada día y descarga de los datos en CSV y JSON.',
+  'Evolution and history of the blue and official dollar in Argentina: chart since 2011, yearly summary, buy and sell rates for every day, and the data as CSV and JSON downloads.',
 );
 ---
 
@@ -38,7 +41,8 @@ const description = pick(
   paths={historyPaths()}
   current="history"
   crumbs={[{ name: t.nav.history, path: historyPath(locale) }]}
-  dateModified={null}
+  dateModified={snapshot.updatedAt}
+  ogVersion={ogVersion(snapshot)}
   graph={first && last ? [datasetNode(locale, { from: first, to: last })] : []}
 >
   <div class="page-head">
@@ -46,36 +50,54 @@ const description = pick(
     <p>
       {
         first && last
-          ? pick(locale, `Cotizaciones de cada día entre el ${formatDay(first, locale)} y el ${formatDay(last, locale)}. Elegí un año para ver sus meses y días.`, `Rates for every day from ${formatDay(first, locale)} to ${formatDay(last, locale)}. Pick a year to see its months and days.`)
+          ? pick(locale, `Cotizaciones de cada día entre el ${formatDay(first, locale)} y el ${formatDay(last, locale)}. Elegí el período en el gráfico, o un año para ver sus meses y días.`, `Rates for every day from ${formatDay(first, locale)} to ${formatDay(last, locale)}. Pick a range on the chart, or a year to see its months and days.`)
           : t.noData
       }
     </p>
   </div>
   {
-    data.monthly.length > 1 && (
+    series.days.length > 1 && (
       <section class="card">
-        <RangeChart locale={locale} mode="rates" data={toSeries(data.monthly)} range="max" label={pick(locale, 'Dólar blue y oficial, cierre de cada mes desde 2011', 'Blue and official dollar, monthly close since 2011')} caption={pick(locale, 'Cierre mensual, precio de venta.', 'Monthly close, sell price.')} />
+        <RangeChart locale={locale} mode="rates" data={series} presets range="1y" label={pick(locale, 'Dólar blue y oficial, precio de venta al cierre de cada día', 'Blue and official dollar, sell price at each day’s close')} />
+        <p class="dim downloads">
+          {pick(locale, 'Descargar todos los datos:', 'Download all data:')} <a href={`${API_ORIGIN}/v2/evolution.csv`}>CSV</a> · <a href={`${API_ORIGIN}/v2/evolution.json`}>JSON</a> · <a href={ROUTES.api[locale]}>API</a>
+        </p>
       </section>
     )
   }
   <section class="section">
-    <h2>{pick(locale, 'Por año', 'By year')}</h2>
-    <ul class="year-list" role="list">
-      {years.map(({ year, summary }) => {
-        const open = summary.first.blue?.sell ?? 0;
-        const close = summary.last.blue?.sell ?? 0;
-        const ratio = open > 0 ? close / open - 1 : 0;
-        return (
-          <li>
-            <a class="card" href={historyPath(locale, { year })}>
-              <strong>{year}</strong>
-              <span class="num">{formatPesos(close, locale)}</span>
-              <span class:list={['num dim', ratio > 0 ? 'up' : ratio < 0 ? 'down' : '']}>{formatSignedPercent(ratio, locale)}</span>
-            </a>
-          </li>
-        );
-      })}
-    </ul>
+    <h2>{pick(locale, 'Resumen por año (dólar blue, venta)', 'Yearly summary (blue dollar, sell)')}</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">{pick(locale, 'Año', 'Year')}</th>
+            <th scope="col" class="num">{pick(locale, 'Apertura', 'Open')}</th>
+            <th scope="col" class="num">{pick(locale, 'Cierre', 'Close')}</th>
+            <th scope="col" class="num">{pick(locale, 'Mínimo', 'Low')}</th>
+            <th scope="col" class="num">{pick(locale, 'Máximo', 'High')}</th>
+            <th scope="col" class="num">{pick(locale, 'Variación', 'Change')}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {years.map(({ year, summary }) => {
+            const open = summary.first.blue?.sell ?? 0;
+            const close = summary.last.blue?.sell ?? 0;
+            const ratio = open > 0 ? close / open - 1 : 0;
+            return (
+              <tr>
+                <th scope="row"><a href={historyPath(locale, { year })}>{year}</a></th>
+                <td class="num">{formatPesos(open, locale)}</td>
+                <td class="num">{formatPesos(close, locale)}</td>
+                <td class="num">{formatPesos(summary.minSell, locale)}</td>
+                <td class="num">{formatPesos(summary.maxSell, locale)}</td>
+                <td class:list={['num', ratio > 0 ? 'up' : ratio < 0 ? 'down' : '']}>{formatSignedPercent(ratio, locale)}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
   </section>
   <section class="section prose">
     <h2>{pick(locale, 'Sobre estos datos', 'About this data')}</h2>

@@ -1,16 +1,21 @@
 /** Data of the history pages (`/historico/…`); `null` = no data for that period (answer 404). */
 import { addDays } from '@bluelytics/core';
-import { loadCoverage, loadDays, todayArt } from './data.ts';
+import { rangeStart, sliceSeries, type SeriesData } from './chart.ts';
+import { loadCoverage, loadDays, loadSnapshot, todayArt } from './data.ts';
 import { isClosed, periodEnd } from './history.ts';
-import { groupByPeriod, type DayRates } from './series.ts';
+import { toSeries, type DayRates } from './series.ts';
+import type { Snapshot } from './snapshot.ts';
 
 /** `YYYY-MM` keys of the months with data, ascending. */
 export type Coverage = string[];
 
+/** The history hub (`/historico`): the interactive chart, downloads and the yearly table. */
 export interface HistoryIndexData {
+  snapshot: Snapshot;
+  /** The last year (what the server draws; the range presets fetch the rest on the client). */
+  series: SeriesData;
+  /** Every day with data, for the yearly table. */
   days: DayRates[];
-  /** One close per month (its last day), for the long-range chart. */
-  monthly: DayRates[];
 }
 
 export interface HistoryYearData {
@@ -45,11 +50,6 @@ export interface HistoryDayData {
 
 const hasData = (d: DayRates): boolean => (d.blue?.sell ?? 0) > 0 || (d.oficial?.sell ?? 0) > 0;
 
-/** Last element of each group: monthly closes. */
-export function monthlyCloses(days: readonly DayRates[]): DayRates[] {
-  return groupByPeriod(days, 7).flatMap(({ days: list }) => list.slice(-1));
-}
-
 /** Neighbours of `key` in a sorted list. */
 export function neighbours<T>(sorted: readonly T[], key: T): { previous: T | null; next: T | null } {
   const index = sorted.indexOf(key);
@@ -58,8 +58,11 @@ export function neighbours<T>(sorted: readonly T[], key: T): { previous: T | nul
 }
 
 export async function loadHistoryIndex(): Promise<HistoryIndexData> {
-  const days = (await loadDays()).filter(hasData);
-  return { days, monthly: monthlyCloses(days) };
+  const [snapshot, all] = await Promise.all([loadSnapshot(), loadDays()]);
+  const days = all.filter(hasData);
+  const series = toSeries(days);
+  const last = series.days.at(-1);
+  return { snapshot, series: last === undefined ? series : sliceSeries(series, rangeStart(last, '1y')), days };
 }
 
 export async function loadHistoryYear(year: number): Promise<HistoryYearData | null> {

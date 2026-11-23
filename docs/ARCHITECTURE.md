@@ -317,7 +317,7 @@ hreflang (`es`, `en`, `x-default`) and sitemaps.
 | `/euro-blue` | `/en/blue-euro` | SSR 60 s |
 | `/brecha` | `/en/gap` | SSR 60 s + SVG chart |
 | `/calculadora` | `/en/calculator` | SSR 60 s + custom element |
-| `/evolucion` | `/en/evolution` | SSR 300 s + SVG chart with range presets |
+| `/evolucion` | `/en/evolution` | 301 to `/historico` / `/en/history` (merged into the history hub: interactive chart with range presets, downloads, yearly table) |
 | `/historico`, `/historico/[yyyy]`, `/historico/[yyyy]/[mm]`, `/historico/[yyyy]/[mm]/[dd]` | `/en/history/…` | SSR; past periods cached 1 day; 404 for dates without data |
 | `/api` | `/en/api` | prerendered docs (corrected: `date`/`source` field names, `days` = rows, `currency.json`) |
 | `/acerca` | `/en/about` | prerendered |

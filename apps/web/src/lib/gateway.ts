@@ -4,6 +4,7 @@
  */
 
 import privacyPolicy from '../privacy.html?raw';
+import { MOVED } from '../i18n/routes.ts';
 
 /** Query parameters that never change a page: dropped so they do not fragment the cache. */
 const TRACKING_PARAMS = /^(utm_[a-z]+|fbclid|gclid|gbraid|wbraid|msclkid|mc_[a-z]+|igshid|ref|_ga)$/i;
@@ -36,6 +37,8 @@ export function legacyResponse(request: Request): Response | null {
   if (request.method !== 'GET' && request.method !== 'HEAD') return null;
   const { pathname } = new URL(request.url);
   if (pathname === '/index.html') return new Response(null, { status: 301, headers: { Location: '/' } });
+  const moved = MOVED[pathname.replace(/\/$/, '')];
+  if (moved !== undefined) return new Response(null, { status: 301, headers: { Location: moved, 'Cache-Control': 'public, max-age=86400' } });
   if (pathname === '/privacy.html') {
     return new Response(request.method === 'HEAD' ? null : privacyPolicy, {
       headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'public, max-age=86400' },
