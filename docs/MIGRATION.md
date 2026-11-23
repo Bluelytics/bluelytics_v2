@@ -74,7 +74,7 @@ Write the answer next to each; several of them change commands below.
       entrypoint through `ctx.exports`, and favicon, images and `robots.txt` pass the gateway too; only
       `/_astro/*` skips it). Multiply the page requests of step 0.8 by 2 or more when sizing against Free's
       100k/day or Paid's 10M/month.
-- [ ] **`/json/last_price` bug.** Legacy returns the *oficial* numbers in the `blue` entry. v2 fixes it by
+- [x] **`/json/last_price` bug — decided 2026-11-23: fix it** (`LEGACY_V1_BLUE_BUG=false`). Legacy returns the *oficial* numbers in the `blue` entry. v2 fixes it by
       default; `LEGACY_V1_BLUE_BUG=true` keeps the bug. Three third-party bindings use this endpoint; the
       choice is announced before the switch (step 3.4).
 - [ ] **Shadow hostnames.** This guide uses `api-v2.bluelytics.com.ar` (API) and `v2.bluelytics.com.ar` (web).
