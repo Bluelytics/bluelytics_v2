@@ -4,20 +4,23 @@ import Base from '../layouts/Base.astro';
 import { ROUTES, type Locale } from '../i18n/routes.ts';
 import { pick, UI } from '../i18n/ui.ts';
 import { formatDateTime } from '../lib/format.ts';
+import { calcCurrencies } from '../lib/calc.ts';
 import { calcRates, ogVersion, type Snapshot } from '../lib/snapshot.ts';
+import type { CurrencyRow } from '@bluelytics/core';
 
 interface Props {
   locale: Locale;
   snapshot: Snapshot;
+  currencies: readonly CurrencyRow[];
 }
 
-const { locale, snapshot } = Astro.props;
+const { locale, snapshot, currencies } = Astro.props;
 const t = UI[locale];
 const title = pick(locale, 'Convertir dólares a pesos: calculadora dólar blue y oficial | Bluelytics', 'Convert dollars to pesos: blue and official dollar calculator | Bluelytics');
 const description = pick(
   locale,
-  'Calculadora para convertir dólares o euros a pesos argentinos (y pesos a dólares) al valor del dólar blue o del dólar oficial de hoy.',
-  'Convert US dollars or euros to Argentine pesos (and back) at today’s blue or official rate.',
+  'Calculadora para convertir dólares, euros, reales o cualquier otra moneda a pesos argentinos (y pesos a dólares) al valor del dólar blue o del dólar oficial de hoy.',
+  'Convert US dollars, euros, reais or any other currency to Argentine pesos (and back) at today’s blue or official rate.',
 );
 ---
 
@@ -29,7 +32,7 @@ const description = pick(
       {snapshot.updatedAt && <>{' '}{t.updated}: <time datetime={snapshot.updatedAt}>{formatDateTime(snapshot.updatedAt, locale)}</time>.</>}
     </p>
   </div>
-  <Calculator locale={locale} rates={calcRates(snapshot)} />
+  <Calculator locale={locale} rates={calcRates(snapshot)} currencies={calcCurrencies(currencies, locale)} />
   <section class="section prose">
     <h2>{pick(locale, '¿Qué precio usar?', 'Which price should I use?')}</h2>
     <p>

@@ -1,6 +1,7 @@
 /** Reads for the pages, through `@bluelytics/db` on the `DB` binding. */
 import { addDays, artDate, artParts } from '@bluelytics/core';
 import {
+  getCurrencies,
   getCurrency,
   getDailyRowsBetween,
   getExtraRates,
@@ -58,6 +59,11 @@ export function loadCoverage() {
 
 export function loadExtras() {
   return getExtraRates(db());
+}
+
+/** Every currency of `currency.json` (the calculator's list). */
+export function loadCurrencies() {
+  return getCurrencies(db());
 }
 
 /** EUR per USD (the cross rate the euro values are derived with), `null` when unknown. */

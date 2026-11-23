@@ -22,13 +22,14 @@ const NAMES: Record<string, string> = {
   cronista: 'El Cronista',
   infodolar: 'Infodolar',
   lanacion: 'La Nación',
-  infobae: 'Infobae',
   bna: 'Banco Nación',
   criptoya: 'CriptoYa',
-  ambito_extras: pick(locale, 'Ámbito (otros dólares)', 'Ámbito (other rates)'),
+  ambito_extras: pick(locale, 'Ámbito: MEP, CCL, tarjeta, mayorista y cripto', 'Ámbito: MEP, CCL, card, wholesale and crypto'),
 };
-const KIND: Record<string, string> = { blue: 'Blue', oficial: pick(locale, 'Oficial', 'Official'), extra: pick(locale, 'Otros', 'Other') };
-const sorted = [...health].sort((a, b) => a.kind.localeCompare(b.kind) || a.source.localeCompare(b.source));
+const KIND: Record<string, string> = { blue: 'Blue', oficial: pick(locale, 'Oficial', 'Official'), extra: pick(locale, 'Otros dólares', 'Other dollar rates') };
+/** Sources no longer read (infobae: blocked from Cloudflare, 2026-11-23); old rows age out within 24 h. */
+const RETIRED = new Set(['infobae']);
+const sorted = health.filter((h) => !RETIRED.has(h.source)).sort((a, b) => a.kind.localeCompare(b.kind) || a.source.localeCompare(b.source));
 const title = pick(locale, 'Estado de las fuentes | Bluelytics', 'Source status | Bluelytics');
 const description = pick(
   locale,

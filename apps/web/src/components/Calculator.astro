@@ -2,15 +2,16 @@
 // Two-way converter. The default conversion is rendered on the server; src/client/calculator.ts makes it live.
 import type { Locale } from '../i18n/routes.ts';
 import { UI } from '../i18n/ui.ts';
-import { toPesosHundredths, type CalcRates } from '../lib/calc.ts';
+import { toPesosHundredths, type CalcCurrency, type CalcRates } from '../lib/calc.ts';
 import { formatHundredths, formatPesosHundredths } from '../lib/format.ts';
 
 interface Props {
   locale: Locale;
   rates: CalcRates;
+  currencies: readonly CalcCurrency[];
 }
 
-const { locale, rates } = Astro.props;
+const { locale, rates, currencies } = Astro.props;
 const t = UI[locale];
 const es = locale === 'es';
 const amount = 100;
@@ -22,7 +23,7 @@ const kinds = [
 ] as const;
 ---
 
-<bl-calc class="card form-grid" data-rates={JSON.stringify(rates)} data-locale={locale}>
+<bl-calc class="card form-grid" data-rates={JSON.stringify(rates)} data-currencies={JSON.stringify(currencies)} data-locale={locale}>
   <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr))">
     <fieldset class="field">
       <legend>{es ? 'Cotización' : 'Rate'}</legend>
@@ -31,13 +32,20 @@ const kinds = [
         <label><input type="radio" name="tipo" value="oficial" /><span>{es ? 'Oficial' : 'Official'}</span></label>
       </div>
     </fieldset>
-    <fieldset class="field">
-      <legend>{es ? 'Moneda' : 'Currency'}</legend>
-      <div class="seg">
-        <label><input type="radio" name="moneda" value="usd" checked /><span>USD</span></label>
-        <label><input type="radio" name="moneda" value="eur" /><span>EUR</span></label>
-      </div>
-    </fieldset>
+    <div class="field">
+      <label for="calc-moneda">{es ? 'Moneda' : 'Currency'}</label>
+      <select class="input" id="calc-moneda" name="moneda">
+        <option value="usd" selected>{es ? 'Dólar estadounidense (USD)' : 'US dollar (USD)'}</option>
+        <option value="eur">{es ? 'Euro (EUR)' : 'Euro (EUR)'}</option>
+        {
+          currencies.length > 0 && (
+            <optgroup label={es ? 'Otras monedas (vía dólar)' : 'Other currencies (via the dollar)'}>
+              {currencies.map((c) => <option value={c.code}>{`${c.name} (${c.code})`}</option>)}
+            </optgroup>
+          )
+        }
+      </select>
+    </div>
     <fieldset class="field">
       <legend>{es ? 'Precio' : 'Price'}</legend>
       <div class="seg">
