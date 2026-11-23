@@ -29,7 +29,8 @@ const NAMES: Record<string, string> = {
 const KIND: Record<string, string> = { blue: 'Blue', oficial: pick(locale, 'Oficial', 'Official'), extra: pick(locale, 'Otros dólares', 'Other dollar rates') };
 /** Sources no longer read (infobae: blocked from Cloudflare, 2026-11-23); old rows age out within 24 h. */
 const RETIRED = new Set(['infobae']);
-const sorted = health.filter((h) => !RETIRED.has(h.source)).sort((a, b) => a.kind.localeCompare(b.kind) || a.source.localeCompare(b.source));
+// Only the sources behind the published blue and official values; the daily extra-rates job is not listed.
+const sorted = health.filter((h) => !RETIRED.has(h.source) && h.kind !== 'extra').sort((a, b) => a.kind.localeCompare(b.kind) || a.source.localeCompare(b.source));
 const title = pick(locale, 'Estado de las fuentes | Bluelytics', 'Source status | Bluelytics');
 const description = pick(
   locale,

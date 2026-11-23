@@ -155,6 +155,18 @@ Owner decisions and read-only findings from the first session. Re-check them onl
   exemption routes for the old bundles in `.work/exemption-routes.jsonl` (remove on Monday, 4.10/5.6).
   `SOCIAL_ENABLED=true` after a passing draft gate; `PUSH_ENABLED=false` (app retired). Rollback scripts:
   `.work/ROLLBACK_API.sh`, `.work/ROLLBACK_WEB.sh`. Next: 4.11 (Monday open), then Phase 5.
+- **Phase 5–6 progress, 2026-11-23 (night):** exemption routes and shadow hostnames removed (5.6, 5.7).
+  LinkedIn added as a third Buffer channel (`6b03a7e9…`); Facebook is not used. Backups in
+  `~/dev/bluelytics/backups/` (SHA256SUMS): final legacy `pg_dump` taken by a one-off Fargate task in the scraper
+  network (`bluelytics-20261123T0300Z.dump`, also in `s3://db-bluelytics/pg-dump-final/`), restore-tested
+  (dolar_values 704,368; alertas_dolar 1,884; actualizaciones_sociales 6,152; weekly 1,229; currency_values
+  381,871); D1 export; the site bucket and `db-bluelytics` archived; www bucket redirect config saved. 6.3: www →
+  apex is a Cloudflare redirect rule. 6.4: apex and api are proxied `AAAA 100::`, www a proxied CNAME to the apex,
+  ACM validation records deleted; nothing in DNS points at AWS. 6.7: ECS API service scaled to 0, RDS stopped
+  (**AWS restarts a stopped RDS after 7 days**: delete or re-stop it by 2026-11-30). ALB access logging off;
+  `bluelytics-access-logs` has a 1-day expire-all lifecycle rule (owner: delete it, not needed), so
+  `aws s3 rb s3://bluelytics-access-logs` once empty. Remaining: 6.5 wait, 6.8 delete AWS (owner go needed),
+  6.9–6.13.
 
 ---
 
