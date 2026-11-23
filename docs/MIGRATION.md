@@ -146,6 +146,15 @@ Owner decisions and read-only findings from the first session. Re-check them onl
   `bluelytics-pre-v2-migration-2026-11-22` exists; the VPN endpoint in the old `.ovpn` no longer exists, so
   the full `pg_dump` of 0.10 needs another route (a one-off task inside AWS) before Phase 6.
 - **Website:** `/evolucion` was merged into `/historico` (301 redirect); drop it from any page lists.
+- **CUTOVER DONE 2026-11-23 01:28–02:10 UTC (Sunday night ART), shadow period skipped by owner decision.**
+  A forced observe run first proved every source reachable from Cloudflare (all blue primaries ok; infobae
+  failing, secondary). Legacy frozen at `FREEZE_UTC=2026-11-23T01:28:40Z` (both EventBridge rules DISABLED;
+  post-freeze RDS snapshot `bluelytics-post-freeze-2026-11-23`). 4.5 sync: no change needed; parity showed only
+  the planned differences (euro fields, currency.json, last_price fix). Social baseline rows inserted (4.6).
+  API route `api.bluelytics.com.ar/*` (id `ad52a0b0…`) and web route `bluelytics.com.ar/*` live; five
+  exemption routes for the old bundles in `.work/exemption-routes.jsonl` (remove on Monday, 4.10/5.6).
+  `SOCIAL_ENABLED=true` after a passing draft gate; `PUSH_ENABLED=false` (app retired). Rollback scripts:
+  `.work/ROLLBACK_API.sh`, `.work/ROLLBACK_WEB.sh`. Next: 4.11 (Monday open), then Phase 5.
 
 ---
 
