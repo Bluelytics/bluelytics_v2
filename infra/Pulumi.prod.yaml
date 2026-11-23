@@ -1,0 +1,11 @@
+config:
+  bluelytics:accountId: bb89fd1555c4374955e50cf1112d2845
+  bluelytics:zoneId: 0a984ad377dc9f0db7092fd75702ccdc
+  bluelytics:zoneName: bluelytics.com.ar
+  bluelytics:webHostname: bluelytics.com.ar
+  bluelytics:apiHostname: api.bluelytics.com.ar
+  bluelytics:mediaHostname: media.bluelytics.com.ar
+  bluelytics:apiMode: worker
+  bluelytics:manageRulesets: "false"
+  cloudflare:apiToken:
+    secure: AAABACTV6fFuB1NUSVIEUYcFxdT/l1d3fkqW/oGLEN3dtNsXHtfGJyEOFTnBO8ODAntV154QKg64ZyKMemZY+EO4aadsKUX4yM+4HzD7/bxnC6wcgg==

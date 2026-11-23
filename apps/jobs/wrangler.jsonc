@@ -16,7 +16,7 @@
       "binding": "DB",
       "database_name": "bluelytics",
       // Placeholder: `pnpm infra:sync-ids` writes the id of the Pulumi-managed database here.
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "ea1ea06c-0f80-4190-80c4-9f86822ceeca",
       "migrations_dir": "../../packages/db/migrations"
     }
   ],
