@@ -6,7 +6,7 @@ export const API_ORIGIN = 'https://api.bluelytics.com.ar';
 export const SOCIAL = {
   x: 'https://x.com/bluelytics',
   instagram: 'https://www.instagram.com/bluelytics_dolar',
-  facebook: 'https://www.facebook.com/bluelytics',
+  linkedin: 'https://www.linkedin.com/company/74483029',
   github: 'https://github.com/Bluelytics',
 } as const;
 

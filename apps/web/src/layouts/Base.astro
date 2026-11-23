@@ -1,5 +1,6 @@
 ---
-import interUrl from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
+import geistUrl from '@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url';
+import geistMonoUrl from '@fontsource-variable/geist-mono/files/geist-mono-latin-wght-normal.woff2?url';
 import { env } from 'cloudflare:workers';
 import Analytics from '../components/Analytics.astro';
 import Footer from '../components/Footer.astro';
@@ -41,12 +42,13 @@ const nodes = [
 ];
 const ogImage = ogImageUrl(env.MEDIA_ORIGIN, ogVersion);
 const ogAlt = locale === 'es' ? 'Cotización del dólar blue hoy en Bluelytics' : 'Blue dollar rate today on Bluelytics';
-// Metric-matched fallback (Inter on Arial) keeps text from shifting when the web font arrives.
-const fontCss = `@font-face{font-family:'Inter';font-style:normal;font-weight:100 900;font-display:swap;src:url(${interUrl}) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}@font-face{font-family:'Inter Fallback';src:local('Arial');size-adjust:107.12%;ascent-override:90.44%;descent-override:22.52%;line-gap-override:0%}`;
+// Self-hosted Geist / Geist Mono (OFL), Latin subset with the signs the site prints (−, €, arrows).
+const RANGE = 'U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+25B2,U+25BC,U+FEFF,U+FFFD';
+const fontCss = `@font-face{font-family:'Geist';font-style:normal;font-weight:100 900;font-display:swap;src:url(${geistUrl}) format('woff2');unicode-range:${RANGE}}@font-face{font-family:'Geist Mono';font-style:normal;font-weight:100 900;font-display:swap;src:url(${geistMonoUrl}) format('woff2');unicode-range:${RANGE}}`;
 ---
 
 <!doctype html>
-<html lang={locale === 'es' ? 'es-AR' : 'en'} data-theme="light">
+<html lang={locale === 'es' ? 'es-AR' : 'en'} >
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -55,22 +57,14 @@ const fontCss = `@font-face{font-family:'Inter';font-style:normal;font-weight:10
     <link rel="canonical" href={canonical} />
     {alternates(paths).map((alt) => <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />)}
     <meta name="robots" content={noindex ? 'noindex' : 'max-image-preview:large'} />
-    <meta name="theme-color" content="#f4f6fa" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0a0e14" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#040a14" />
+    <meta name="color-scheme" content="dark" />
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/images/mobile-icon-144.png" />
-    <link rel="preload" href={interUrl} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={geistUrl} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={geistMonoUrl} as="font" type="font/woff2" crossorigin />
     <style is:inline set:html={fontCss}></style>
-    <script is:inline>
-      (() => {
-        let t;
-        try {
-          t = localStorage.getItem('theme');
-        } catch {}
-        document.documentElement.dataset.theme = t === 'dark' || t === 'light' ? t : matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      })();
-    </script>
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={SITE_NAME} />
     <meta property="og:title" content={title} />

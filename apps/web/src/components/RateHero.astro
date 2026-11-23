@@ -1,8 +1,10 @@
 ---
-// The page's main quote: sell is the hero number (neutral colour), the move is a chip with arrow and sign.
+// The page's main quote, in the social cards' language: the brand blade sweeps behind a very large sell price
+// (direction of the day's move), the move sits in a diagonal-cut slab, buy/average below on a ruled ledger.
 import type { RatePair } from '@bluelytics/core';
 import type { Locale } from '../i18n/routes.ts';
 import { UI } from '../i18n/ui.ts';
+import { bladeShape } from '../lib/blade.ts';
 import { formatDateTime, formatDay, formatPesos, formatPesosHundredths } from '../lib/format.ts';
 import { averageOf, type Move } from '../lib/series.ts';
 import Delta from './Delta.astro';
@@ -18,41 +20,66 @@ interface Props {
 
 const { locale, title, rate, move = null, previousDay = null, updatedAt } = Astro.props;
 const t = UI[locale];
+const direction = move?.direction === 'down' ? 'down' : move?.direction === 'up' ? 'up' : 'flat';
+const blade = bladeShape(direction);
+/** "$ 1.670" → sign and digits, so the sign can sit small beside the figure as on the cards. */
+const split = (text: string): [string, string] => {
+  const match = text.match(/^(\S+)\s+(.*)$/);
+  return match ? [match[1] as string, match[2] as string] : ['', text];
+};
+const [currency, digits] = rate ? split(formatPesos(rate.sell, locale)) : ['', ''];
 ---
 
-<section class="card hero" aria-labelledby="hero-title">
-  <div class="hero-head">
-    <h1 id="hero-title">{title}</h1>
+<section class:list={['hero', `hero-${direction}`]} aria-labelledby="hero-title">
+  <svg class="blade" viewBox={blade.viewBox} preserveAspectRatio="xMaxYMid slice" aria-hidden="true">
+    <defs>
+      <linearGradient id="blade-fill" x1="0" y1="1" x2="1" y2="0">
+        <stop offset="0" stop-color="#0069AC" stop-opacity="0" />
+        <stop offset="0.35" stop-color="#005E9D" stop-opacity="0.85" />
+        <stop offset="1" stop-color="#1C7FD6" />
+      </linearGradient>
+    </defs>
+    <path class="blade-band" d={blade.band} fill="url(#blade-fill)" />
+    <path class="blade-sliver" d={blade.sliver} />
+  </svg>
+  <div class="hero-body">
+    <div class="hero-head">
+      <h1 id="hero-title">{title}</h1>
+      {
+        updatedAt && (
+          <p class="stamp">
+            <span class="live" aria-hidden="true" />
+            {t.updated} <time datetime={updatedAt}>{formatDateTime(updatedAt, locale)}</time>
+          </p>
+        )
+      }
+    </div>
     {
-      updatedAt && (
-        <p class="dim" style="margin:0">
-          {t.updated}: <time datetime={updatedAt}>{formatDateTime(updatedAt, locale)}</time>
-        </p>
+      rate ? (
+        <>
+          <div class="quote-main">
+            <span class="label">{t.sell}</span>
+            <p class="figure num" aria-label={formatPesos(rate.sell, locale)}>
+              <span class="cur" aria-hidden="true">{currency}</span>
+              <span aria-hidden="true">{digits}</span>
+            </p>
+            <Delta move={move} locale={locale} slab note={previousDay ? t.vsPrevious(formatDay(previousDay, locale, 'short')) : undefined} />
+          </div>
+          <dl class="ledger">
+            <div>
+              <dt class="label">{t.buy}</dt>
+              <dd class="num">{formatPesos(rate.buy, locale)}</dd>
+            </div>
+            <div>
+              <dt class="label">{t.average}</dt>
+              <dd class="num">{formatPesosHundredths(averageOf(rate), locale)}</dd>
+            </div>
+          </dl>
+        </>
+      ) : (
+        <p class="muted">{t.noData}</p>
       )
     }
+    <slot />
   </div>
-  {
-    rate ? (
-      <div class="quotes">
-        <div class="quote quote-main">
-          <span class="label">{t.sell}</span>
-          <div class="row">
-            <span class="value num">{formatPesos(rate.sell, locale)}</span>
-            <Delta move={move} locale={locale} note={previousDay ? t.vsPrevious(formatDay(previousDay, locale, 'short')) : undefined} />
-          </div>
-        </div>
-        <div class="quote">
-          <span class="label">{t.buy}</span>
-          <span class="value num">{formatPesos(rate.buy, locale)}</span>
-        </div>
-        <div class="quote">
-          <span class="label">{t.average}</span>
-          <span class="value num">{formatPesosHundredths(averageOf(rate), locale)}</span>
-        </div>
-      </div>
-    ) : (
-      <p class="muted">{t.noData}</p>
-    )
-  }
-  <slot />
 </section>

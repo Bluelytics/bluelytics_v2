@@ -1,6 +1,5 @@
 ---
-import logoDark from '../../../../assets/brand/logo-dark.svg?url';
-import logoLight from '../../../../assets/brand/logo.svg?url';
+import logo from '../../../../assets/brand/logo-dark.svg?url';
 import { NAV, ROUTES, type Locale, type LocalizedPaths, type RouteId } from '../i18n/routes.ts';
 import { UI } from '../i18n/ui.ts';
 
@@ -15,36 +14,15 @@ const t = UI[locale];
 const other: Locale = locale === 'es' ? 'en' : 'es';
 ---
 
-<header class="wrap">
-  <div class="top">
+<header class="masthead">
+  <div class="wrap top">
     <a class="brand" href={ROUTES.home[locale]} aria-label="Bluelytics">
-      <img class="logo-light" src={logoLight} alt="" width="34" height="34" />
-      <img class="logo-dark" src={logoDark} alt="" width="34" height="34" />
+      <img src={logo} alt="" width="30" height="30" />
       <span>bluelytics</span>
     </a>
-    <a class="tool" href={paths[other]} hreflang={other} lang={other}>{other.toUpperCase()}<span class="sr-only"> — {t.otherLanguage}</span></a>
-    <button class="tool" type="button" data-theme-toggle aria-label={t.themeToggle}>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-        <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>
-      </svg>
-    </button>
+    <nav class="nav" aria-label={t.menuLabel}>
+      {NAV.map((id) => <a href={ROUTES[id][locale]} aria-current={id === current ? 'page' : undefined}>{t.nav[id]}</a>)}
+    </nav>
+    <a class="lang" href={paths[other]} hreflang={other} lang={other}>{other.toUpperCase()}<span class="sr-only"> — {t.otherLanguage}</span></a>
   </div>
-  <nav class="nav" aria-label={t.menuLabel}>
-    {NAV.map((id) => <a href={ROUTES[id][locale]} aria-current={id === current ? 'page' : undefined}>{t.nav[id]}</a>)}
-  </nav>
 </header>
-
-<script>
-  for (const button of document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]')) {
-    button.addEventListener('click', () => {
-      const root = document.documentElement;
-      const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
-      root.dataset.theme = next;
-      try {
-        localStorage.setItem('theme', next);
-      } catch {
-        // Storage can be disabled; the choice then lasts for this page only.
-      }
-    });
-  }
-</script>

@@ -5,7 +5,6 @@ export interface UiStrings {
   nav: Record<RouteId, string>;
   skip: string;
   menuLabel: string;
-  themeToggle: string;
   languageName: string;
   otherLanguage: string;
   buy: string;
@@ -53,7 +52,6 @@ export const UI: Record<Locale, UiStrings> = {
     },
     skip: 'Ir al contenido',
     menuLabel: 'Secciones',
-    themeToggle: 'Cambiar tema claro/oscuro',
     languageName: 'Español',
     otherLanguage: 'English',
     buy: 'Compra',
@@ -100,7 +98,6 @@ export const UI: Record<Locale, UiStrings> = {
     },
     skip: 'Skip to content',
     menuLabel: 'Sections',
-    themeToggle: 'Toggle light/dark theme',
     languageName: 'English',
     otherLanguage: 'Español',
     buy: 'Buy',

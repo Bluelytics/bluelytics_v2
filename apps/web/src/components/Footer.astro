@@ -18,12 +18,12 @@ const appLabel = locale === 'es' ? 'App móvil' : 'Mobile app';
   <div class="wrap">
     <div class="foot-grid">
       <div>
-        <p><strong>bluelytics</strong> · {t.footer.tagline}</p>
+        <p class="foot-tag">{t.footer.tagline}</p>
         {
           (android || ios) && (
             <div class="badges" aria-label={appLabel}>
-              {android && <a class="tool" href={android} rel="noopener">Google Play</a>}
-              {ios && <a class="tool" href={ios} rel="noopener">App Store</a>}
+              {android && <a class="lang" href={android} rel="noopener">Google Play</a>}
+              {ios && <a class="lang" href={ios} rel="noopener">App Store</a>}
             </div>
           )
         }
@@ -50,7 +50,7 @@ const appLabel = locale === 'es' ? 'App móvil' : 'Mobile app';
         <ul>
           <li><a href={SOCIAL.x} rel="me noopener">X / Twitter</a></li>
           <li><a href={SOCIAL.instagram} rel="me noopener">Instagram</a></li>
-          <li><a href={SOCIAL.facebook} rel="me noopener">Facebook</a></li>
+          <li><a href={SOCIAL.linkedin} rel="me noopener">LinkedIn</a></li>
           <li><a href={SOCIAL.github} rel="noopener">GitHub</a></li>
         </ul>
       </div>
@@ -60,4 +60,5 @@ const appLabel = locale === 'es' ? 'App móvil' : 'Mobile app';
       {t.footer.madeBy} <a href={AUTHOR.url}>{AUTHOR.name}</a> · <a href={SOCIAL.github}>{t.footer.license}</a>
     </p>
   </div>
+  <p class="wordmark" aria-hidden="true">bluelytics</p>
 </footer>

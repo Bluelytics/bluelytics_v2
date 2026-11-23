@@ -2,10 +2,11 @@
 import RangeChart from '../components/RangeChart.astro';
 import RateHero from '../components/RateHero.astro';
 import RateTile from '../components/RateTile.astro';
+import Ticker from '../components/Ticker.astro';
 import Base from '../layouts/Base.astro';
 import { ROUTES, type Locale } from '../i18n/routes.ts';
 import { pick, UI } from '../i18n/ui.ts';
-import { formatPercent, formatPesos, formatPesosHundredths } from '../lib/format.ts';
+import { formatPercent, formatPesos, formatPesosHundredths, formatSignedPercent } from '../lib/format.ts';
 import type { HomeData } from '../lib/pages.ts';
 import { exchangeRateNode } from '../lib/seo.ts';
 import { ogVersion } from '../lib/snapshot.ts';
@@ -51,9 +52,17 @@ const otherRates = EXTRA_ORDER.flatMap((code) => {
 });
 
 const amounts = [1, 10, 100, 500, 1000];
+const tape = [
+  ...(blue ? [{ label: t.blue, value: formatPesos(blue.sell, locale), direction: snapshot.blueMove?.direction, change: snapshot.blueMove ? formatSignedPercent(snapshot.blueMove.ratio, locale, 2) : undefined, href: ROUTES.history[locale] }] : []),
+  ...(oficial ? [{ label: t.oficial, value: formatPesos(oficial.sell, locale), direction: snapshot.oficialMove?.direction, change: snapshot.oficialMove ? formatSignedPercent(snapshot.oficialMove.ratio, locale, 2) : undefined, href: ROUTES.official[locale] }] : []),
+  ...(blue && blue.euroSell > 0 ? [{ label: t.euroBlue, value: formatPesos(blue.euroSell, locale), href: ROUTES.euro[locale] }] : []),
+  ...(snapshot.gap !== null ? [{ label: pick(locale, 'Brecha', 'Gap'), value: formatPercent(snapshot.gap, locale), href: ROUTES.gap[locale] }] : []),
+  ...otherRates.map((rate) => ({ label: rate.name, value: formatPesosHundredths(rate.sellCents, locale) })),
+];
 ---
 
 <Base locale={locale} title={title} description={description} paths={ROUTES.home} current="home" dateModified={snapshot.updatedAt} ogVersion={ogVersion(snapshot)} graph={graph}>
+  <Ticker items={tape} label={pick(locale, 'Todas las cotizaciones', 'All rates')} />
   <RateHero locale={locale} title={pick(locale, 'Dólar blue hoy', 'Blue dollar today')} rate={blue} move={snapshot.blueMove} previousDay={snapshot.previousDay} updatedAt={snapshot.updatedAt}>
     {
       series.days.length > 1 && (

@@ -20,7 +20,7 @@ export function organizationNode(): Node {
     name: SITE_NAME,
     url: absoluteUrl('/'),
     logo: absoluteUrl('/favicon.svg'),
-    sameAs: [SOCIAL.x, SOCIAL.instagram, SOCIAL.facebook, SOCIAL.github],
+    sameAs: [SOCIAL.x, SOCIAL.instagram, SOCIAL.linkedin, SOCIAL.github],
   };
 }
 

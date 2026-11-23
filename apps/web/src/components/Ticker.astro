@@ -1,0 +1,38 @@
+---
+// A market tape with every published rate, scrolling like a trading-floor board. The list is rendered twice for a
+// seamless loop; the copy is hidden from assistive tech. With reduced motion it is a plain scrollable row.
+interface Item {
+  label: string;
+  value: string;
+  direction?: 'up' | 'down' | 'flat' | undefined;
+  change?: string | undefined;
+  href?: string | undefined;
+}
+
+interface Props {
+  items: Item[];
+  label: string;
+}
+
+const { items, label } = Astro.props;
+---
+
+{
+  items.length > 0 && (
+    <div class="ticker" role="region" aria-label={label}>
+      <div class="ticker-track">
+        {[0, 1].map((copy) => (
+          <ul class="ticker-list" aria-hidden={copy === 1 ? 'true' : undefined}>
+            {items.map((item) => (
+              <li>
+                {item.href && copy === 0 ? <a href={item.href}>{item.label}</a> : <span class="ticker-label">{item.label}</span>}
+                <span class="num">{item.value}</span>
+                {item.change && <span class:list={['num', 'ticker-change', item.direction]}>{item.direction === 'up' ? '▲' : item.direction === 'down' ? '▼' : ''} {item.change}</span>}
+              </li>
+            ))}
+          </ul>
+        ))}
+      </div>
+    </div>
+  )
+}
