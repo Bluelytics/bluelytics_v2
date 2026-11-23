@@ -10,9 +10,9 @@
   // hostname that already has a DNS record replaces that record without asking: never add one for
   // api.bluelytics.com.ar. The production entry is a plain zone route on the existing proxied record.
   "routes": [
-    { "pattern": "api-v2.bluelytics.com.ar", "custom_domain": true }
-    // Cutover (MIGRATION.md 4.7) adds the production zone route here and keeps the shadow entry. The guide
-    // holds the exact entry, so the 1.1 grep guard lists only routes that are live.
+    { "pattern": "api-v2.bluelytics.com.ar", "custom_domain": true },
+    // Production since the cutover (MIGRATION.md 4.7, 2026-11-23): a zone route on the existing proxied record.
+    { "pattern": "api.bluelytics.com.ar/*", "zone_name": "bluelytics.com.ar" }
   ],
   "d1_databases": [
     {
