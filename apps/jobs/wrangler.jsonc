@@ -32,7 +32,7 @@
     // Keep equal to apps/api/wrangler.jsonc; this Worker renders the bodies, so its value decides.
     "LEGACY_V1_BLUE_BUG": "false",
     // {"twitter":"<Buffer channel id>","instagram":"<id>"} from `pnpm buffer:channels` (MIGRATION.md 2.7).
-    "BUFFER_CHANNELS": "{\"instagram\":\"5eaee89c594d230afc4f3418\",\"twitter\":\"532affdc1d36e0037832ea01\"}",
+    "BUFFER_CHANNELS": "{\"instagram\":\"5eaee89c594d230afc4f3418\",\"twitter\":\"532affdc1d36e0037832ea01\",\"linkedin\":\"6b03a7e98541f09ecb6eec06\"}",
     "MEDIA_HOSTNAME": "media.bluelytics.com.ar",
     // static-first only: the purge names these (secret CLOUDFLARE_PURGE_TOKEN).
     "API_HOSTNAME": "api.bluelytics.com.ar",

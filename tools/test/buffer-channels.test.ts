@@ -52,7 +52,7 @@ describe('buffer:channels', () => {
     expect(output).toMatch(/fb1\s+facebook\s+bluelytics-facebook\s+disconnected/);
     expect(output).toContain('warning: twitter: the queue of tw1 is paused in Buffer');
     expect(output).toContain('warning: facebook: every channel is disconnected or locked');
-    expect(output).toContain('BUFFER_CHANNELS={"instagram":"ig1","twitter":"tw1"}');
+    expect(output).toContain('BUFFER_CHANNELS={"instagram":"ig1","twitter":"tw1","linkedin":"li1"}');
     expect(output).not.toContain('svc-ig1');
     expect(output).not.toContain(KEY);
   });
@@ -65,7 +65,7 @@ describe('buffer:channels', () => {
   });
 
   it('fails without a usable channel', async () => {
-    const { code, output } = await run([channel('li1', 'linkedin')]);
+    const { code, output } = await run([channel('m1', 'mastodon')]);
     expect(code).toBe(1);
     expect(output).toContain('No usable channel');
   });

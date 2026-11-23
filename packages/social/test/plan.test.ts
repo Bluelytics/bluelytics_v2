@@ -18,7 +18,7 @@ describe('parseBufferChannels', () => {
   it.each([
     ['not json', 'not valid JSON'],
     ['["ig1"]', 'JSON object'],
-    ['{"linkedin":"li1"}', 'unsupported network "linkedin"'],
+    ['{"mastodon":"m1"}', 'unsupported network "mastodon"'],
     ['{"twitter":""}', 'missing channel id'],
     ['{"twitter":42}', 'expected a channel id'],
     ['{"instagram":{"channelId":"ig1","story":"yes"}}', 'must be a boolean'],

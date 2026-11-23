@@ -22,6 +22,7 @@ export const ALT_TEXT_MAX_LENGTH = 1000;
 
 const INSTAGRAM_TAGS = '#dólarblue #dolarblue #dólar #dolar #argentina #economía #bluelytics';
 const TWITTER_TAGS = '#DólarBlue';
+const LINKEDIN_TAGS = '#DólarBlue #Argentina #Economía #TipoDeCambio';
 
 const pesos = (n: number) => plainText(formatPesos(n));
 const signedPesos = (n: number) => plainText(formatSignedPesos(n));
@@ -92,6 +93,8 @@ export function buildCaption(network: PostingService, kind: PostCardKind, data: 
       return [headline(kind, f), ...detailLines(kind, f), stamp(f), '', 'Histórico, gráficos y API gratuita: link en la bio.', '', INSTAGRAM_TAGS].join('\n');
     case 'facebook':
       return [headline(kind, f), ...detailLines(kind, f), stamp(f), '', `Más datos e histórico: ${SITE_URL}`].join('\n');
+    case 'linkedin':
+      return [headline(kind, f), ...detailLines(kind, f), stamp(f), '', `Histórico, gráficos y API gratuita: ${SITE_URL}`, '', LINKEDIN_TAGS].join('\n');
   }
 }
 

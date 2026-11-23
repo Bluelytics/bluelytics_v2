@@ -17,6 +17,8 @@ const FEED_SIZE: Readonly<Record<PostingService, CardSize>> = {
   twitter: 'landscape',
   instagram: 'portrait',
   facebook: 'portrait',
+  // LinkedIn shows feed images best near 1.91:1; the 16:9 landscape card is the closest size.
+  linkedin: 'landscape',
 };
 
 const isPostingService = (key: string): key is PostingService => (POSTING_SERVICES as readonly string[]).includes(key);

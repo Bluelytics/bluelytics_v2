@@ -16,7 +16,7 @@ export type BufferService =
   | 'youtube';
 
 /** The services this client can build an image post for. */
-export const POSTING_SERVICES = ['instagram', 'twitter', 'facebook'] as const;
+export const POSTING_SERVICES = ['instagram', 'twitter', 'facebook', 'linkedin'] as const;
 export type PostingService = (typeof POSTING_SERVICES)[number];
 
 /** Feed post or story (`PostType` / `PostTypeFacebook` member). X has no stories. */

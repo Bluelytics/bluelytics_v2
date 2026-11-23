@@ -25,12 +25,16 @@ function metadataFor(service: PostingService, kind: BufferPostKind): PostMetadat
     case 'twitter':
       if (kind !== 'post') throw new RangeError('X (twitter) has no stories');
       return undefined;
+    case 'linkedin':
+      // LinkedInPostMetadataInput has only optional fields; an image post needs none.
+      if (kind !== 'post') throw new RangeError('LinkedIn has no stories');
+      return undefined;
   }
 }
 
 /**
  * `CreatePostInput` for one image post: published at once by Buffer (`shareNow`, `automatic`), or a
- * draft (`saveToDraft` + `addToQueue`). Only the channel's own metadata key is sent; X needs none.
+ * draft (`saveToDraft` + `addToQueue`). Only the channel's own metadata key is sent; X and LinkedIn need none.
  */
 export function buildCreatePostInput(post: CreateImagePostInput): CreatePostInputJson {
   const image: CreatePostInputJson['assets'][number]['image'] = { url: post.imageUrl };
