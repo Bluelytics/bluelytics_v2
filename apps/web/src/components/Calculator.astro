@@ -14,6 +14,10 @@ interface Props {
 const { locale, rates, currencies } = Astro.props;
 const t = UI[locale];
 const es = locale === 'es';
+const groups = [
+  { label: es ? 'Monedas de América (vía dólar)' : 'Currencies of the Americas (via the dollar)', list: currencies.filter((c) => c.americas) },
+  { label: es ? 'Otras monedas (vía dólar)' : 'Other currencies (via the dollar)', list: currencies.filter((c) => !c.americas) },
+];
 const amount = 100;
 const rate = rates.blue.usd?.average ?? 0;
 const kinds = [
@@ -38,10 +42,12 @@ const kinds = [
         <option value="usd" selected>{es ? 'Dólar estadounidense (USD)' : 'US dollar (USD)'}</option>
         <option value="eur">{es ? 'Euro (EUR)' : 'Euro (EUR)'}</option>
         {
-          currencies.length > 0 && (
-            <optgroup label={es ? 'Otras monedas (vía dólar)' : 'Other currencies (via the dollar)'}>
-              {currencies.map((c) => <option value={c.code}>{`${c.name} (${c.code})`}</option>)}
-            </optgroup>
+          groups.map((group) =>
+            group.list.length > 0 && (
+              <optgroup label={group.label}>
+                {group.list.map((c) => <option value={c.code}>{`${c.name} (${c.code})`}</option>)}
+              </optgroup>
+            ),
           )
         }
       </select>

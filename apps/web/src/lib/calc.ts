@@ -14,7 +14,16 @@ export interface CalcCurrency {
   name: string;
   /** Units of the currency per 1 USD, in hundredths (`currency.json` `value` × 100). */
   perUsdHundredths: number;
+  /** Currency of a country of the Americas: listed first, in its own group. */
+  americas: boolean;
 }
+
+/** ISO codes of the currencies of the Americas (ARS and USD aside). */
+export const AMERICAS = new Set([
+  'BRL', 'CLP', 'UYU', 'PYG', 'BOB', 'PEN', 'COP', 'VES', 'VEF', 'ECS', 'MXN', 'CAD', 'CRC', 'SVC', 'GTQ', 'HNL',
+  'NIO', 'PAB', 'DOP', 'CUP', 'CUC', 'HTG', 'JMD', 'TTD', 'BSD', 'BBD', 'BZD', 'BMD', 'KYD', 'XCD', 'AWG',
+  'ANG', 'SRD', 'GYD', 'FKP',
+]);
 
 /** Hundredths of a peso per unit of `currency` at a dollar rate (unrounded: small currencies need the decimals). */
 export function crossRateHundredths(usdRateHundredths: number, perUsdHundredths: number): number | null {
@@ -48,7 +57,7 @@ export function calcCurrencies(rows: readonly { code: string; name: string; valu
           // keep the stored (Spanish) name
         }
       }
-      return { code: row.code, name, perUsdHundredths: row.valueHundredths as number };
+      return { code: row.code, name, perUsdHundredths: row.valueHundredths as number, americas: AMERICAS.has(row.code) };
     })
     .sort((a, b) => a.name.localeCompare(b.name, locale));
 }

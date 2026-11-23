@@ -41,5 +41,6 @@ describe('calculator arithmetic', () => {
     ];
     expect(calcCurrencies(rows, 'es').map((c) => c.code)).toEqual(['CLP', 'BRL']);
     expect(calcCurrencies(rows, 'en').map((c) => c.name)).toEqual(['Brazilian Real', 'Chilean Peso']);
+    expect(calcCurrencies(rows, 'es').every((c) => c.americas)).toBe(true);
   });
 });
