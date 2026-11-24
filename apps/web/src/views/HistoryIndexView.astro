@@ -26,7 +26,7 @@ const years = groupByPeriod(data.days, 4)
     return summary === null ? [] : [{ year: Number(key), summary }];
   })
   .reverse();
-const title = pick(locale, 'Dólar blue histórico: evolución y cotización día por día desde 2011 | Bluelytics', 'Blue dollar history: evolution chart and day-by-day rates since 2011 | Bluelytics');
+const title = pick(locale, 'Dólar blue histórico desde 2011, día por día | Bluelytics', 'Blue dollar history since 2011, day by day | Bluelytics');
 const description = pick(
   locale,
   'Evolución e histórico del dólar blue y oficial en Argentina: gráfico desde 2011, resumen anual, cotización de compra y venta de cada día y descarga de los datos en CSV y JSON.',

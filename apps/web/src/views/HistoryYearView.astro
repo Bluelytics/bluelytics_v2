@@ -21,7 +21,7 @@ const months = groupByPeriod(data.days, 7).flatMap(({ key, days }) => {
   const s = summarize(days);
   return s === null ? [] : [{ month: Number(key.slice(5, 7)), s }];
 });
-const title = pick(locale, `Dólar blue en ${year}: cotización histórica mes a mes | Bluelytics`, `Blue dollar in ${year}: historical rates month by month | Bluelytics`);
+const title = pick(locale, `Dólar blue en ${year}: cotización mes a mes | Bluelytics`, `Blue dollar in ${year}: rates month by month | Bluelytics`);
 const description = summary
   ? pick(
       locale,

@@ -11,7 +11,7 @@ interface Props {
 const { locale } = Astro.props;
 const t = UI[locale];
 const es = locale === 'es';
-const title = pick(locale, 'Acerca de Bluelytics: cómo calculamos el dólar blue | Bluelytics', 'About Bluelytics: how the blue dollar is computed | Bluelytics');
+const title = pick(locale, 'Cómo calculamos el dólar blue | Bluelytics', 'How the blue dollar is computed | Bluelytics');
 const description = pick(
   locale,
   'Qué es Bluelytics, de qué fuentes toma la cotización del dólar blue y oficial, cómo combina los valores y quién lo hace. Proyecto de código abierto desde 2014.',

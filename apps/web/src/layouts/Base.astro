@@ -54,8 +54,9 @@ const fontCss = `@font-face{font-family:'Geist';font-style:normal;font-weight:10
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={canonical} />
-    {alternates(paths).map((alt) => <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />)}
+    {/* A noindex page (404) has no canonical URL or language versions of its own. */}
+    {!noindex && <link rel="canonical" href={canonical} />}
+    {!noindex && alternates(paths).map((alt) => <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />)}
     <meta name="robots" content={noindex ? 'noindex' : 'max-image-preview:large'} />
     <meta name="theme-color" content="#040a14" />
     <meta name="color-scheme" content="dark" />
