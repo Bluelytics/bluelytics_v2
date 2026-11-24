@@ -45,10 +45,10 @@ const ALL_OFICIAL = [oficial('ambito_oficial', 1550.4, 1602.6), oficial('bna', 1
 describe('computeConsensus: voter selection', () => {
   it('uses the four primaries when all are fresh (reserve, substitute and last resort stay out)', () => {
     const result = run([...ALL_BLUE, ...ALL_OFICIAL]);
-    expect(result.voters).toEqual({ blue: ['ambito', 'dolarhoy', 'cronista', 'infodolar'], oficial: ['ambito_oficial'] });
+    expect(result.voters).toEqual({ blue: ['ambito', 'dolarhoy', 'cronista', 'infodolar'], oficial: ['bna'] });
     // buys 1620 1630 1640 1650 → 1635; sells 1660 1670 1680 1690 → 1675
     expect(result.state.blue).toMatchObject({ buy: 1635, sell: 1675, buyRaw: 1635, sellRaw: 1675, updatedAt: NOW });
-    expect(result.state.oficial).toMatchObject({ buy: 1550, sell: 1603, buyRaw: 1550.4, sellRaw: 1602.6, updatedAt: NOW });
+    expect(result.state.oficial).toMatchObject({ buy: 1550, sell: 1600, buyRaw: 1550, sellRaw: 1600, updatedAt: NOW });
     expect(result.held).toEqual({ blue: false, oficial: false });
     expect(result.rejected).toEqual([]);
   });
@@ -92,10 +92,11 @@ describe('computeConsensus: voter selection', () => {
     expect(result.voters.blue).toEqual(['ambito', 'dolarhoy', 'infobae', 'infodolar']);
   });
 
-  it('official: first usable source of the chain, BNA when Ámbito is down', () => {
-    expect(run([oficial('bna', 1550, 1600), failed('ambito_oficial', 'oficial')]).voters.oficial).toEqual(['bna']);
+  it('official: first usable source of the chain, BNA first and Ámbito when BNA is down', () => {
+    expect(run([oficial('ambito_oficial', 1550.4, 1602.6), failed('bna', 'oficial')]).voters.oficial).toEqual(['ambito_oficial']);
     const both = run(ALL_OFICIAL);
-    expect(both.state.oficial).toMatchObject({ buy: 1550, sell: 1603 });
+    expect(both.voters.oficial).toEqual(['bna']);
+    expect(both.state.oficial).toMatchObject({ buy: 1550, sell: 1600 });
   });
 
   it('ignores extra-rate observations', () => {
@@ -326,10 +327,10 @@ describe('rows derived from a run', () => {
       blueBuyRaw: 1635,
       blueSellRaw: 1675,
       oficialBuy: 1550,
-      oficialSell: 1603,
-      oficialBuyRaw: 1550.4,
-      oficialSellRaw: 1602.6,
-      voters: { blue: ['ambito', 'dolarhoy', 'cronista', 'infodolar'], oficial: ['ambito_oficial'] },
+      oficialSell: 1600,
+      oficialBuyRaw: 1550,
+      oficialSellRaw: 1600,
+      voters: { blue: ['ambito', 'dolarhoy', 'cronista', 'infodolar'], oficial: ['bna'] },
       changed: true,
     });
   });
@@ -337,7 +338,7 @@ describe('rows derived from a run', () => {
   it('builds the two daily rows of the Argentine trading day, Oficial first', () => {
     const lateRun = '2026-11-24T02:30:00.000Z'; // 23:30 on the 23rd in Buenos Aires
     expect(dailyRowsFromState(lateRun, result.state)).toEqual([
-      { day: '2026-11-23', tipo: 'Oficial', buy: 1550, sell: 1603, updatedAt: lateRun, origin: 'live' },
+      { day: '2026-11-23', tipo: 'Oficial', buy: 1550, sell: 1600, updatedAt: lateRun, origin: 'live' },
       { day: '2026-11-23', tipo: 'Blue', buy: 1635, sell: 1675, updatedAt: lateRun, origin: 'live' },
     ]);
     expect(dailyRowsFromState(NOW, { oficial: null, blue: null })).toEqual([]);

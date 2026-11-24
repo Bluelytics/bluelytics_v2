@@ -32,7 +32,7 @@ const description = pick(
             <li>Cada 5 minutos, de lunes a viernes de 7 a 20 h (hora argentina), leemos Ámbito, DolarHoy, El Cronista (o Infobae, que publica el mismo dato) e Infodolar.</li>
             <li>Una fuente vota solo si la leímos bien en los últimos 30 minutos y su valor es razonable: descartamos diferencias entre compra y venta mayores al 10 % y saltos de más del 15 % que ninguna otra fuente confirma.</li>
             <li>Publicamos la mediana de compra y la de venta, redondeadas al peso. Si hay menos de tres fuentes disponibles se suma La Nación, y como último recurso CriptoYa.</li>
-            <li>El dólar oficial es el de Ámbito y, si no está disponible, el del Banco Nación. El euro se calcula a partir del dólar con la cotización euro/dólar del día.</li>
+            <li>El dólar oficial es la cotización billete del Banco Nación y, si no está disponible, la que publica Ámbito. El euro se calcula a partir del dólar con la cotización euro/dólar del día.</li>
             <li>El valor de cada día en el histórico es el último publicado ese día (el cierre).</li>
           </ul>
           <p>
@@ -40,7 +40,7 @@ const description = pick(
           </p>
           <h2>Quién lo hace</h2>
           <p>
-            Bluelytics fue creado por <a href={AUTHOR.url}>{AUTHOR.name}</a>. El código es libre (AGPL-3.0) y está en <a href={SOCIAL.github}>GitHub</a>. Para novedades seguí a Bluelytics en <a href={SOCIAL.x}>X</a>, <a href={SOCIAL.instagram}>Instagram</a> o <a href={SOCIAL.linkedin}>LinkedIn</a>.
+            Bluelytics fue creado por <a href={AUTHOR.url}>{AUTHOR.name}</a>. El código es libre (AGPL-3.0) y está en <a href={SOCIAL.github}>GitHub</a>. Los datos se publican bajo <a href="https://creativecommons.org/licenses/by/4.0/deed.es" rel="license">CC BY 4.0</a>: podés usarlos citando a Bluelytics. Para novedades seguí a Bluelytics en <a href={SOCIAL.x}>X</a>, <a href={SOCIAL.instagram}>Instagram</a> o <a href={SOCIAL.linkedin}>LinkedIn</a>.
           </p>
         </>
       ) : (
@@ -53,7 +53,7 @@ const description = pick(
             <li>Every 5 minutes, Monday to Friday 7:00–20:00 Argentine time, we read Ámbito, DolarHoy, El Cronista (or Infobae, which publishes the same feed) and Infodolar.</li>
             <li>A source only votes if it was read successfully within the last 30 minutes and its value is sane: spreads above 10 % and jumps above 15 % that no other source confirms are discarded.</li>
             <li>We publish the median buy and the median sell, rounded to whole pesos. With fewer than three sources available La Nación joins in, and CriptoYa as a last resort.</li>
-            <li>The official rate is Ámbito’s, falling back to Banco Nación. Euro values are derived from the dollar with the day’s euro/dollar rate.</li>
+            <li>The official rate is Banco Nación’s counter rate, falling back to the one Ámbito publishes. Euro values are derived from the dollar with the day’s euro/dollar rate.</li>
             <li>Each day in the history is the last value published that day (the close).</li>
           </ul>
           <p>
@@ -61,7 +61,7 @@ const description = pick(
           </p>
           <h2>Who makes it</h2>
           <p>
-            Bluelytics was created by <a href={AUTHOR.url}>{AUTHOR.name}</a>. The code is free software (AGPL-3.0) on <a href={SOCIAL.github}>GitHub</a>. Follow Bluelytics on <a href={SOCIAL.x}>X</a>, <a href={SOCIAL.instagram}>Instagram</a> or <a href={SOCIAL.linkedin}>LinkedIn</a> for updates.
+            Bluelytics was created by <a href={AUTHOR.url}>{AUTHOR.name}</a>. The code is free software (AGPL-3.0) on <a href={SOCIAL.github}>GitHub</a>. The data is published under <a href="https://creativecommons.org/licenses/by/4.0/" rel="license">CC BY 4.0</a>: use it freely with credit to Bluelytics. Follow Bluelytics on <a href={SOCIAL.x}>X</a>, <a href={SOCIAL.instagram}>Instagram</a> or <a href={SOCIAL.linkedin}>LinkedIn</a> for updates.
           </p>
         </>
       )

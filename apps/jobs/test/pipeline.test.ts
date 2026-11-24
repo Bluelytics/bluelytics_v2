@@ -55,7 +55,7 @@ describe('a trading week with push and social enabled', () => {
     const report = await h.run(at);
     expect(report.mode).toBe('tick');
     expect(report.errors).toEqual([]);
-    expect(report.voters).toEqual({ blue: ['ambito', 'dolarhoy', 'cronista', 'infodolar'], oficial: ['ambito_oficial'] });
+    expect(report.voters).toEqual({ blue: ['ambito', 'dolarhoy', 'cronista', 'infodolar'], oficial: ['bna'] });
     const latest = await getLatestRates(h.db);
     expect(latest.blue).toMatchObject({ buy: 1650, sell: 1670, updatedAt: at });
     expect(latest.oficial).toMatchObject({ buy: 1550, sell: 1600 });
@@ -141,7 +141,7 @@ describe('a trading week with push and social enabled', () => {
     expect(after.blue).toEqual({ ...before.blue, updatedAt: art(TUE, '07:05') });
     expect(held.alert).toBeUndefined();
     expect(await h.rows('SELECT blue_sell, voters FROM ticks WHERE run_at = ?', art(TUE, '07:40'))).toEqual([
-      { blue_sell: 1680, voters: JSON.stringify({ blue: [], oficial: ['ambito_oficial'] }) },
+      { blue_sell: 1680, voters: JSON.stringify({ blue: [], oficial: ['bna'] }) },
     ]);
   });
 

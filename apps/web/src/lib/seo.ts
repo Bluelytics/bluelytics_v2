@@ -81,7 +81,7 @@ export function datasetNode(locale: Locale, coverage: { from: string; to: string
     temporalCoverage: `${coverage.from}/${coverage.to}`,
     variableMeasured: ['value_buy', 'value_sell'],
     isAccessibleForFree: true,
-    license: 'https://www.gnu.org/licenses/agpl-3.0.html',
+    license: 'https://creativecommons.org/licenses/by/4.0/',
     creator: { '@type': 'Person', name: AUTHOR.name, url: AUTHOR.url },
     publisher: { '@id': ORG_ID },
     distribution: [

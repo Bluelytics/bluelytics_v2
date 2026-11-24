@@ -29,9 +29,9 @@ describe('tick with the real parsers', () => {
     await h.run(art('2026-11-23', '06:00'));
     const report = await h.run(art('2026-11-23', '12:00'));
     expect(report.sources?.every((source) => source.ok)).toBe(true);
-    expect(report.voters).toEqual({ blue: ['ambito', 'dolarhoy', 'cronista', 'infodolar'], oficial: ['ambito_oficial'] });
+    expect(report.voters).toEqual({ blue: ['ambito', 'dolarhoy', 'cronista', 'infodolar'], oficial: ['bna'] });
     const latest = await getLatestRates(h.db);
-    expect([latest.blue?.buy, latest.blue?.sell, latest.oficial?.buy, latest.oficial?.sell]).toEqual([1655, 1675, 1548, 1601]);
+    expect([latest.blue?.buy, latest.blue?.sell, latest.oficial?.buy, latest.oficial?.sell]).toEqual([1655, 1675, 1550, 1600]);
     const userAgents = new Set(h.net.calls.filter((call) => call.method === 'GET').map((call) => call.headers.get('user-agent')));
     expect(userAgents).toEqual(new Set(['bluelytics-bot/2.0 (+https://bluelytics.com.ar)']));
   });

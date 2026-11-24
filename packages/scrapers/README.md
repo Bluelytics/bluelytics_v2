@@ -21,13 +21,13 @@ const currencies = await fetchCurrencies({ now: runAt });            // daily: f
 | id | kind | URL | Format | Numbers | `sourceTs` | Role (ARCHITECTURE §2, §4) |
 |---|---|---|---|---|---|---|
 | `ambito` | blue | `mercados.ambito.com/dolar/informal/variacion` | JSON | `ar` strings | `fecha` (ART) | primary |
-| `ambito_oficial` | oficial | `mercados.ambito.com/dolar/oficial/variacion` | JSON | `ar` strings | `fecha` (ART) | oficial, first in chain |
+| `ambito_oficial` | oficial | `mercados.ambito.com/dolar/oficial/variacion` | JSON | `ar` strings | `fecha` (ART) | oficial, fallback after `bna` |
 | `dolarhoy` | blue | `dolarhoy.com/cotizaciondolarblue` | HTML, first `cotizacion_value` tile titled "Dólar Libre" | `ar` | none (the page time is render time) | primary |
 | `cronista` | blue | `www.cronista.com/MercadosOnline/moneda/ARSB/` | HTML: embedded JSON `"Ric":"ARSB="` with the `"Ultimo"` guard; markup fallback; both present → must agree within 1 % | JSON numbers / `ar` | `UltimaActualizacion` (epoch ms) | primary (not the robots-disallowed `/pf/api`) |
 | `infodolar` | blue | `www.infodolar.com/cotizacion-dolar-blue.aspx` | HTML, "Dólar Blue" row of `#CompraVenta`, both cells within that `<tr>` | `ar` | row `datetime` | primary |
 | `lanacion` | blue | `www.lanacion.com.ar/tema/dolar-blue-tid67294/` | HTML, `<li>` labelled "Dólar blue" in `dolar-subgroup` | `ar` | none | reserve |
 | `infobae` | blue | `www.infobae.com/economia/divisas/dolar-libre/` | HTML, embedded `"ric":"ARSB=","sellValue"…` (sell before buy) | JSON numbers | `utcDate` | standby for cronista (same vendor feed) |
-| `bna` | oficial | `www.bna.com.ar/Personas` | HTML, billetes tab "Dolar U.S.A" row | `ar` | table date + "Hora Actualización" (ART) | oficial fallback; 20 s timeout |
+| `bna` | oficial | `www.bna.com.ar/Personas` | HTML, billetes tab "Dolar U.S.A" row | `ar` | table date + "Hora Actualización" (ART) | oficial, first in chain; 20 s timeout |
 | `criptoya` | blue | `criptoya.com/api/dolar` | JSON `blue.bid`/`blue.ask` | JSON numbers | `blue.timestamp` (their poll time, s) | last resort |
 | `ambito_extras` | extra | `mercados.ambito.com/mercados/monedas` + `/dolarrava/cl/variacion` | JSON | `ar` strings | per item `fecha` | daily `extra_rates` |
 

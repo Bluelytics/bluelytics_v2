@@ -43,7 +43,8 @@ export const CONSENSUS_CONFIG: ConsensusConfig = {
   reserveBelowPrimaries: 3,
   blueLastResort: 'criptoya',
   lastResortBelowVoters: 2,
-  oficialChain: ['ambito_oficial', 'bna'],
+  // Banco Nación's counter rate is the official reference; Ámbito's official quote is the fallback.
+  oficialChain: ['bna', 'ambito_oficial'],
 };
 
 export type ConsensusObservation = Pick<Observation, 'runAt' | 'source' | 'kind' | 'ok' | 'buyCents' | 'sellCents'>;

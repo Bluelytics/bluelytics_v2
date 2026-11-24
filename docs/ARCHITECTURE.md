@@ -103,7 +103,7 @@ Consensus per run (`computeConsensus`):
   a fresh but rejected cronista is replaced by infobae and does not count towards the thresholds.
 - Blue published = `rint(median(buy))`, `rint(median(sell))` in pesos, medians taken over voters'
   values in pesos (cents/100). Keep the unrounded medians (`buyRaw`, `sellRaw`).
-- Official published = first fresh of `ambito_oficial`, `bna` (rint to pesos; keep raw).
+- Official published = first fresh of `bna`, `ambito_oficial` (rint to pesos; keep raw). BNA (Banco Nación counter rate) became primary on 2026-11-24.
 - No fresh voter for a kind → hold previous published values for that kind; `updated_at` unchanged.
   Held values include the euro ones: a run without voters republishes nothing. A new EUR value is
   applied to held rates only by the daily currency step (`withEuro`).
