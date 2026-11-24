@@ -1483,8 +1483,8 @@ stale responses for 2 hours (every path except `/v2/latest`, 404s included; `leg
 
 ### 5.2 Search Console and Bing
 
-- [ ] Verify the domain property for `bluelytics.com.ar` (DNS TXT record) in Google Search Console and Bing Webmaster Tools.
-- [ ] Submit `https://bluelytics.com.ar/sitemap.xml`.
+- [x] Google Search Console property verified (2026-11-23). Bing Webmaster Tools: not yet (it can import from Search Console).
+- [x] Submitted `https://bluelytics.com.ar/sitemap.xml` to Google (2026-11-23). Bing: not yet.
 - [ ] URL Inspection on `/` and on one `/historico/…` day page; request indexing.
 - [ ] Old hash URLs (`/#!/calculator` etc.) need nothing: Google treats them as `/`, so their links already count for the home page (`astro-seo.md` §9). The client shim forwards human visitors.
 - [ ] Keep `www` → apex and `http` → `https` 301s permanently; expect a few weeks of ranking fluctuation.
