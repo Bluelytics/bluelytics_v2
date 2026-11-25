@@ -136,6 +136,9 @@ Owner decisions and read-only findings from the first session. Re-check them onl
   `PUSH_ENABLED` remains `"false"` after cutover, `FIREBASE_SERVICE_ACCOUNT_JSON` keeps its placeholder, and
   the Firebase steps (1.8, the real key in 4.10, the mobile check in Phase 5) are skipped. The FCM topic
   `dolar` simply stops receiving messages when legacy is switched off.
+- **Mobile app rewritten in Flutter** (2026-11-25, `apps/mobile`). It subscribes to the topic `alertas-blue`
+  that `apps/jobs` sends to; alerts start arriving once the steps in `apps/mobile/README.md` ("Push alerts")
+  are done. Until then `PUSH_ENABLED` stays `"false"`.
 - **Progress, 2026-11-22/23:** Phase 1 done (Pulumi Cloud stack `magiquear/prod`; D1 `ea1ea06c-…`; shadow
   hosts live). Phase 2: backfill done (9,365 rows, alerts to 1885, `PRE_SHADOW_LAST=1885`, remote
   `sqlite_sequence` writable); strict parity 25/27, the two `/json/last_price` differences being the

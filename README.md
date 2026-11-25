@@ -22,7 +22,7 @@ Licence: AGPL-3.0 ([`LICENSE`](LICENSE)).
 | `packages/social` | `@bluelytics/social` | Card templates, renderers, Buffer client |
 | `infra` | `@bluelytics/infra` | Pulumi program |
 | `tools` | `@bluelytics/tools` | Backfill, id sync, local previews |
-| `apps/mobile` | — | Frozen React Native app, **not** a workspace member |
+| `apps/mobile` | — | Flutter app for Android and iOS ([docs](apps/mobile/README.md)); **not** a pnpm workspace member |
 | `legacy/` | — | Imported legacy repos, reference only, not a workspace member |
 | `docs/` | — | Architecture, legacy analysis, platform research |
 

@@ -1,3 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Bluelytics</string>
+    <string name="app_name" translatable="false">Bluelytics</string>
+    <string name="alerts_channel_name">Alertas del dólar blue</string>
+    <string name="alerts_channel_description">Avisos cuando el precio de venta del dólar blue cambia de forma significativa.</string>
 </resources>

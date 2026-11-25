@@ -1,60 +1,47 @@
-require_relative '../node_modules/react-native/scripts/react_native_pods'
-require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
-$RNFirebaseAsStaticFramework = true
-$RNFirebaseAnalyticsWithoutAdIdSupport=true
+# Firebase (push alerts) needs iOS 15.
+platform :ios, '15.0'
 
-platform :ios, '12.4'
-install! 'cocoapods', :deterministic_uuids => false
-production = ENV["PRODUCTION"] == "1"
+# CocoaPods analytics sends network stats synchronously affecting flutter build latency.
+ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
+project 'Runner', {
+  'Debug' => :debug,
+  'Profile' => :release,
+  'Release' => :release,
+}
 
-target 'bluelytics_mobile_v3' do
-  config = use_native_modules!
-  # Flags change depending on the env values.
-  flags = get_default_flags()
-
-  pod 'Firebase', :modular_headers => true
-  pod 'FirebaseCore', :modular_headers => true
-  pod 'GoogleUtilities', :modular_headers => true
-
-  use_react_native!(
-    :path => config[:reactNativePath],
-    # to enable hermes on iOS, change `false` to `true` and then install pods
-
-    :production => production,
-    :hermes_enabled => flags[:hermes_enabled],
-    :fabric_enabled => flags[:fabric_enabled],
-    :flipper_configuration => FlipperConfiguration.enabled,
-    # An absolute path to your application root.
-    :app_path => "#{Pod::Config.instance.installation_root}/.."  )
-
-
-  target 'bluelytics_mobile_v3Tests' do
-    inherit! :complete
-    # Pods for testing
+def flutter_root
+  generated_xcode_build_settings_path = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'), __FILE__)
+  unless File.exist?(generated_xcode_build_settings_path)
+    raise "#{generated_xcode_build_settings_path} must exist. If you're running pod install manually, make sure flutter pub get is executed first"
   end
-  
-  # Enables Flipper.
-  #
-  # Note that if you have use_frameworks! enabled, Flipper will not work and
-  # you should disable the next line.
-  use_flipper!()
 
+  File.foreach(generated_xcode_build_settings_path) do |line|
+    matches = line.match(/FLUTTER_ROOT\=(.*)/)
+    return matches[1].strip if matches
+  end
+  raise "FLUTTER_ROOT not found in #{generated_xcode_build_settings_path}. Try deleting Generated.xcconfig, then run flutter pub get"
+end
 
-  post_install do |installer|
-    react_native_post_install(installer)
+require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
 
+flutter_ios_podfile_setup
 
-    installer.pods_project.targets.each do |target|
-      target.build_configurations.each do |config|
-        # Using the un-qualified names means you can swap in different implementations, for example ccache
-        config.build_settings["CC"] = "clang"
-        config.build_settings["LD"] = "clang"
-        config.build_settings["CXX"] = "clang++"
-        config.build_settings["LDPLUSPLUS"] = "clang++"
-      end
+target 'Runner' do
+  use_frameworks!
+
+  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+  target 'RunnerTests' do
+    inherit! :search_paths
+  end
+end
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    flutter_additional_ios_build_settings(target)
+    target.build_configurations.each do |config|
+      # Some pods still declare an older minimum than the app's.
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
     end
-
-    __apply_Xcode_12_5_M1_post_install_workaround(installer)
   end
 end

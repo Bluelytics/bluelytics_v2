@@ -6,7 +6,7 @@ packages:
   - packages/*
   - infra
   - tools
-# apps/mobile (frozen React Native app) and legacy/** are deliberately NOT workspace members.
+# apps/mobile (Flutter app, built with its own tools) and legacy/** are deliberately NOT workspace members.
 
 # One version of each shared tool for the whole workspace: reference these as "catalog:".
 catalog:

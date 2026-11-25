@@ -15,7 +15,7 @@ in 2026.
 5. Automatic social posts through Buffer's current GraphQL API with a new dark card design.
 6. One monorepo, one `pulumi up` + deploy script, safe staged cutover from the legacy AWS stack.
 
-Non-goals: rewriting the mobile app (frozen in `apps/mobile`), adding new public API endpoints,
+Non-goals: adding new public API endpoints,
 user accounts, anything stateful beyond D1/R2.
 
 ## 2. Decisions
@@ -31,7 +31,7 @@ user accounts, anything stateful beyond D1/R2.
 | D7 | Social posting through Buffer GraphQL (`https://api.buffer.com`, `createPost`, `mode: shareNow`). Images are JPEGs on a public R2 URL. Direct X/Meta integrations are NOT built (research kept for reference). | Owner decision 2026-11-22. The legacy v1 token is rejected by the new API (`FORBIDDEN`), so a new API key is required. |
 | D8 | Post images: HTML/CSS template → JPEG screenshot via Browser Run (Worker `BROWSER` binding, Quick Action). Locally the same HTML is rendered with Playwright/Chrome for previews and visual tests. | Real CSS, negligible Worker CPU, 10 free browser-minutes/day. |
 | D9 | TypeScript everywhere, pnpm 12 workspace, Node 24 (`.nvmrc`), vitest 5. **One TypeScript version for the whole workspace: `typescript@6.0.3`** (pnpm `catalog:` in `pnpm-workspace.yaml`; astro check rejects TS 7, and a single version avoids two toolchains). D1 tests run against Miniflare's real SQLite D1 (`@bluelytics/db/testing`); `@cloudflare/vitest-pool-workers` 0.23.0 needs vitest ^4.1 and is not used. | See research; changed 2026-11-22 from "`apps/web` pins 6.0.3". |
-| D10 | `apps/mobile` (React Native 0.69, imported with history) is frozen and excluded from the workspace. `legacy/**` is reference only: excluded from workspace, lint, tests, CI. | See `docs/legacy/legacy-mobile.md`. |
+| D10 | `apps/mobile` is a Flutter app (2026-11-25) that replaces the React Native 0.69 app and keeps its store identifiers, Firebase project and FCM topic. It is a client of the public API like any other, built with Flutter's own tools and CI workflow, and excluded from the pnpm workspace. `legacy/**` is reference only: excluded from workspace, lint, tests, CI. | See `apps/mobile/README.md`; the old app is described in `docs/legacy/legacy-mobile.md` and remains in git history. |
 | D11 | Licence AGPL-3.0 (same as the legacy frontend and scraper). | Continuity; the About page says open source. |
 
 ### Deliberate behaviour changes versus legacy (each is documented for users in `docs/DECISIONS.md`)
@@ -57,7 +57,7 @@ apps/
   api/        Worker: public API (fetch only)
   jobs/       Worker: scheduled() pipeline + small authenticated admin fetch()
   web/        Astro 7 site on Workers
-  mobile/     frozen React Native app (NOT in the pnpm workspace)
+  mobile/     Flutter app for Android and iOS (NOT in the pnpm workspace)
 packages/
   core/       pure domain logic: money, time, consensus, API body rendering, alert + social rules
   db/         D1 migrations + typed repository functions

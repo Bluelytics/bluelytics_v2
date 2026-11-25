@@ -20,7 +20,16 @@ indent_size = unset
 insert_final_newline = unset
 trim_trailing_whitespace = unset
 
-[{legacy,apps/mobile}/**]
+# API captures used as test fixtures, and platform files written by Flutter's tools.
+[apps/mobile/{test/fixtures,android,ios,linux}/**]
+charset = unset
+end_of_line = unset
+indent_style = unset
+indent_size = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+
+[legacy/**]
 charset = unset
 end_of_line = unset
 indent_style = unset
