@@ -84,6 +84,46 @@ The last one is served by the website (`apps/web/src/pages/data/extras.json.ts`)
 API. Until the website is deployed with that route the request returns 404 and the app leaves the
 "Otros tipos de dólar" section out; nothing else depends on it.
 
+## Testing on your phone
+
+### Android, from this repository's build
+
+1. Build the APK (needs Docker; signed with the debug key unless `android/key.properties` exists):
+
+   ```sh
+   tool/android_build.sh        # → build/android/app-release.apk
+   ```
+
+2. On the phone, **uninstall the Bluelytics app from Google Play first**: Android refuses to install a
+   build signed with a different key over it.
+3. Copy the APK to the phone and open it (allow "install unknown apps" for the file manager), or with
+   USB debugging on: `adb install build/android/app-release.apk`.
+
+Or run it straight from source on a phone connected by USB (needs the Android SDK and JDK 17–21):
+`flutter run --release`.
+
+### iPhone (needs a Mac with Xcode)
+
+```sh
+flutter pub get && (cd ios && pod install)
+open ios/Runner.xcworkspace     # Signing & Capabilities: pick your team once
+flutter run --release           # with the iPhone connected and trusted
+```
+
+This is the first time the iOS project is built: expect to fix small things.
+
+### What to check
+
+- **Hoy:** prices match the website, the "vs. cierre" move and the month chart; pull down to refresh.
+  "Otros tipos de dólar" only appears once the website serves `/data/extras.json` (in this branch).
+- **Histórico:** each range (1M … Máx), the gap mode, touching the chart, the day table.
+- **Calcular:** an amount, swap direction, another currency (search "real"), tap a result to copy.
+- **Alertas:** turning the switch on asks for notification permission; it stays on after closing and
+  reopening the app. Nothing arrives until push is turned on (below).
+- **Offline:** open it once online, then in airplane mode: prices stay, marked "Sin conexión".
+- **Language:** the EN/ES button in the header; the app starts in the phone's language.
+- **Large text:** set the phone's font size to the maximum; nothing should be cut off.
+
 ## Push alerts
 
 The device subscribes to the Firebase Cloud Messaging topic `alertas-blue`; the sender is the jobs
@@ -185,7 +225,9 @@ The first build on a Mac, or the `iOS build` job of the "Mobile app" workflow, i
 
 - Confirm in Play Console and App Store Connect that both apps still exist. Both public listings
   returned "not found" on 2026-11-22 (`docs/legacy/legacy-mobile.md`).
-- Both stores ask for a **privacy policy URL**; the site has no such page yet.
+- Both stores ask for a **privacy policy URL**: `https://bluelytics.com.ar/privacy.html`, the one
+  already registered. It dates from 2020 and only names Google Play Services; consider adding Firebase
+  Cloud Messaging (the push token, below).
 - Data collected, for the stores' privacy forms: nothing about the person. With alerts on, Firebase
   Cloud Messaging holds a push token for the device (a device identifier, used for app functionality,
   not for tracking). The Firebase Analytics SDK is not part of the app.
