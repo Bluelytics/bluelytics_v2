@@ -18,6 +18,7 @@ export const ROUTES = {
   calculator: { es: '/calculadora', en: '/en/calculator' },
   history: { es: '/historico', en: '/en/history' },
   api: { es: '/api', en: '/en/api' },
+  mcp: { es: '/mcp', en: '/en/mcp' },
   about: { es: '/acerca', en: '/en/about' },
   status: { es: '/estado', en: '/en/status' },
 } as const satisfies Record<string, Record<Locale, string>>;

@@ -1,4 +1,5 @@
 ---
+import AddToAssistant from '../components/AddToAssistant.astro';
 import RangeChart from '../components/RangeChart.astro';
 import RateHero from '../components/RateHero.astro';
 import RateTile from '../components/RateTile.astro';
@@ -156,6 +157,7 @@ const tape = [
       </section>
     )
   }
+  <AddToAssistant locale={locale} />
   {blue === null && <p class="muted">{t.noData}</p>}
 </Base>
 

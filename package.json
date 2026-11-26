@@ -15,6 +15,7 @@
     "build": "pnpm -r --if-present run build",
     "dev:api": "pnpm --filter @bluelytics/api run dev",
     "dev:jobs": "pnpm --filter @bluelytics/jobs run dev",
+    "dev:mcp": "pnpm --filter @bluelytics/mcp run dev",
     "dev:web": "pnpm --filter @bluelytics/web run dev",
     "db:migrate:local": "pnpm --filter @bluelytics/api run db:migrate:local",
     "db:migrate:remote": "pnpm --filter @bluelytics/api run db:migrate:remote",
@@ -27,8 +28,9 @@
     "infra:sync-ids": "pnpm --filter @bluelytics/tools run infra:sync-ids",
     "deploy:api": "pnpm --filter @bluelytics/api run deploy",
     "deploy:jobs": "pnpm --filter @bluelytics/jobs run deploy",
+    "deploy:mcp": "pnpm --filter @bluelytics/mcp run deploy",
     "deploy:web": "pnpm --filter @bluelytics/web run deploy",
-    "deploy:all": "pnpm run deploy:api && pnpm run deploy:jobs && pnpm run deploy:web"
+    "deploy:all": "pnpm run deploy:api && pnpm run deploy:jobs && pnpm run deploy:mcp && pnpm run deploy:web"
   },
   "devDependencies": {
     "@types/node": "catalog:",

@@ -1,0 +1,22 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "bluelytics-mcp",
+  "main": "src/index.ts",
+  // D1 id comes from `pnpm infra:sync-ids`
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "bluelytics",
+      "database_id": "00000000-0000-0000-0000-000000000000", // placeholder
+      "migrations_dir": "../../packages/db/migrations",
+    },
+  ],
+  "env": {
+    "shadow": {
+      "name": "bluelytics-mcp-shadow",
+      "d1_databases": [
+        { "binding": "DB", "database_name": "bluelytics", "database_id": "<d1DatabaseId>" },
+      ],
+    },
+  },
+}

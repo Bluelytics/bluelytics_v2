@@ -1,6 +1,7 @@
 packages:
   - apps/api
   - apps/jobs
+  - apps/mcp
   - apps/web
   - packages/*
   - infra

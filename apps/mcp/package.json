@@ -1,0 +1,26 @@
+{
+  "name": "@bluelytics/mcp",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev --local",
+    "deploy": "node ../../scripts/wrangler-deploy.mjs",
+    "typecheck": "tsc -p tsconfig.src.json && tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@bluelytics/core": "workspace:*",
+    "@bluelytics/db": "workspace:*"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "catalog:",
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "@types/node": "catalog:",
+    "miniflare": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:",
+    "wrangler": "catalog:"
+  }
+}

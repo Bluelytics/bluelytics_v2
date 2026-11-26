@@ -6,7 +6,7 @@ import { parseArgs } from 'node:util';
 import { applyEdits, findNodeAtLocation, getNodeValue, modify, parseTree, printParseErrorCode, type JSONPath, type ParseError } from 'jsonc-parser';
 
 /** Wrangler configs whose D1 binding points at the Pulumi-managed database (relative to the repo root). */
-export const WRANGLER_CONFIGS = ['apps/api/wrangler.jsonc', 'apps/jobs/wrangler.jsonc', 'apps/web/wrangler.jsonc'] as const;
+export const WRANGLER_CONFIGS = ['apps/api/wrangler.jsonc', 'apps/jobs/wrangler.jsonc', 'apps/mcp/wrangler.jsonc', 'apps/web/wrangler.jsonc'] as const;
 
 /** The `pulumi stack output --json` fields this tool consumes (see infra/README.md). */
 export interface D1Ids {

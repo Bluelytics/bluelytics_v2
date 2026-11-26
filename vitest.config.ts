@@ -6,7 +6,7 @@ import { defineConfig } from 'vitest/config';
  * would otherwise let one of these go green with zero files after a renamed directory or a broken
  * `include` glob. Add a project here once it has tests.
  */
-const PROJECTS_WITH_TESTS = ['core', 'db', 'contract', 'scrapers', 'social', 'api', 'jobs', 'web', 'tools', 'infra'];
+const PROJECTS_WITH_TESTS = ['core', 'db', 'contract', 'scrapers', 'social', 'api', 'jobs', 'mcp', 'web', 'tools', 'infra'];
 
 const requireTests = {
   projects: [] as TestProject[],
@@ -27,7 +27,7 @@ export default defineConfig({
   test: {
     projects: [
       'packages/*/vitest.config.ts',
-      'apps/{api,jobs,web}/vitest.config.ts',
+      'apps/{api,jobs,mcp,web}/vitest.config.ts',
       'tools/vitest.config.ts',
       'infra/vitest.config.ts',
     ],

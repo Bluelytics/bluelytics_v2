@@ -3,6 +3,16 @@
 export const SITE_NAME = 'Bluelytics';
 export const API_ORIGIN = 'https://api.bluelytics.com.ar';
 
+/** The MCP server (apps/mcp): stateless Streamable HTTP, no authentication. */
+export const MCP_URL = 'https://mcp.bluelytics.com.ar/mcp';
+export const MCP_NAME = 'Bluelytics';
+
+/** Claude's "add custom connector" dialog, filled in. */
+export const CLAUDE_CONNECTOR_URL = `https://claude.ai/customize/connectors?modal=add-custom-connector&connectorName=${encodeURIComponent(MCP_NAME)}&connectorUrl=${encodeURIComponent(MCP_URL)}`;
+
+/** Gemini CLI command that adds the server. */
+export const GEMINI_COMMAND = `gemini mcp add --transport http bluelytics ${MCP_URL}`;
+
 export const SOCIAL = {
   x: 'https://x.com/bluelytics',
   instagram: 'https://www.instagram.com/bluelytics_dolar',

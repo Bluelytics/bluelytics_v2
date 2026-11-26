@@ -1,0 +1,82 @@
+---
+// "Add Bluelytics to your assistant": pick Claude (default), ChatGPT or Gemini. Claude opens its
+// connector dialog filled in; the others need a manual step, so the button copies what to paste and
+// the steps appear below. Works without JavaScript as plain links/details (Claude link + MCP docs).
+import { CLAUDE_CONNECTOR_URL, GEMINI_COMMAND, MCP_URL } from '../config.ts';
+import { ROUTES, type Locale } from '../i18n/routes.ts';
+import { pick } from '../i18n/ui.ts';
+
+interface Props {
+  locale: Locale;
+  /** Link to the MCP docs (off on that page itself). */
+  details?: boolean;
+}
+
+const { locale, details = true } = Astro.props;
+const L = (es: string, en: string): string => pick(locale, es, en);
+---
+
+<section class="section add-ai" aria-labelledby="add-ai">
+  <div class="section-head">
+    <h2 id="add-ai">{L('Preguntale a tu IA por el dólar', 'Ask your AI about the dollar')}</h2>
+    {details && <a href={ROUTES.mcp[locale]}>{L('Más detalles', 'More details')} →</a>}
+  </div>
+  <p class="dim">
+    {L('Conectá Bluelytics a tu asistente y preguntale la cotización de hoy, la de cualquier día desde 2011 o cuántos pesos son 300 euros.', 'Connect Bluelytics to your assistant and ask it for today’s rate, any day since 2011, or how many pesos 300 euros are.')}
+  </p>
+  <bl-add-ai class="add-ai-row" data-claude={CLAUDE_CONNECTOR_URL} data-mcp={MCP_URL} data-gemini={GEMINI_COMMAND}>
+    <label class="sr-only" for="add-ai-target">{L('Asistente', 'Assistant')}</label>
+    <select id="add-ai-target" name="target">
+      <option value="claude" selected>Claude</option>
+      <option value="chatgpt">ChatGPT</option>
+      <option value="gemini">Gemini</option>
+    </select>
+    <a class="add-ai-button" href={CLAUDE_CONNECTOR_URL} target="_blank" rel="noopener" data-label-claude={L('Agregar a Claude', 'Add to Claude')} data-label-chatgpt={L('Copiar URL', 'Copy URL')} data-label-gemini={L('Copiar comando', 'Copy command')}>{L('Agregar a Claude', 'Add to Claude')}</a>
+    <p class="add-ai-steps dim" data-for="chatgpt" hidden>
+      {L('Copiamos la URL. En ChatGPT: Configuración → Apps y conectores → Configuración avanzada → activá el modo desarrollador → Crear, y pegala como URL del servidor MCP (sin autenticación).', 'URL copied. In ChatGPT: Settings → Apps & Connectors → Advanced settings → turn on developer mode → Create, and paste it as the MCP server URL (no authentication).')}
+    </p>
+    <p class="add-ai-steps dim" data-for="gemini" hidden>
+      {L('Copiamos el comando. Pegalo en una terminal con Gemini CLI instalado:', 'Command copied. Paste it in a terminal with Gemini CLI installed:')} <code>{GEMINI_COMMAND}</code>
+    </p>
+    <p class="add-ai-steps dim" data-for="copy-failed" hidden>{L('URL del servidor:', 'Server URL:')} <code>{MCP_URL}</code></p>
+  </bl-add-ai>
+</section>
+
+<script>
+  class AddToAssistant extends HTMLElement {
+    connectedCallback(): void {
+      const select = this.querySelector('select');
+      const button = this.querySelector<HTMLAnchorElement>('.add-ai-button');
+      if (!select || !button) return;
+      const steps = [...this.querySelectorAll<HTMLElement>('.add-ai-steps')];
+      const show = (name: string | null): void => steps.forEach((step) => (step.hidden = step.dataset['for'] !== name));
+      const update = (): void => {
+        const target = select.value;
+        button.textContent = button.dataset[`label${target[0]!.toUpperCase()}${target.slice(1)}`] ?? button.textContent;
+        if (target === 'claude') {
+          button.href = this.dataset['claude'] ?? '#';
+          button.target = '_blank';
+        } else {
+          button.href = '#';
+          button.removeAttribute('target');
+        }
+        show(null);
+      };
+      select.addEventListener('change', update);
+      button.addEventListener('click', async (event) => {
+        const target = select.value;
+        if (target === 'claude') return;
+        event.preventDefault();
+        const text = target === 'gemini' ? this.dataset['gemini'] : this.dataset['mcp'];
+        try {
+          await navigator.clipboard.writeText(text ?? '');
+          show(target);
+        } catch {
+          show(target === 'gemini' ? 'gemini' : 'copy-failed');
+        }
+      });
+      update();
+    }
+  }
+  customElements.define('bl-add-ai', AddToAssistant);
+</script>

@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { API_ORIGIN } from '../config.ts';
+import { API_ORIGIN, MCP_URL } from '../config.ts';
 import { absoluteUrl, ROUTES } from '../i18n/routes.ts';
 
 export const prerender = true;
@@ -17,6 +17,17 @@ The published blue value is the median of several public sources (Ámbito, Dolar
 - [Full history, JSON](${API_ORIGIN}/v2/evolution.json): items {date, source: Oficial|Blue, value_sell, value_buy}, newest first; ?days=N limits rows
 - [Full history, CSV](${API_ORIGIN}/v2/evolution.csv): columns day,type,value_buy,value_sell
 - [Currencies](${API_ORIGIN}/data/json/currency.json): {code, name, value} units per US dollar
+
+## MCP server (no authentication)
+
+Model Context Protocol server at ${MCP_URL} (stateless Streamable HTTP, JSON responses, read-only). Tools:
+
+- get_current_rates: blue and official buy/sell/average, change since the previous close, gap, euros, MEP/CCL/crypto/card/wholesale
+- get_rates_on_date {date}: one day since 2011-01-03 (weekends answer the previous Friday)
+- get_rate_history {from, to?, granularity?}: a period with summary; daily up to 400 days or monthly
+- convert_currency {amount, currency?, direction?}: any of ~160 currencies to pesos or back, blue and official
+
+- [MCP documentation and setup for Claude, ChatGPT and Gemini](${absoluteUrl(ROUTES.mcp.en)})
 
 ## Pages
 

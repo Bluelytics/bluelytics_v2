@@ -1,0 +1,22 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "bluelytics-mcp",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-22",
+  "upload_source_maps": true,
+  "workers_dev": false,
+  "preview_urls": false,
+  // A new hostname with no DNS record: a custom domain creates and owns its record. Never point a
+  // custom_domain at a hostname that already has one (it replaces the record without asking).
+  "routes": [{ "pattern": "mcp.bluelytics.com.ar", "custom_domain": true }],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "bluelytics",
+      // Placeholder: `pnpm infra:sync-ids` writes the id of the Pulumi-managed database here.
+      "database_id": "ea1ea06c-0f80-4190-80c4-9f86822ceeca",
+      "migrations_dir": "../../packages/db/migrations"
+    }
+  ],
+  "observability": { "enabled": true, "head_sampling_rate": 0.2 }
+}

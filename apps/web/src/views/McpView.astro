@@ -1,0 +1,153 @@
+---
+// The MCP server (apps/mcp): what it offers and how to connect each assistant.
+import AddToAssistant from '../components/AddToAssistant.astro';
+import Base from '../layouts/Base.astro';
+import { CLAUDE_CONNECTOR_URL, GEMINI_COMMAND, MCP_URL } from '../config.ts';
+import { ROUTES, type Locale } from '../i18n/routes.ts';
+import { pick } from '../i18n/ui.ts';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const L = (es: string, en: string): string => pick(locale, es, en);
+
+const tools = [
+  {
+    name: 'get_current_rates',
+    args: L('sin argumentos', 'no arguments'),
+    text: L(
+      'Dólar blue y oficial ahora (compra, venta, promedio), variación desde el cierre anterior, brecha, euros y otros dólares (MEP, CCL, cripto, tarjeta, mayorista).',
+      'Blue and official dollar now (buy, sell, average), change since the previous close, the gap, both euros and other dollar rates (MEP, CCL, crypto, card, wholesale).',
+    ),
+  },
+  {
+    name: 'get_rates_on_date',
+    args: 'date',
+    text: L('Cierre de blue y oficial de un día desde 2011-01-03. Sábados y domingos devuelven el viernes anterior.', 'Blue and official close of one day since 2011-01-03. Saturdays and Sundays return the Friday before.'),
+  },
+  {
+    name: 'get_rate_history',
+    args: 'from, to?, granularity?',
+    text: L(
+      'Blue y oficial entre dos fechas con un resumen (primero, último, variación, mínimo y máximo). Día por día hasta 400 días o un valor por mes.',
+      'Blue and official between two dates with a summary (first, last, change, low, high). Day by day up to 400 days, or one row per month.',
+    ),
+  },
+  {
+    name: 'convert_currency',
+    args: 'amount, currency?, direction?',
+    text: L(
+      'Convierte un monto de cualquier moneda (unas 160) a pesos o al revés, al blue y al oficial, para comprar y para vender.',
+      'Converts an amount of any currency (about 160) to pesos or back, at the blue and official rates, for buying and for selling.',
+    ),
+  },
+];
+const prompts = locale === 'es'
+  ? ['¿A cuánto está el dólar blue hoy?', '¿Cuánto subió el blue en el último año?', '¿Cuántos pesos son 300 euros al blue?', '¿Cuál era la brecha el 1 de diciembre de 2023?']
+  : ['What is the blue dollar rate today?', 'How much did the blue dollar rise over the last year?', 'How many pesos are 300 euros at the blue rate?', 'What was the gap on 1 December 2023?'];
+const configExample = `{
+  "mcpServers": {
+    "bluelytics": { "type": "http", "url": "${MCP_URL}" }
+  }
+}`;
+const curlExample = `curl -s ${MCP_URL} \\
+  -H 'Content-Type: application/json' \\
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call",
+       "params":{"name":"get_current_rates","arguments":{}}}'`;
+const title = L('Servidor MCP del dólar blue para Claude, ChatGPT y Gemini | Bluelytics', 'Blue dollar MCP server for Claude, ChatGPT and Gemini | Bluelytics');
+const description = L(
+  'Conectá Bluelytics a tu asistente de IA con el Model Context Protocol: dólar blue y oficial actuales, histórico desde 2011 y conversión de monedas. Gratis, sin registro.',
+  'Connect Bluelytics to your AI assistant over the Model Context Protocol: current blue and official dollar, history since 2011 and currency conversion. Free, no sign-up.',
+);
+---
+
+<Base locale={locale} title={title} description={description} paths={ROUTES.mcp} current="mcp" crumbs={[{ name: 'MCP', path: ROUTES.mcp[locale] }]}>
+  <div class="page-head">
+    <h1>{L('Bluelytics en tu asistente de IA', 'Bluelytics in your AI assistant')}</h1>
+    <p>
+      {
+        L(
+          'Un servidor MCP (Model Context Protocol) público con los mismos datos que este sitio y la ',
+          'A public MCP (Model Context Protocol) server with the same data as this site and the ',
+        )
+      }
+      <a href={ROUTES.api[locale]}>API</a>{L('. Sin registro, sin clave, gratis.', '. No sign-up, no key, free.')}
+    </p>
+  </div>
+
+  <AddToAssistant locale={locale} details={false} />
+
+  <div class="prose api">
+    <h2 id="url">{L('URL del servidor', 'Server URL')}</h2>
+    <pre><code>{MCP_URL}</code></pre>
+    <p>
+      {
+        L(
+          'Transporte Streamable HTTP sin estado: cada pedido es independiente, sin sesión ni autenticación, y la respuesta es JSON. Acepta las versiones del protocolo 2024-11-05 a 2025-11-25. Todas las herramientas son de solo lectura.',
+          'Stateless Streamable HTTP transport: every request stands alone, with no session and no authentication, and the answer is JSON. Speaks protocol revisions 2024-11-05 to 2025-11-25. Every tool is read-only.',
+        )
+      }
+    </p>
+
+    <h2 id="claude">Claude</h2>
+    <p>
+      <a href={CLAUDE_CONNECTOR_URL} target="_blank" rel="noopener">{L('Abrí el diálogo de conectores de Claude', 'Open Claude’s connector dialog')}</a>
+      {L(' con el nombre y la URL completos y confirmá. A mano: Configuración → Conectores → Agregar conector personalizado.', ' with the name and URL filled in, and confirm. By hand: Settings → Connectors → Add custom connector.')}
+    </p>
+    <p>{L('Claude Code:', 'Claude Code:')}</p>
+    <pre><code>{`claude mcp add --transport http bluelytics ${MCP_URL}`}</code></pre>
+
+    <h2 id="chatgpt">ChatGPT</h2>
+    <p>
+      {
+        L(
+          'Configuración → Apps y conectores → Configuración avanzada → activá el modo desarrollador. Después Crear, poné un nombre, pegá la URL del servidor y elegí sin autenticación. Disponible en los planes que permiten conectores personalizados.',
+          'Settings → Apps & Connectors → Advanced settings → turn on developer mode. Then Create, give it a name, paste the server URL and choose no authentication. Available on the plans that allow custom connectors.',
+        )
+      }
+    </p>
+
+    <h2 id="gemini">Gemini</h2>
+    <p>{L('Gemini CLI:', 'Gemini CLI:')}</p>
+    <pre><code>{GEMINI_COMMAND}</code></pre>
+
+    <h2 id="other">{L('Otros clientes', 'Other clients')}</h2>
+    <p>{L('Cursor, VS Code, Windsurf y la mayoría de los clientes aceptan una configuración como esta:', 'Cursor, VS Code, Windsurf and most clients accept a configuration like this:')}</p>
+    <pre><code>{configExample}</code></pre>
+
+    <h2 id="tools">{L('Herramientas', 'Tools')}</h2>
+    <dl class="tool-list">
+      {
+        tools.map((t) => (
+          <>
+            <dt><code>{t.name}</code> <span class="dim">({t.args})</span></dt>
+            <dd>{t.text}</dd>
+          </>
+        ))
+      }
+    </dl>
+    <p>
+      {
+        L(
+          'Los precios son pesos argentinos por unidad; las fechas, días del calendario argentino. "Compra" es lo que recibís al vender un dólar; "venta", lo que pagás al comprarlo.',
+          'Prices are Argentine pesos per unit; dates are Argentine calendar days. "Buy" is what you get selling a dollar; "sell" is what you pay buying one.',
+        )
+      }
+    </p>
+
+    <h2 id="prompts">{L('Para probar', 'Things to ask')}</h2>
+    <ul>{prompts.map((p) => <li>{p}</li>)}</ul>
+
+    <h2 id="raw">{L('Sin cliente MCP', 'Without an MCP client')}</h2>
+    <p>{L('Es JSON-RPC sobre HTTP, así que alcanza con curl:', 'It is JSON-RPC over HTTP, so curl is enough:')}</p>
+    <pre><code>{curlExample}</code></pre>
+
+    <h2 id="license">{L('Licencia', 'License')}</h2>
+    <p>
+      {L('Los datos se publican bajo ', 'The data is published under ')}<a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>{L(': citá a Bluelytics. Los valores son de referencia; Bluelytics no compra ni vende divisas. ', ': credit Bluelytics. Values are for reference; Bluelytics does not trade currency. ')}
+      <a href={ROUTES.about[locale]}>{L('Cómo calculamos', 'How we calculate')}</a>.
+    </p>
+  </div>
+</Base>
