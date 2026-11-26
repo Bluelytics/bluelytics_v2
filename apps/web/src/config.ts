@@ -4,7 +4,7 @@ export const SITE_NAME = 'Bluelytics';
 export const API_ORIGIN = 'https://api.bluelytics.com.ar';
 
 /** The MCP server (apps/mcp): stateless Streamable HTTP, no authentication. */
-export const MCP_URL = 'https://mcp.bluelytics.com.ar/mcp';
+export const MCP_URL = 'https://bluelytics.com.ar/mcp';
 export const MCP_NAME = 'Bluelytics';
 
 /** Claude's "add custom connector" dialog, filled in. */

@@ -31,6 +31,9 @@
       "migrations_dir": "../../packages/db/migrations"
     }
   ],
+  // The MCP server (apps/mcp) answers MCP requests on /mcp (src/lib/gateway.ts isMcpRequest). Deploy
+  // bluelytics-mcp before the first deploy that has this binding.
+  "services": [{ "binding": "MCP", "service": "bluelytics-mcp" }],
   "vars": {
     // Responses on any other host carry `X-Robots-Tag: noindex` (shadow host, previews, localhost).
     "PRODUCTION_HOSTNAME": "bluelytics.com.ar",

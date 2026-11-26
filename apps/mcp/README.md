@@ -1,7 +1,9 @@
 # bluelytics-mcp
 
-Public, read-only [MCP](https://modelcontextprotocol.io) server at `https://mcp.bluelytics.com.ar/mcp`.
-User docs: https://bluelytics.com.ar/mcp (`apps/web/src/views/McpView.astro`).
+Public, read-only [MCP](https://modelcontextprotocol.io) server at `https://bluelytics.com.ar/mcp`.
+The same URL is its documentation page (`apps/web/src/views/McpView.astro`): this Worker has no
+route of its own, and the site's gateway (`apps/web/src/worker.ts`, `isMcpRequest`) forwards MCP
+requests to it through the service binding `MCP`. Browsers opening the URL get the page.
 
 - **Stateless Streamable HTTP**: every `POST` is answered with JSON in the same response. No
   session id, no event stream (`GET`/`DELETE` → 405), no authentication, CORS `*`. `initialize`
@@ -15,7 +17,7 @@ User docs: https://bluelytics.com.ar/mcp (`apps/web/src/views/McpView.astro`).
 pnpm --filter @bluelytics/mcp test
 pnpm --filter @bluelytics/web seed:local      # local data, then:
 cd apps/mcp && pnpm exec wrangler dev --local --persist-to ../web/.wrangler/state
-pnpm deploy:mcp                               # creates the mcp.bluelytics.com.ar custom domain
+pnpm deploy:mcp                               # before the first site deploy that has the MCP binding
 ```
 
 Only the default export may leave `src/index.ts`: the Workers runtime refuses to start an entry

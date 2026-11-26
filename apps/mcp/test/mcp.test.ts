@@ -160,7 +160,7 @@ describe('stateless transport', () => {
     expect(preflight.status).toBe(204);
     expect(preflight.headers.get('Access-Control-Allow-Headers')).toContain('MCP-Protocol-Version');
     expect((await send(new Request('https://mcp.test/elsewhere', { method: 'POST' }))).status).toBe(404);
-    expect(((await (await worker.fetch(new Request('https://mcp.test/'), { DB: db })).json()) as any).endpoint).toBe('https://mcp.bluelytics.com.ar/mcp');
+    expect(((await (await worker.fetch(new Request('https://mcp.test/'), { DB: db })).json()) as any).endpoint).toBe('https://bluelytics.com.ar/mcp');
   });
 
   it('the deployed entry point wires the database binding', async () => {

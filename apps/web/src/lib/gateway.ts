@@ -19,6 +19,18 @@ export function cacheableRequest(request: Request): Request {
   return new Request(url, request);
 }
 
+/**
+ * Whether a request to the site is MCP traffic for the MCP Worker (apps/mcp): `/mcp` serves both the
+ * MCP endpoint and its documentation page. A client sends POST (JSON-RPC) and the CORS preflight;
+ * GET asking for an event stream, or DELETE, gets the server's own 405. A browser's GET is the page.
+ */
+export function isMcpRequest(request: Request): boolean {
+  if (new URL(request.url).pathname !== '/mcp') return false;
+  const { method } = request;
+  if (method === 'POST' || method === 'OPTIONS' || method === 'DELETE') return true;
+  return method === 'GET' && (request.headers.get('Accept') ?? '').includes('text/event-stream');
+}
+
 /** Response headers for the host that was actually requested. */
 export function finalizeResponse(request: Request, response: Response, productionHostname: string): Response {
   const result = new Response(response.body, response);

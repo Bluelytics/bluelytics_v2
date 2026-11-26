@@ -1,6 +1,6 @@
 /**
  * bluelytics-mcp: a public, read-only MCP server with the Bluelytics data (stateless Streamable HTTP
- * on https://mcp.bluelytics.com.ar/mcp). Any isolate answers any request: nothing is kept between
+ * on https://bluelytics.com.ar/mcp). Any isolate answers any request: nothing is kept between
  * requests, so it scales like the API.
  */
 import type { D1DatabaseLike } from '@bluelytics/db';
@@ -28,7 +28,7 @@ const handler = createHandler<ToolContext>({
   about: {
     name: 'Bluelytics MCP server',
     description: 'Argentine dollar rates (blue and official) for AI assistants, over the Model Context Protocol.',
-    endpoint: 'https://mcp.bluelytics.com.ar/mcp',
+    endpoint: 'https://bluelytics.com.ar/mcp',
     transport: 'Streamable HTTP (stateless, JSON responses)',
     authentication: 'none',
     tools: TOOLS.map((tool) => tool.definition.name),

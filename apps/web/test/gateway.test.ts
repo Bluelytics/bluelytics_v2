@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
-import { cacheableRequest, finalizeResponse, legacyResponse } from '../src/lib/gateway.ts';
+import { cacheableRequest, finalizeResponse, isMcpRequest, legacyResponse } from '../src/lib/gateway.ts';
 
 // sha256 of legacy/bluelytics_frontend/privacy.html: tests never read legacy/ (ARCHITECTURE D10).
 const LEGACY_POLICY_SHA256 = 'afe012bdca471faf087ba0b562a90a06b4f8db17ec764f64803f05e76085034b';
@@ -43,5 +43,24 @@ describe('gateway', () => {
     expect(response?.status).toBe(301);
     expect(response?.headers.get('Location')).toBe('/');
     expect(legacyResponse(new Request('https://bluelytics.com.ar/'))).toBeNull();
+  });
+});
+
+describe('MCP on /mcp', () => {
+  const req = (method: string, path = '/mcp', headers: Record<string, string> = {}) => new Request(`https://bluelytics.com.ar${path}`, { method, headers });
+
+  it('sends client traffic to the MCP server', () => {
+    expect(isMcpRequest(req('POST'))).toBe(true);
+    expect(isMcpRequest(req('OPTIONS'))).toBe(true);
+    expect(isMcpRequest(req('DELETE'))).toBe(true);
+    expect(isMcpRequest(req('GET', '/mcp', { Accept: 'text/event-stream' }))).toBe(true);
+  });
+
+  it('leaves the documentation page and every other path to the site', () => {
+    expect(isMcpRequest(req('GET', '/mcp', { Accept: 'text/html,application/xhtml+xml' }))).toBe(false);
+    expect(isMcpRequest(req('HEAD'))).toBe(false);
+    expect(isMcpRequest(req('POST', '/en/mcp'))).toBe(false);
+    expect(isMcpRequest(req('POST', '/mcp/'))).toBe(false);
+    expect(isMcpRequest(req('POST', '/api'))).toBe(false);
   });
 });

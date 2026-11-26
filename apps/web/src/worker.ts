@@ -5,7 +5,7 @@
  */
 import { handle } from '@astrojs/cloudflare/handler';
 import { WorkerEntrypoint } from 'cloudflare:workers';
-import { cacheableRequest, finalizeResponse, legacyResponse } from './lib/gateway.ts';
+import { cacheableRequest, finalizeResponse, isMcpRequest, legacyResponse } from './lib/gateway.ts';
 
 export class Site extends WorkerEntrypoint<Env> {
   override fetch(request: Request): Promise<Response> {
@@ -15,6 +15,8 @@ export class Site extends WorkerEntrypoint<Env> {
 
 export default {
   async fetch(request, env, ctx) {
+    // Straight through: the MCP server's answers are not pages (no caching, its own headers).
+    if (isMcpRequest(request)) return env.MCP.fetch(request);
     const response = legacyResponse(request) ?? (await ctx.exports.Site.fetch(cacheableRequest(request)));
     return finalizeResponse(request, response, env.PRODUCTION_HOSTNAME);
   },
