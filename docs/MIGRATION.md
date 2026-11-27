@@ -170,7 +170,8 @@ Owner decisions and read-only findings from the first session. Re-check them onl
   snapshot (the restore-tested dump replaces it), with its automated backups and the three manual snapshots;
   ECS service, both clusters and every task definition; both EventBridge rules; the ALB (and its Elastic IP);
   CloudFormation stack `EC2ContainerService-bluelytics-api-cluster` (VPC, subnets, target group; the eight
-  security groups made outside the stack had to go first); both ECR
+  security groups made outside the stack, and the `InterVPC` peering to the default VPC with its
+  10.0.0.0/16 route, had to go first); both ECR
   repositories; the 11 `/bluelytics/*` SSM parameters; the three `/ecs/bluelytics-*` log groups; Route 53 zone
   `bluelytics.com.ar` (unused: the registrar delegates to Cloudflare; records saved in
   `.work/aws-teardown/route53-bluelytics.json`); IAM user `bluesocial` and roles `BlueExportRole`, `RDSAccessS3`;
