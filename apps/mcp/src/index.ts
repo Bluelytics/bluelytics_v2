@@ -27,7 +27,7 @@ const handler = createHandler<ToolContext>({
   server,
   about: {
     name: 'Bluelytics MCP server',
-    description: 'Argentine dollar rates (blue and official) for AI assistants, over the Model Context Protocol.',
+    description: 'Argentine dollar rates (blue and official) for agents, over the Model Context Protocol.',
     endpoint: 'https://bluelytics.com.ar/mcp',
     transport: 'Streamable HTTP (stateless, JSON responses)',
     authentication: 'none',

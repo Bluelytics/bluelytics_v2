@@ -1,5 +1,5 @@
 ---
-// The MCP server (apps/mcp): what it offers and how to connect each assistant.
+// The MCP server (apps/mcp): what it offers and how to connect each agent.
 import AddToAssistant from '../components/AddToAssistant.astro';
 import Base from '../layouts/Base.astro';
 import { CLAUDE_CONNECTOR_URL, GEMINI_COMMAND, MCP_URL } from '../config.ts';
@@ -58,14 +58,14 @@ const curlExample = `curl -s ${MCP_URL} \\
        "params":{"name":"get_current_rates","arguments":{}}}'`;
 const title = L('Servidor MCP del dólar blue para Claude, ChatGPT y Gemini | Bluelytics', 'Blue dollar MCP server for Claude, ChatGPT and Gemini | Bluelytics');
 const description = L(
-  'Conectá Bluelytics a tu asistente de IA con el Model Context Protocol: dólar blue y oficial actuales, histórico desde 2011 y conversión de monedas. Gratis, sin registro.',
-  'Connect Bluelytics to your AI assistant over the Model Context Protocol: current blue and official dollar, history since 2011 and currency conversion. Free, no sign-up.',
+  'Conectá Bluelytics a tu agente con el Model Context Protocol: dólar blue y oficial actuales, histórico desde 2011 y conversión de monedas. Gratis, sin registro.',
+  'Connect Bluelytics to your agent over the Model Context Protocol: current blue and official dollar, history since 2011 and currency conversion. Free, no sign-up.',
 );
 ---
 
 <Base locale={locale} title={title} description={description} paths={ROUTES.mcp} current="mcp" crumbs={[{ name: 'MCP', path: ROUTES.mcp[locale] }]}>
   <div class="page-head">
-    <h1>{L('Bluelytics en tu asistente de IA', 'Bluelytics in your AI assistant')}</h1>
+    <h1>{L('Bluelytics en tu agente', 'Bluelytics in your agent')}</h1>
     <p>
       {
         L(

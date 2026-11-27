@@ -14,7 +14,7 @@ Licence: AGPL-3.0 ([`LICENSE`](LICENSE)).
 | `apps/api` | `@bluelytics/api` | Worker: public API (serves pre-rendered bodies) |
 | `apps/jobs` | `@bluelytics/jobs` | Worker: cron pipeline + admin endpoints |
 | `apps/web` | `@bluelytics/web` | Astro site on Workers |
-| `apps/mcp` | `@bluelytics/mcp` | Worker: public MCP server for AI assistants ([docs](apps/mcp/README.md)) |
+| `apps/mcp` | `@bluelytics/mcp` | Worker: public MCP server for agents ([docs](apps/mcp/README.md)) |
 | `packages/core` | `@bluelytics/core` | Pure domain logic: money, time, consensus, API rendering, alert and social rules ([API](packages/core/README.md)) |
 | `packages/db` | `@bluelytics/db` | D1 migrations and typed repository functions ([API](packages/db/README.md)) |
 | `packages/contract` | `@bluelytics/contract` | Golden captures of the legacy API and seed helpers ([docs](packages/contract/README.md)) |
