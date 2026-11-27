@@ -165,8 +165,21 @@ Owner decisions and read-only findings from the first session. Re-check them onl
   ACM validation records deleted; nothing in DNS points at AWS. 6.7: ECS API service scaled to 0, RDS stopped
   (**AWS restarts a stopped RDS after 7 days**: delete or re-stop it by 2026-11-30). ALB access logging off;
   `bluelytics-access-logs` has a 1-day expire-all lifecycle rule (owner: delete it, not needed), so
-  `aws s3 rb s3://bluelytics-access-logs` once empty. Remaining: 6.5 wait, 6.8 delete AWS (owner go needed),
-  6.9–6.13.
+  `aws s3 rb s3://bluelytics-access-logs` once empty.
+- **6.8 done, 2026-11-27** (owner go; log in `.work/aws-teardown/`): RDS `bluelytics` deleted without a final
+  snapshot (the restore-tested dump replaces it), with its automated backups and the three manual snapshots;
+  ECS service, both clusters and every task definition; both EventBridge rules; the ALB (and its Elastic IP);
+  CloudFormation stack `EC2ContainerService-bluelytics-api-cluster` (VPC, subnets, target group; the eight
+  security groups made outside the stack had to go first); both ECR
+  repositories; the 11 `/bluelytics/*` SSM parameters; the three `/ecs/bluelytics-*` log groups; Route 53 zone
+  `bluelytics.com.ar` (unused: the registrar delegates to Cloudflare; records saved in
+  `.work/aws-teardown/route53-bluelytics.json`); IAM user `bluesocial` and roles `BlueExportRole`, `RDSAccessS3`;
+  bucket `bluelytics-access-logs`. Emptied, website off, public access blocked, names kept:
+  `bluelytics.com.ar`, `www.bluelytics.com.ar`, `bluesocialposts`. `db-bluelytics` keeps only
+  `pg-dump-final/bluelytics-20261123T0300Z.dump` (off-site copy; the 2023 export is archived locally).
+  Kept on purpose: generic roles `ecsTaskExecutionRole`, `ecsEventsRole`, `ecsAutoscaleRole`,
+  `rds-monitoring-role`, IAM group `s3blue`, SNS topic `mailPablo`, and everything of other projects in the
+  account. Remaining: 6.9 (bill to zero after one cycle), 6.10–6.13.
 
 ---
 
