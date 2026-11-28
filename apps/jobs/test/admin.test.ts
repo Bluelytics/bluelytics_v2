@@ -5,7 +5,7 @@ import { handleAdmin } from '../src/admin.ts';
 import type { Env } from '../src/env.ts';
 import type { Harness } from './support/harness.ts';
 import { art, createHarness } from './support/harness.ts';
-import { testServiceAccount } from './support/keys.ts';
+import { testApnsKey, testServiceAccount } from './support/keys.ts';
 
 const TOKEN = 'test-admin-token';
 const SATURDAY_NOON = art('2026-11-28', '12:00');
@@ -109,21 +109,37 @@ describe('admin API', () => {
     expect(await h.rows('SELECT * FROM social_posts')).toEqual(posts);
   });
 
-  it('push/test validates the deployed Firebase secret with validate_only and sends nothing (C10)', async () => {
+  it('push/test checks both push paths with the deployed secrets and sends nothing (C10)', async () => {
+    const account = await testServiceAccount();
+    const apnsKey = await testApnsKey();
+    h = await harness({ FIREBASE_SERVICE_ACCOUNT_JSON: account.json, APNS_KEY_P8: apnsKey.p8, APNS_KEY_ID: 'TESTKEY123' });
+    await h.run(art('2026-11-23', '11:00'));
+    const result = JSON.parse((await admin(h, 'POST', '/admin/push/test')).text);
+    expect(result).toMatchObject({
+      ok: true,
+      android: { ok: true, validateOnly: true, name: 'projects/bluelytics-mobile/messages/0:1' },
+      ios: { ok: true, apnsReason: 'BadDeviceToken', devices: 0 },
+    });
+    const [push] = h.net.callsTo('fcm.googleapis.com');
+    expect(JSON.parse(push?.body ?? '').validate_only).toBe(true);
+    // A token that cannot exist: Apple checks the key and delivers nothing.
+    expect(h.net.callsTo('api.push.apple.com').map((call) => call.url)).toEqual([`https://api.push.apple.com/3/device/${'0'.repeat(64)}`]);
+  });
+
+  it('push/test reports a missing Apple key without failing the Android check', async () => {
     const account = await testServiceAccount();
     h = await harness({ FIREBASE_SERVICE_ACCOUNT_JSON: account.json });
     await h.run(art('2026-11-23', '11:00'));
     const result = JSON.parse((await admin(h, 'POST', '/admin/push/test')).text);
-    expect(result).toMatchObject({ ok: true, validateOnly: true, name: 'projects/bluelytics-mobile/messages/0:1' });
-    const [push] = h.net.callsTo('fcm.googleapis.com');
-    expect(JSON.parse(push?.body ?? '').validate_only).toBe(true);
+    expect(result).toMatchObject({ ok: false, android: { ok: true }, ios: { ok: false, error: expect.stringContaining('APNS_KEY_P8') } });
+    expect(h.net.callsTo('api.push.apple.com')).toHaveLength(0);
   });
 
   it('push/test reports the shadow placeholder as an error instead of failing (C5)', async () => {
     h = await harness({ FIREBASE_SERVICE_ACCOUNT_JSON: '{"placeholder":"shadow mode, not a key"}' });
     await h.run(art('2026-11-23', '11:00'));
     const result = JSON.parse((await admin(h, 'POST', '/admin/push/test')).text);
-    expect(result).toMatchObject({ ok: false, error: expect.stringContaining('not a service-account key') });
+    expect(result).toMatchObject({ ok: false, android: { ok: false, error: expect.stringContaining('not a service-account key') } });
     expect(h.net.callsTo('oauth2.googleapis.com')).toHaveLength(0);
   });
 });

@@ -24,6 +24,7 @@ import com.bluelytics.mobileapp.support.pumpApp
 import com.bluelytics.mobileapp.support.tap
 import com.github.takahirom.roborazzi.ExperimentalRoborazziApi
 import com.github.takahirom.roborazzi.captureScreenRoboImage
+import kotlinx.coroutines.runBlocking
 import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Rule
@@ -72,7 +73,9 @@ class ScreenshotTest {
 
     private fun screens(locale: AppLocale) {
         val es = locale == AppLocale.es
-        rule.pumpApp(locale = locale, push = FakePush(legacy = true))
+        val harness = rule.pumpApp(locale = locale, push = FakePush())
+        // The Alerts screenshot shows the switch on, as in the Flutter app's.
+        runBlocking { harness.alerts.setEnabled(true) }
         val tag = locale.name
         shoot("$tag-1-today")
         scrollBy(620f)

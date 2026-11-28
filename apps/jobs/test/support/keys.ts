@@ -19,3 +19,11 @@ export async function testServiceAccount(projectId = 'bluelytics-mobile'): Promi
   });
   return { json, publicKey: pair.publicKey };
 }
+
+/** A throwaway P-256 key in Apple's `.p8` form (PEM PKCS #8), generated per test run. */
+export async function testApnsKey(): Promise<{ p8: string; publicKey: webcrypto.CryptoKey }> {
+  const pair = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
+  const der = Buffer.from(await crypto.subtle.exportKey('pkcs8', pair.privateKey)).toString('base64');
+  const p8 = `-----BEGIN PRIVATE KEY-----\n${der.match(/.{1,64}/g)?.join('\n')}\n-----END PRIVATE KEY-----\n`;
+  return { p8, publicKey: pair.publicKey };
+}

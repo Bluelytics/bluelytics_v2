@@ -1,9 +1,10 @@
 import { addSeconds, artDate, buildAlertNotification, epochMs, toStoredUtc } from '@bluelytics/core';
-import { getLatestAlerts, getLatestRates, getRenderedEtags, getSourceHealth, getState } from '@bluelytics/db';
+import { countApnsDevices, getLatestAlerts, getLatestRates, getRenderedEtags, getSourceHealth, getState } from '@bluelytics/db';
 import type { CardKind, CardSize } from '@bluelytics/social';
 import { BufferClient, CARD_KIND_SIZES, parseBufferChannels, planPosts, renderCardHtml, toCreateImagePostInput } from '@bluelytics/social';
 import { isPublished, updateCardData, weeklyCardData } from './card-data.ts';
 import { DAILY_STATE_KEY } from './daily.ts';
+import { apnsProviderToken, postApns } from './apns.ts';
 import type { Deps } from './deps.ts';
 import { errorText } from './errors.ts';
 import { sendPush } from './fcm.ts';
@@ -137,20 +138,30 @@ async function socialTest(deps: Deps, now: string) {
   return { drafts: results };
 }
 
-/** FCM `validate_only` with the deployed secret and the current price: checks key, OAuth and payload, delivers nothing. */
+/**
+ * Checks both push paths with the deployed secrets and delivers nothing. Android: FCM `validate_only`
+ * (key, OAuth and payload). iOS: one APNs request to a token that cannot exist; Apple answers
+ * `BadDeviceToken` once it has accepted the key, `InvalidProviderToken` and the like when not.
+ */
 async function pushTest(deps: Deps, now: string) {
   const state = await currentState(deps);
   const { current } = await getLatestAlerts(deps.db);
   const notification = buildAlertNotification(state.blue.sell, current?.sell ?? state.blue.sell);
+  const nowMs = epochMs(now);
+  let android: Record<string, unknown>;
   try {
-    const name = await sendPush(notification, {
-      fetch: deps.fetch,
-      serviceAccountJson: deps.secrets.firebaseServiceAccountJson,
-      nowMs: epochMs(now),
-      validateOnly: true,
-    });
-    return { ok: true, validateOnly: true, name, notification };
+    const name = await sendPush(notification, { fetch: deps.fetch, serviceAccountJson: deps.secrets.firebaseServiceAccountJson, nowMs, validateOnly: true });
+    android = { ok: true, validateOnly: true, name };
   } catch (error) {
-    return { ok: false, validateOnly: true, error: errorText(error), notification };
+    android = { ok: false, validateOnly: true, error: errorText(error) };
   }
+  let ios: Record<string, unknown>;
+  try {
+    const providerToken = await apnsProviderToken({ keyP8: deps.secrets.apnsKeyP8, keyId: deps.secrets.apnsKeyId }, nowMs);
+    const result = await postApns(deps.fetch, providerToken, 'production', '0'.repeat(64), '{"aps":{}}', nowMs);
+    ios = { ok: result.reason === 'BadDeviceToken', apnsReason: result.reason, devices: await countApnsDevices(deps.db) };
+  } catch (error) {
+    ios = { ok: false, error: errorText(error) };
+  }
+  return { ok: android.ok === true && ios.ok === true, android, ios, notification };
 }

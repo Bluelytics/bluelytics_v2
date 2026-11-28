@@ -1,5 +1,6 @@
 export * from './alerts.ts';
 export * from './currencies.ts';
+export * from './devices.ts';
 export * from './d1.ts';
 export * from './history.ts';
 export * from './observations.ts';

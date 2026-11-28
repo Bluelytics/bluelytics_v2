@@ -29,9 +29,6 @@ interface PushBackend {
     /** Called at start when alerts are on: keeps the token fresh for subscribed devices. */
     suspend fun resume()
 
-    /** Whether the React Native app (versions 1.x) had alerts on, or `null` when it left no trace. */
-    suspend fun legacyEnabled(): Boolean?
-
     val messages: Flow<AlertMessage>
 }
 
@@ -43,8 +40,6 @@ object NoPush : PushBackend {
     override suspend fun disable() {}
 
     override suspend fun resume() {}
-
-    override suspend fun legacyEnabled(): Boolean? = null
 
     override val messages: Flow<AlertMessage> = emptyFlow()
 }
@@ -61,13 +56,10 @@ class AlertsController(val backend: PushBackend, val prefs: Prefs) {
 
     val messages: Flow<AlertMessage> get() = backend.messages
 
-    /**
-     * Reads the saved choice. On the first run after an update from the React Native app it carries
-     * over that app's choice: a device that was subscribed stays subscribed, and the switch must say so.
-     */
+    /** Reads the saved choice: off until someone turns alerts on. */
     suspend fun init() {
         if (!supported) return
-        val saved = prefs.getBoolean(KEY) ?: return firstRun()
+        val saved = prefs.getBoolean(KEY) ?: false
         _state.update { it.copy(enabled = saved) }
         if (saved) {
             try {
@@ -77,40 +69,6 @@ class AlertsController(val backend: PushBackend, val prefs: Prefs) {
             } catch (_: Exception) {
                 // Notifications still arrive through the system; only the in-app banner is lost.
             }
-        }
-    }
-
-    private suspend fun firstRun() {
-        val legacy = try {
-            backend.legacyEnabled() ?: false
-        } catch (error: CancellationException) {
-            throw error
-        } catch (_: Exception) {
-            false
-        }
-        _state.update { it.copy(enabled = legacy) }
-        prefs.putBoolean(KEY, legacy)
-        if (!legacy) return
-        // Version 1 never asked Android 13+ for the notification permission, so a device can be
-        // subscribed and still show nothing. Turning alerts on again asks for it; the subscription
-        // itself is already there.
-        try {
-            if (backend.enable()) return
-        } catch (error: CancellationException) {
-            throw error
-        } catch (_: Exception) {
-            // Offline, for instance: the device is still subscribed from before.
-            return
-        }
-        // Refused: off, and no point in receiving what cannot be shown.
-        _state.update { it.copy(enabled = false) }
-        prefs.putBoolean(KEY, false)
-        try {
-            backend.disable()
-        } catch (error: CancellationException) {
-            throw error
-        } catch (_: Exception) {
-            // The switch is off either way.
         }
     }
 

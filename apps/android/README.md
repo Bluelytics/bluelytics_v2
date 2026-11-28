@@ -124,8 +124,7 @@ depends on it. Refreshes less than 30 s apart reuse what the API already returne
 The device subscribes to the Firebase Cloud Messaging topic `alertas-blue`; the sender is the jobs
 Worker (`apps/jobs/src/alerts.ts`), which targets the notification channel `Dolar Blue`. Firebase does
 nothing, and no push token exists, until someone turns the switch on (automatic initialisation is off
-in the manifest). Someone updating from version 1 keeps the choice they had: the app reads the old
-app's `subState` setting once.
+in the manifest).
 
 **The sender is off today** (`PUSH_ENABLED` is `"false"` in `apps/jobs/wrangler.jsonc`), so the switch
 subscribes but nothing arrives. To turn alerts on, give the jobs Worker a service account key as the

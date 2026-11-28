@@ -26,6 +26,8 @@ export interface Env {
   CLOUDFLARE_ZONE_ID?: string;
   BUFFER_API_KEY?: string;
   FIREBASE_SERVICE_ACCOUNT_JSON?: string;
+  APNS_KEY_P8?: string;
+  APNS_KEY_ID?: string;
   ADMIN_TOKEN?: string;
   OPS_WEBHOOK_URL?: string;
   CLOUDFLARE_PURGE_TOKEN?: string;
@@ -49,6 +51,9 @@ export interface JobsConfig {
 export interface Secrets {
   bufferApiKey: string | undefined;
   firebaseServiceAccountJson: string | undefined;
+  /** iOS alerts (apps/jobs/src/apns.ts): the `.p8` key and its Key ID. */
+  apnsKeyP8: string | undefined;
+  apnsKeyId: string | undefined;
   opsWebhookUrl: string | undefined;
   purgeToken: string | undefined;
 }
@@ -75,6 +80,8 @@ export function readSecrets(env: Env): Secrets {
   return {
     bufferApiKey: env.BUFFER_API_KEY,
     firebaseServiceAccountJson: env.FIREBASE_SERVICE_ACCOUNT_JSON,
+    apnsKeyP8: env.APNS_KEY_P8 || undefined,
+    apnsKeyId: env.APNS_KEY_ID || undefined,
     opsWebhookUrl: env.OPS_WEBHOOK_URL || undefined,
     purgeToken: env.CLOUDFLARE_PURGE_TOKEN || undefined,
   };

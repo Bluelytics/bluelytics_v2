@@ -351,7 +351,7 @@ class AppTest {
 
     @Test
     fun `alerts - an alert that arrives while the app is open shows as a banner, then leaves`() {
-        val push = FakePush(legacy = true)
+        val push = FakePush()
         rule.pumpApp(push = push)
         push.receive(AlertMessage("Subió el dólar blue", "Venta: \$ 1.740"))
         rule.waitForIdle()

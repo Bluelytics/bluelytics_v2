@@ -1,4 +1,4 @@
-import type { AlertDecision, PublishedRate } from '@bluelytics/core';
+import type { AlertDecision, AlertNotification, PublishedRate } from '@bluelytics/core';
 import { ALERT_CONFIG, addSeconds, alertWindow, artDate, buildAlertNotification, epochMs, shouldAlert } from '@bluelytics/core';
 import {
   buildRendered,
@@ -7,11 +7,14 @@ import {
   getPreviousClose,
   getTicksBetween,
   insertAlertUnlessRecent,
+  deleteApnsDevices,
+  listApnsDevices,
   setAlertPushStatus,
   writeRendered,
 } from '@bluelytics/db';
 import type { Deps } from './deps.ts';
 import { errorText } from './errors.ts';
+import { sendApns } from './apns.ts';
 import { sendPush } from './fcm.ts';
 
 export type AlertReport =
@@ -20,8 +23,9 @@ export type AlertReport =
 
 /**
  * Step 4 of ARCHITECTURE §7. The alert row is inserted and `/v2/alerts` re-rendered before the
- * push, so a failed push never loses the alert; `push_status` is `disabled` with `PUSH_ENABLED`
- * off, `sent`, or `failed: <reason>`.
+ * push, so a failed push never loses the alert. Android gets it through the FCM topic, iPhones
+ * straight from APNs, each independently of the other. `push_status` is `disabled` with
+ * `PUSH_ENABLED` off, `sent` when both went out, or `failed: <reasons>`.
  */
 export async function runAlerts(deps: Deps, now: string, blue: PublishedRate): Promise<AlertReport> {
   const { db } = deps;
@@ -52,18 +56,41 @@ export async function runAlerts(deps: Deps, now: string, blue: PublishedRate): P
   const reference = lastAlert?.sell ?? (blue.sell > decision.max ? decision.max : decision.min);
   let pushStatus = 'disabled';
   if (deps.config.pushEnabled) {
-    try {
-      await sendPush(buildAlertNotification(blue.sell, reference), {
-        fetch: deps.fetch,
-        serviceAccountJson: deps.secrets.firebaseServiceAccountJson,
-        nowMs: epochMs(now),
-      });
-      pushStatus = 'sent';
-    } catch (error) {
-      pushStatus = `failed: ${errorText(error)}`;
-      deps.log('error', 'push failed', { alertId: alert.id, error: pushStatus });
-    }
+    const notification = buildAlertNotification(blue.sell, reference);
+    const [android, ios] = await Promise.all([pushAndroid(deps, notification, now), pushIos(deps, notification, now)]);
+    const failures = [android, ios].filter((failure) => failure !== null);
+    pushStatus = failures.length === 0 ? 'sent' : `failed: ${failures.join('; ')}`;
+    if (failures.length > 0) deps.log('error', 'push failed', { alertId: alert.id, error: pushStatus });
   }
   await setAlertPushStatus(db, alert.id, pushStatus);
   return { fired: true, id: alert.id, sell: blue.sell, pushStatus };
+}
+
+/** The FCM topic (Android). `null` when sent, else the reason. */
+async function pushAndroid(deps: Deps, notification: AlertNotification, now: string): Promise<string | null> {
+  try {
+    await sendPush(notification, { fetch: deps.fetch, serviceAccountJson: deps.secrets.firebaseServiceAccountJson, nowMs: epochMs(now) });
+    return null;
+  } catch (error) {
+    return `fcm: ${errorText(error)}`;
+  }
+}
+
+/** Every registered iPhone through APNs; dead tokens are deleted. `null` when nothing failed. */
+async function pushIos(deps: Deps, notification: AlertNotification, now: string): Promise<string | null> {
+  try {
+    const devices = await listApnsDevices(deps.db);
+    const report = await sendApns(notification, devices, {
+      fetch: deps.fetch,
+      keyP8: deps.secrets.apnsKeyP8,
+      keyId: deps.secrets.apnsKeyId,
+      nowMs: epochMs(now),
+    });
+    await deleteApnsDevices(deps.db, report.invalid);
+    if (report.failed.length === 0) return null;
+    const reasons = [...new Set(report.failed.map((failure) => failure.reason))].join(', ');
+    return `apns: ${report.failed.length} of ${devices.length} failed (${reasons})`;
+  } catch (error) {
+    return `apns: ${errorText(error)}`;
+  }
 }

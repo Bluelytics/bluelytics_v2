@@ -39,7 +39,8 @@
     "CLOUDFLARE_ZONE_ID": ""
   },
   // Secrets, by name only: BUFFER_API_KEY, FIREBASE_SERVICE_ACCOUNT_JSON, ADMIN_TOKEN, and optionally
-  // OPS_WEBHOOK_URL and CLOUDFLARE_PURGE_TOKEN (static-first). The first deploy passes them with
+  // OPS_WEBHOOK_URL, CLOUDFLARE_PURGE_TOKEN (static-first), and APNS_KEY_P8 + APNS_KEY_ID (iPhone alerts,
+  // apps/ios/README.md). The first deploy passes them with
   // --secrets-file (MIGRATION.md 2.4). Never declare a var with one of these names: it deletes the secret.
   "secrets": { "required": ["BUFFER_API_KEY", "FIREBASE_SERVICE_ACCOUNT_JSON", "ADMIN_TOKEN"] },
   "observability": { "enabled": true, "head_sampling_rate": 1, "issues": { "enabled": true } }

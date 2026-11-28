@@ -46,7 +46,7 @@ fun fixtureStore(
 ): AppStore = AppStore(FixtureFetcher(fail, overrides), cache, scope, clock)
 
 /** A push backend that records what the app asked of it. */
-class FakePush(var grant: Boolean = true, var legacy: Boolean? = null, var fail: Boolean = false) : PushBackend {
+class FakePush(var grant: Boolean = true, var fail: Boolean = false) : PushBackend {
     val calls = mutableListOf<String>()
     private val incoming = MutableSharedFlow<AlertMessage>(extraBufferCapacity = 4)
 
@@ -71,8 +71,6 @@ class FakePush(var grant: Boolean = true, var legacy: Boolean? = null, var fail:
     override suspend fun resume() {
         calls.add("resume")
     }
-
-    override suspend fun legacyEnabled(): Boolean? = legacy
 
     override val messages: Flow<AlertMessage> = incoming
 }

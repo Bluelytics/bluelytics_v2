@@ -73,54 +73,6 @@ class AlertsTest {
     }
 
     @Test
-    fun `the first run after updating from version 1 carries its switch over, once`() = runTest {
-        val push = FakePush(legacy = true)
-        val alerts = controller(push)
-        alerts.init()
-        assertTrue(alerts.enabled)
-        assertEquals(true, alerts.prefs.getBoolean("alerts_enabled"))
-        assertEquals("asks for the notification permission version 1 never requested", listOf("enable"), push.calls)
-
-        // The person turns alerts off: the old app's "on" must not come back.
-        alerts.setEnabled(false)
-        val again = AlertsController(FakePush(legacy = true), alerts.prefs)
-        again.init()
-        assertFalse(again.enabled)
-    }
-
-    @Test
-    fun `carried over from version 1 but notifications refused - off, and unsubscribed`() = runTest {
-        val push = FakePush(legacy = true, grant = false)
-        val alerts = controller(push)
-        alerts.init()
-        assertFalse(alerts.enabled)
-        assertEquals(false, alerts.prefs.getBoolean("alerts_enabled"))
-        assertEquals(listOf("enable", "disable"), push.calls)
-    }
-
-    @Test
-    fun `carried over from version 1 while offline - still on, as the device is still subscribed`() = runTest {
-        val push = FakePush(legacy = true, fail = true)
-        val alerts = controller(push)
-        alerts.init()
-        assertTrue(alerts.enabled)
-        assertEquals(true, alerts.prefs.getBoolean("alerts_enabled"))
-        assertNull(alerts.problem)
-    }
-
-    @Test
-    fun `version 1 had alerts off, or left no trace - off, and Firebase is not touched`() = runTest {
-        for (legacy in listOf(false, null)) {
-            val push = FakePush(legacy = legacy)
-            val alerts = controller(push)
-            alerts.init()
-            assertFalse(alerts.enabled)
-            assertEquals(false, alerts.prefs.getBoolean("alerts_enabled"))
-            assertTrue(push.calls.isEmpty())
-        }
-    }
-
-    @Test
     fun `where push does not exist the switch does nothing`() = runTest {
         val alerts = controller(NoPush)
         alerts.init()

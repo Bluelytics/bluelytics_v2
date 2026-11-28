@@ -8,7 +8,6 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
-import android.database.sqlite.SQLiteDatabase
 import android.os.Build
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
@@ -54,7 +53,7 @@ class FirebasePush(private val context: Context) : PushBackend {
     }
 
     override suspend fun resume() {
-        // Keeps the token fresh for devices that carried their subscription over from version 1.
+        // Alerts were left on: keeps the token fresh so the subscription keeps working.
         messaging.isAutoInitEnabled = true
     }
 
@@ -67,24 +66,6 @@ class FirebasePush(private val context: Context) : PushBackend {
         }
         // Below Android 13 there is no dialog, but notifications can still be off for the app.
         return NotificationManagerCompat.from(context).areNotificationsEnabled()
-    }
-
-    /**
-     * Whether the React Native app (versions 1.x) had alerts on: it kept the switch in AsyncStorage,
-     * an SQLite database named RKStorage, under the key `subState`. `null` when it left no trace.
-     */
-    override suspend fun legacyEnabled(): Boolean? {
-        val file = context.getDatabasePath("RKStorage")
-        if (!file.exists()) return null
-        return try {
-            SQLiteDatabase.openDatabase(file.path, null, SQLiteDatabase.OPEN_READONLY).use { database ->
-                database.rawQuery("SELECT value FROM catalystLocalStorage WHERE key = ?", arrayOf("subState")).use { cursor ->
-                    if (cursor.moveToFirst()) cursor.getString(0) == "true" else null
-                }
-            }
-        } catch (_: Exception) {
-            null
-        }
     }
 }
 

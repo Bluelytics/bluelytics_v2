@@ -49,11 +49,13 @@ export interface Net {
   pages: Map<string, string | (() => Response)>;
   buffer: { fail?: string; nextId: number };
   fcm: { status: number };
+  /** APNs answers per device token (default 200; the all-zero token is `BadDeviceToken`). */
+  apns: Map<string, { status: number; reason: string }>;
   callsTo(host: string): Call[];
   fetch(url: string, init: RequestInit): Promise<Response>;
 }
 
-export const EXTERNAL_HOSTS = ['api.buffer.com', 'oauth2.googleapis.com', 'fcm.googleapis.com', 'ops.example', 'api.cloudflare.com'];
+export const EXTERNAL_HOSTS = ['api.buffer.com', 'oauth2.googleapis.com', 'fcm.googleapis.com', 'api.push.apple.com', 'api.sandbox.push.apple.com', 'ops.example', 'api.cloudflare.com'];
 
 const json = (body: unknown, status = 200): Response => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
 
@@ -64,6 +66,7 @@ export function createNet(): Net {
     pages: new Map(),
     buffer: { nextId: 1 },
     fcm: { status: 200 },
+    apns: new Map(),
     callsTo: (host) => net.calls.filter((call) => call.host === host),
     async fetch(url, init) {
       const body = typeof init.body === 'string' ? init.body : '';
@@ -99,6 +102,12 @@ export function createNet(): Net {
           return net.fcm.status === 200
             ? json({ name: 'projects/bluelytics-mobile/messages/0:1' })
             : json({ error: { code: net.fcm.status, message: 'denied' } }, net.fcm.status);
+        case 'api.push.apple.com':
+        case 'api.sandbox.push.apple.com': {
+          const token = new URL(url).pathname.split('/').pop() ?? '';
+          const answer = net.apns.get(token) ?? (/^0+$/.test(token) ? { status: 400, reason: 'BadDeviceToken' } : undefined);
+          return answer ? json({ reason: answer.reason }, answer.status) : new Response(null, { status: 200 });
+        }
         case 'ops.example':
         case 'api.cloudflare.com':
           return json({ success: true });
