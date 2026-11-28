@@ -93,11 +93,27 @@ final class ScreenshotTests: XCTestCase {
         return model
     }
 
+    /// The app's scene. A window outside a scene is never put on screen, so it draws nothing
+    /// (the first CI run wrote 16 white images that way).
+    private func windowScene() async throws -> UIWindowScene {
+        for _ in 0..<50 {
+            let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+            if let scene = scenes.first(where: { $0.activationState == .foregroundActive }) ?? scenes.first { return scene }
+            try await Task.sleep(nanoseconds: 100_000_000)
+        }
+        XCTFail("the test host has no window scene")
+        throw CancellationError()
+    }
+
     private func render(_ shot: Shot, _ model: AppModel) async throws -> Data {
         let root = AppShell(tab: shot.tab, historyMode: shot.mode, historyRange: shot.range, startOnPicker: shot.picker)
             .environmentObject(model)
             .environment(\.motion, false)
-        let window = UIWindow(frame: UIScreen.main.bounds)
+        let scene = try await windowScene()
+        let window = UIWindow(windowScene: scene)
+        window.frame = scene.coordinateSpace.bounds
+        window.windowLevel = .alert + 1
+        window.overrideUserInterfaceStyle = .dark
         window.rootViewController = UIHostingController(rootView: root)
         window.makeKeyAndVisible()
         defer {
@@ -105,18 +121,89 @@ final class ScreenshotTests: XCTestCase {
             window.isHidden = true
             window.rootViewController = nil
         }
-        // Layout, fonts and (for the picker) the sheet's presentation.
-        try await Task.sleep(nanoseconds: shot.picker ? 1_200_000_000 : 500_000_000)
-        if shot.scroll > 0, let scroll = largestScrollView(in: window) {
-            let maxY = max(0, scroll.contentSize.height + scroll.adjustedContentInset.bottom - scroll.bounds.height)
-            scroll.setContentOffset(CGPoint(x: 0, y: min(shot.scroll, maxY) - scroll.adjustedContentInset.top), animated: false)
-            try await Task.sleep(nanoseconds: 300_000_000)
+        // Layout, fonts and (for the picker) the sheet's presentation; sleeping lets the main run
+        // loop turn, so SwiftUI commits its frames.
+        try await settle(window, seconds: shot.picker ? 1.5 : 0.8)
+        if shot.scroll > 0 {
+            guard let scroll = largestScrollView(in: window) else {
+                XCTFail("\(shot.name): no scroll view to scroll")
+                throw CancellationError()
+            }
+            let top = -scroll.adjustedContentInset.top
+            let maxY = max(top, scroll.contentSize.height + scroll.adjustedContentInset.bottom - scroll.bounds.height)
+            scroll.setContentOffset(CGPoint(x: 0, y: min(top + shot.scroll, maxY)), animated: false)
+            try await settle(window, seconds: 0.4)
         }
-        let image = UIGraphicsImageRenderer(bounds: window.bounds).image { _ in
-            _ = window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
+        var image = capture(window, hierarchy: true)
+        if !looksReal(image) {
+            // Once more after another frame, then straight from the layer tree.
+            try await settle(window, seconds: 1)
+            image = capture(window, hierarchy: true)
+            if !looksReal(image) { image = capture(window, hierarchy: false) }
         }
-        guard let png = image.pngData() else { throw XCTSkip("could not encode \(shot.name)") }
+        let (colours, brightness) = measure(image)
+        XCTAssertTrue(
+            looksReal(image),
+            "\(shot.name) looks blank: \(colours) distinct colours, mean brightness \(String(format: "%.2f", brightness))"
+        )
+        guard let png = image.pngData() else {
+            XCTFail("could not encode \(shot.name)")
+            throw CancellationError()
+        }
         return png
+    }
+
+    private func settle(_ window: UIWindow, seconds: Double) async throws {
+        let steps = max(1, Int(seconds / 0.1))
+        for _ in 0..<steps {
+            window.setNeedsLayout()
+            window.layoutIfNeeded()
+            try await Task.sleep(nanoseconds: 100_000_000)
+        }
+    }
+
+    private func capture(_ window: UIWindow, hierarchy: Bool) -> UIImage {
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = window.windowScene?.screen.scale ?? UIScreen.main.scale
+        format.opaque = true
+        return UIGraphicsImageRenderer(bounds: window.bounds, format: format).image { context in
+            if hierarchy {
+                _ = window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
+            } else {
+                window.layer.render(in: context.cgContext)
+            }
+        }
+    }
+
+    /// The app is dark and busy: a real screen has many colours and is mostly dark. A blank capture
+    /// is one colour (white, or black).
+    private func looksReal(_ image: UIImage) -> Bool {
+        let (colours, brightness) = measure(image)
+        return colours >= 12 && brightness < 0.6
+    }
+
+    /// Distinct colours and mean brightness (0–1) of the image shrunk to 36×78.
+    private func measure(_ image: UIImage) -> (colours: Int, brightness: Double) {
+        guard let cg = image.cgImage else { return (0, 1) }
+        let width = 36, height = 78
+        var pixels = [UInt8](repeating: 0, count: width * height * 4)
+        let drawn: Bool = pixels.withUnsafeMutableBytes { buffer in
+            guard let context = CGContext(
+                data: buffer.baseAddress, width: width, height: height, bitsPerComponent: 8, bytesPerRow: width * 4,
+                space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue
+            ) else { return false }
+            context.draw(cg, in: CGRect(x: 0, y: 0, width: width, height: height))
+            return true
+        }
+        guard drawn else { return (0, 1) }
+        var colours = Set<UInt32>()
+        var total = 0.0
+        for i in stride(from: 0, to: pixels.count, by: 4) {
+            let r = UInt32(pixels[i]), g = UInt32(pixels[i + 1]), b = UInt32(pixels[i + 2])
+            colours.insert(r << 16 | g << 8 | b)
+            total += Double(r + g + b) / (3 * 255)
+        }
+        return (colours.count, total / Double(width * height))
     }
 
     private func largestScrollView(in view: UIView) -> UIScrollView? {

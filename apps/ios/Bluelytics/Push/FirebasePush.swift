@@ -85,13 +85,16 @@ final class FirebasePush: PushBackend {
 
     private func subscribe(_ messaging: Messaging, _ on: Bool) async throws {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-            let done: (Error?) -> Void = { error in
-                if let error { continuation.resume(throwing: error) } else { continuation.resume() }
-            }
+            // Closure literals, so they are inferred @Sendable as Firebase's completion asks; they
+            // capture only the continuation, which is Sendable.
             if on {
-                messaging.subscribe(toTopic: alertsTopic, completion: done)
+                messaging.subscribe(toTopic: alertsTopic) { error in
+                    if let error { continuation.resume(throwing: error) } else { continuation.resume() }
+                }
             } else {
-                messaging.unsubscribe(fromTopic: alertsTopic, completion: done)
+                messaging.unsubscribe(fromTopic: alertsTopic) { error in
+                    if let error { continuation.resume(throwing: error) } else { continuation.resume() }
+                }
             }
         }
     }
