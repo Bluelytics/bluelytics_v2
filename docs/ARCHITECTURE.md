@@ -31,7 +31,7 @@ user accounts, anything stateful beyond D1/R2.
 | D7 | Social posting through Buffer GraphQL (`https://api.buffer.com`, `createPost`, `mode: shareNow`). Images are JPEGs on a public R2 URL. Direct X/Meta integrations are NOT built (research kept for reference). | Owner decision 2026-11-22. The legacy v1 token is rejected by the new API (`FORBIDDEN`), so a new API key is required. |
 | D8 | Post images: HTML/CSS template → JPEG screenshot via Browser Run (Worker `BROWSER` binding, Quick Action). Locally the same HTML is rendered with Playwright/Chrome for previews and visual tests. | Real CSS, negligible Worker CPU, 10 free browser-minutes/day. |
 | D9 | TypeScript everywhere, pnpm 12 workspace, Node 24 (`.nvmrc`), vitest 5. **One TypeScript version for the whole workspace: `typescript@6.0.3`** (pnpm `catalog:` in `pnpm-workspace.yaml`; astro check rejects TS 7, and a single version avoids two toolchains). D1 tests run against Miniflare's real SQLite D1 (`@bluelytics/db/testing`); `@cloudflare/vitest-pool-workers` 0.23.0 needs vitest ^4.1 and is not used. | See research; changed 2026-11-22 from "`apps/web` pins 6.0.3". |
-| D10 | One native app per platform (2026-11-28): `apps/android` (Kotlin, Jetpack Compose) and `apps/ios` (Swift, SwiftUI). They replace the React Native 0.69 app and keep its store identifiers, Firebase project and FCM topic. Each is a client of the public API like any other, built with its platform's own tools and CI workflow, and excluded from the pnpm workspace. A Flutter version (2026-11-25) preceded them and remains on the `flutter-app` branch. `legacy/**` is reference only: excluded from workspace, lint, tests, CI. | See `apps/android/README.md` and `apps/ios/README.md`; the old app is described in `docs/legacy/legacy-mobile.md` and remains in git history. |
+| D10 | One native app per platform (2026-11-28): `apps/android` (Kotlin, Jetpack Compose) and `apps/ios` (Swift, SwiftUI). They replace the React Native 0.69 app and keep its store identifiers. Android keeps the Firebase project and FCM topic; iOS has no Firebase and gets alerts straight from APNs (2026-11-28). Each is a client of the public API like any other, built with its platform's own tools and CI workflow, and excluded from the pnpm workspace. A Flutter version (2026-11-25) preceded them and remains on the `flutter-app` branch. `legacy/**` is reference only: excluded from workspace, lint, tests, CI. | See `apps/android/README.md` and `apps/ios/README.md`; the old app is described in `docs/legacy/legacy-mobile.md` and remains in git history. |
 | D11 | Licence AGPL-3.0 (same as the legacy frontend and scraper). | Continuity; the About page says open source. |
 
 ### Deliberate behaviour changes versus legacy (each is documented for users in `docs/DECISIONS.md`)
@@ -131,6 +131,16 @@ topic `alertas-blue`; title `Subió el Dólar Blue` / `Bajó el Dólar Blue`; bo
 `Venta: 1670.00 (+12.00 / +0.72%)` (sign `+` only when rising); android `collapse_key: dolar-blue`,
 `priority: high`, `ttl: 1200s`, notification `color: #221199`, `channel_id: Dolar Blue`.
 Sent with FCM HTTP v1 using a service-account JWT signed with WebCrypto (project `bluelytics-mobile`).
+That topic now only reaches Android.
+
+iPhones (no Firebase in `apps/ios`): the app POSTs its APNs device token to `bluelytics.com.ar/app/push/apple`
+(`apps/web/src/lib/push-devices.ts`, rate-limited, DELETE to unregister) into `apns_devices`. The jobs Worker
+signs one ES256 provider token per alert (team `9AGK8J3LYF`, secrets `APNS_KEY_P8`, `APNS_KEY_ID`) and posts
+`{"aps":{"alert":{title,body},"sound":"default"}}` to each token on its environment's host (topic
+`com.bluelytics.mobile`, collapse id `dolar-blue`, expiration 1200 s), 20 at a time; `BadDeviceToken`,
+`Unregistered` and `DeviceTokenNotForTopic` delete the token. Workers' `fetch` speaks the HTTP/2 APNs
+requires (checked from Cloudflare's network, 2026-11-28). FCM and APNs fail independently: `push_status` is
+`sent` only when both went out, else `failed: fcm: …; apns: …`.
 
 Social rule (`shouldPost`), evaluated per network inside 10:00–18:59 ART on weekdays:
 - `update`: cooldown since that network's last sent post of any kind (twitter 15 min, others 60 min) AND
@@ -244,7 +254,7 @@ Tick inside the trading window:
 2. `computeConsensus` → upsert `latest_rates`, upsert today's two `daily_rates` rows, insert `ticks`.
 3. Re-render changed API bodies → `rendered` (same D1 batch as step 2). If a body changed, also put it
    to R2 `api/…` (best effort) and, in `static-first` mode, purge the CDN prefix.
-4. Alerts: `shouldAlert` → insert `alerts`, re-render `alerts` body, send FCM when `PUSH_ENABLED=true`.
+4. Alerts: `shouldAlert` → insert `alerts`, re-render `alerts` body, send FCM and APNs when `PUSH_ENABLED=true`.
 5. Social: `shouldPost` per configured network → render card (Browser Run) → put JPEG to R2
    `social/<yyyy>/<mm>/<network>-<event_key>.jpg` → Buffer `createPost` when `SOCIAL_ENABLED=true`
    (otherwise log a dry run and store status `dry_run`).
@@ -361,7 +371,7 @@ pnpm deploy:api | deploy:jobs | deploy:web | deploy:all
 ```
 
 Secrets (names only; set with `wrangler secret put` / `--secrets-file`, never committed):
-jobs: `BUFFER_API_KEY`, `FIREBASE_SERVICE_ACCOUNT_JSON`, `ADMIN_TOKEN`, `OPS_WEBHOOK_URL` (optional),
+jobs: `BUFFER_API_KEY`, `FIREBASE_SERVICE_ACCOUNT_JSON`, `ADMIN_TOKEN`, `APNS_KEY_P8` + `APNS_KEY_ID` (iPhone alerts), `OPS_WEBHOOK_URL` (optional),
 `CLOUDFLARE_PURGE_TOKEN` (static-first only). Pulumi: `cloudflare:apiToken`. CI: `CLOUDFLARE_API_TOKEN`,
 `CLOUDFLARE_ACCOUNT_ID`, `PULUMI_ACCESS_TOKEN`.
 
