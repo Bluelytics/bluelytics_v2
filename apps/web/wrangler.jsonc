@@ -34,6 +34,8 @@
   // The MCP server (apps/mcp) answers MCP requests on /mcp (src/lib/gateway.ts isMcpRequest). Deploy
   // bluelytics-mcp before the first deploy that has this binding.
   "services": [{ "binding": "MCP", "service": "bluelytics-mcp" }],
+  // /app/push/apple (src/lib/push-devices.ts): registrations per address and minute.
+  "ratelimits": [{ "name": "PUSH_LIMIT", "namespace_id": "1001", "simple": { "limit": 10, "period": 60 } }],
   "vars": {
     // Responses on any other host carry `X-Robots-Tag: noindex` (shadow host, previews, localhost).
     "PRODUCTION_HOSTNAME": "bluelytics.com.ar",

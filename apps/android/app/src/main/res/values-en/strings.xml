@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="alerts_channel_name">Blue dollar alerts</string>
+    <string name="alerts_channel_description">Notices when the blue dollar sell price moves significantly.</string>
+</resources>

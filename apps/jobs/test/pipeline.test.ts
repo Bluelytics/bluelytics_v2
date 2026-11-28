@@ -3,28 +3,37 @@
  * Friday 2026-11-20 closed at blue 1615/1665, the last legacy alert (id 1885) was at sell 1670.
  * The week under test is Monday 2026-11-23 … Friday 2026-11-27, with push and social enabled.
  */
-import { buildAlertNotification, buildFcmMessage } from '@bluelytics/core';
-import { getLatestRates, getRendered } from '@bluelytics/db';
+import { buildAlertNotification, buildApnsPayload, buildFcmMessage } from '@bluelytics/core';
+import { getLatestRates, getRendered, listApnsDevices, upsertApnsDevice } from '@bluelytics/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Harness } from './support/harness.ts';
 import { art, createHarness } from './support/harness.ts';
-import { testServiceAccount } from './support/keys.ts';
+import { testApnsKey, testServiceAccount } from './support/keys.ts';
 
 const MON = '2026-11-23';
 const TUE = '2026-11-24';
 const FRI = '2026-11-27';
+const IPHONE = 'a'.repeat(64);
+const GONE = 'b'.repeat(64);
 
 describe('a trading week with push and social enabled', () => {
   let h: Harness;
   beforeAll(async () => {
     const account = await testServiceAccount();
+    const apnsKey = await testApnsKey();
     h = await createHarness({
+      APNS_KEY_P8: apnsKey.p8,
+      APNS_KEY_ID: 'TESTKEY123',
       PUSH_ENABLED: 'true',
       SOCIAL_ENABLED: 'true',
       BUFFER_API_KEY: 'test-buffer-key',
       FIREBASE_SERVICE_ACCOUNT_JSON: account.json,
       OPS_WEBHOOK_URL: 'https://ops.example/hook',
     });
+    // Two iPhones registered; Apple reports the second one's app as removed.
+    await upsertApnsDevice(h.db, { token: IPHONE, environment: 'production' }, '2026-11-21T12:00:00Z');
+    await upsertApnsDevice(h.db, { token: GONE, environment: 'sandbox' }, '2026-11-21T12:00:00Z');
+    h.net.apns.set(GONE, { status: 410, reason: 'Unregistered' });
     h.setBlue({ buy: 1650, sell: 1670 });
     h.net.market.set('criptoya', { buy: 1650, sell: 1670 });
     h.net.market.set('ambito_oficial', { buy: 1550, sell: 1600 });
@@ -98,6 +107,12 @@ describe('a trading week with push and social enabled', () => {
     expect(push?.headers.get('authorization')).toBe('Bearer test-access-token');
     expect(JSON.parse(push?.body ?? '')).toEqual(buildFcmMessage(buildAlertNotification(1680, 1670)));
     expect(JSON.parse(push?.body ?? '').message.notification).toEqual({ title: 'Subió el Dólar Blue', body: 'Venta: 1680.00 (+10.00 / +0.60%)' });
+
+    // iPhones: straight to APNs, each on its environment's host; the removed app's token is dropped.
+    expect(h.net.callsTo('api.push.apple.com').map((call) => call.url)).toEqual([`https://api.push.apple.com/3/device/${IPHONE}`]);
+    expect(h.net.callsTo('api.sandbox.push.apple.com').map((call) => call.url)).toEqual([`https://api.sandbox.push.apple.com/3/device/${GONE}`]);
+    expect(JSON.parse(h.net.callsTo('api.push.apple.com')[0]?.body ?? '')).toEqual(buildApnsPayload(buildAlertNotification(1680, 1670)));
+    expect(await listApnsDevices(h.db)).toEqual([{ token: IPHONE, environment: 'production' }]);
 
     // 1680 is +0.9 % on Friday's close (1665) but only +0.6 % on the last published 1670: posting proves the Friday baseline.
     expect(report.social?.attempts).toEqual({ 'twitter/update-2026-11-23-1680': 'sent', 'instagram/update-2026-11-23-1680': 'sent' });

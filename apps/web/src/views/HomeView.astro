@@ -7,6 +7,7 @@ import Ticker from '../components/Ticker.astro';
 import Base from '../layouts/Base.astro';
 import { ROUTES, type Locale } from '../i18n/routes.ts';
 import { pick, UI } from '../i18n/ui.ts';
+import { otherRates as listOtherRates, type ExtraCode } from '../lib/extras.ts';
 import { formatPercent, formatPesos, formatPesosHundredths, formatSignedPercent } from '../lib/format.ts';
 import type { HomeData } from '../lib/pages.ts';
 import { exchangeRateNode } from '../lib/seo.ts';
@@ -39,18 +40,14 @@ const graph = [
   ...(oficial ? [exchangeRateNode({ name: t.oficial, buy: oficial.buy, sell: oficial.sell })] : []),
 ];
 
-const EXTRA_ORDER = ['mep', 'ccl', 'cripto', 'tarjeta', 'mayorista'] as const;
-const EXTRA_NAMES: Record<(typeof EXTRA_ORDER)[number], string> = {
+const EXTRA_NAMES: Record<ExtraCode, string> = {
   mep: pick(locale, 'Dólar MEP', 'MEP dollar'),
   ccl: pick(locale, 'Contado con liqui', 'CCL dollar'),
   cripto: pick(locale, 'Dólar cripto', 'Crypto dollar'),
   tarjeta: pick(locale, 'Dólar tarjeta', 'Card dollar'),
   mayorista: pick(locale, 'Dólar mayorista', 'Wholesale dollar'),
 };
-const otherRates = EXTRA_ORDER.flatMap((code) => {
-  const rate = extras.find((extra) => extra.code === code && extra.sellCents !== null);
-  return rate?.sellCents != null ? [{ code, name: EXTRA_NAMES[code], sellCents: rate.sellCents, buyCents: rate.buyCents }] : [];
-});
+const otherRates = listOtherRates(extras).map((rate) => ({ ...rate, name: EXTRA_NAMES[rate.code] }));
 
 const amounts = [1, 10, 100, 500, 1000];
 const tape = [

@@ -146,3 +146,33 @@ export function buildFcmMessage(notification: AlertNotification): FcmMessage {
     },
   };
 }
+
+/** Direct APNs for the iOS app (apps/ios), which has no Firebase: one request per registered device. */
+export const APNS = {
+  hosts: { production: 'api.push.apple.com', sandbox: 'api.sandbox.push.apple.com' },
+  /** The iOS bundle id. */
+  topic: 'com.bluelytics.mobile',
+  teamId: '9AGK8J3LYF',
+  collapseId: 'dolar-blue',
+  /** Seconds APNs keeps trying an offline device, as FCM's `ttl`. */
+  ttlSeconds: 1200,
+} as const;
+
+export type ApnsEnvironment = keyof typeof APNS.hosts;
+
+export function isApnsEnvironment(value: unknown): value is ApnsEnvironment {
+  return value === 'production' || value === 'sandbox';
+}
+
+/**
+ * A device token as the app sends it: lowercase hex. Apple's tokens are 32 bytes today and Apple
+ * says their length may change, so any even length from 32 to 200 bytes is accepted.
+ */
+export function isApnsToken(value: unknown): value is string {
+  return typeof value === 'string' && value.length % 2 === 0 && /^[0-9a-f]{64,400}$/.test(value);
+}
+
+/** The APNs request body for a notification. */
+export function buildApnsPayload(notification: AlertNotification): { aps: { alert: { title: string; body: string }; sound: 'default' } } {
+  return { aps: { alert: { title: notification.title, body: notification.body }, sound: 'default' } };
+}

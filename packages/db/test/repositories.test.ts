@@ -78,11 +78,13 @@ function daily(day: string, tipo: 'Oficial' | 'Blue', sell: number): DailyRow {
 
 describe('migrations', () => {
   it('are split safely: no statement text contains comment or terminator characters', () => {
-    expect(migrationFiles()).toEqual(['0001_init.sql']);
-    const sql = readFileSync(new URL('0001_init.sql', MIGRATIONS_DIR), 'utf8');
+    expect(migrationFiles()).toEqual(['0001_init.sql', '0002_apns_devices.sql']);
+    const sql = migrationFiles()
+      .map((file) => readFileSync(new URL(file, MIGRATIONS_DIR), 'utf8'))
+      .join('\n');
     const statements = splitSqlStatements(sql);
-    expect(statements).toHaveLength(13);
-    expect(statements.filter((s) => s.startsWith('CREATE TABLE'))).toHaveLength(10);
+    expect(statements).toHaveLength(14);
+    expect(statements.filter((s) => s.startsWith('CREATE TABLE'))).toHaveLength(11);
     expect(statements.filter((s) => s.startsWith('CREATE INDEX'))).toHaveLength(3);
     for (const literal of sql.replace(/--.*$/gm, '').match(/'[^']*'/g) ?? []) expect(literal).not.toMatch(/--|;/);
   });
@@ -93,6 +95,7 @@ describe('migrations', () => {
       .all<{ name: string }>();
     expect(results.map((row) => row.name)).toEqual([
       'alerts',
+      'apns_devices',
       'currencies',
       'daily_rates',
       'extra_rates',
