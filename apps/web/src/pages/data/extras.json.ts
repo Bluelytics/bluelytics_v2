@@ -1,5 +1,5 @@
 // The other dollar rates of the home page (MEP, CCL, cripto, tarjeta, mayorista) as data, in hundredths
-// of a peso. Read by the mobile app (apps/mobile/lib/data/api.dart); not part of the public API.
+// of a peso. Read by the mobile app (apps/android and apps/ios); not part of the public API.
 import type { APIRoute } from 'astro';
 import { applyCache, SLOW } from '../../lib/cache.ts';
 import { loadExtras } from '../../lib/data.ts';

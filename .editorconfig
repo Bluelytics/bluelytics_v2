@@ -20,8 +20,8 @@ indent_size = unset
 insert_final_newline = unset
 trim_trailing_whitespace = unset
 
-# API captures used as test fixtures, and platform files written by Flutter's tools.
-[apps/mobile/{test/fixtures,android,ios,linux}/**]
+# API captures used as test fixtures, and project files written by Xcode and Gradle.
+[apps/{android/app/src/test/resources,ios/BluelyticsCore/Tests,ios/Bluelytics.xcodeproj}/**]
 charset = unset
 end_of_line = unset
 indent_style = unset

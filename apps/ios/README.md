@@ -1,7 +1,7 @@
 # Bluelytics for iOS
 
 The native iPhone and iPad app, in Swift and SwiftUI, in the dark "Editorial Bold" style of
-[bluelytics.com.ar](https://bluelytics.com.ar). It is a port of the Flutter app in `apps/mobile`
+[bluelytics.com.ar](https://bluelytics.com.ar). It is a port of the Flutter app (branch `flutter-app`)
 (same screens, strings, formats, feeds and behaviour) and keeps the store identity of the React
 Native app (versions 1.x), so it ships as an update to the same App Store listing.
 
@@ -17,15 +17,12 @@ fetched is kept on disk, so the app opens instantly and still shows prices witho
 
 ## What has been built, and what has not
 
-The app was written on Linux, where Xcode does not run.
+The app was written on Linux and is compiled and tested by the "iOS app" workflow on GitHub's macOS
+runner (Xcode 26): the core package's tests, the app's tests on an iPhone simulator (including the
+screenshots, uploaded as the `ios-screenshots` artifact) and an unsigned device build all pass.
 
-- **Checked:** `BluelyticsCore`, the package with everything that is not a view (formats, models,
-  the calculator, the chart's scales, the data store and its cache, settings, the alerts switch and
-  every string), builds and passes its tests on Linux with the `swift` Docker image. Every app and
-  test file passes Swift's syntax check.
-- **Not yet checked:** the app target itself (SwiftUI, UIKit, Firebase), the Xcode project file and
-  the app's tests have never been compiled. The first build on a Mac, or `tool/ci.sh` on a macOS CI
-  runner, is their first check, and is expected to need small fixes.
+**Not yet done:** running it on a real iPhone, a signed build, and push delivery (needs the APNs key
+below). The first time the project is opened in Xcode it writes `Package.resolved`; commit it.
 
 ## Requirements
 

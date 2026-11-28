@@ -136,9 +136,9 @@ Owner decisions and read-only findings from the first session. Re-check them onl
   `PUSH_ENABLED` remains `"false"` after cutover, `FIREBASE_SERVICE_ACCOUNT_JSON` keeps its placeholder, and
   the Firebase steps (1.8, the real key in 4.10, the mobile check in Phase 5) are skipped. The FCM topic
   `dolar` simply stops receiving messages when legacy is switched off.
-- **Mobile app rewritten in Flutter** (2026-11-25, `apps/mobile`). It subscribes to the topic `alertas-blue`
-  that `apps/jobs` sends to; alerts start arriving once the steps in `apps/mobile/README.md` ("Push alerts")
-  are done. Until then `PUSH_ENABLED` stays `"false"`.
+- **Mobile apps rewritten natively** (2026-11-28, `apps/android` and `apps/ios`; a Flutter version from
+  2026-11-25 is kept on the `flutter-app` branch). They subscribe to the topic `alertas-blue` that `apps/jobs`
+  sends to; alerts start arriving once the "Push alerts" steps in their READMEs are done. Until then `PUSH_ENABLED` stays `"false"`.
 - **Progress, 2026-11-22/23:** Phase 1 done (Pulumi Cloud stack `magiquear/prod`; D1 `ea1ea06c-…`; shadow
   hosts live). Phase 2: backfill done (9,365 rows, alerts to 1885, `PRE_SHADOW_LAST=1885`, remote
   `sqlite_sequence` writable); strict parity 25/27, the two `/json/last_price` differences being the
@@ -692,7 +692,7 @@ shadow API host, so search engines do not index it either.
 ### 1.8 Restrict the Firebase client API key (before any public push)
 
 If the v2 repository is or will be public, do this before the first push to the public remote: the mobile
-app's `google-services.json` and `GoogleService-Info.plist` under `apps/mobile` contain the Firebase client
+app's `google-services.json` and `GoogleService-Info.plist` under `apps/android` and `apps/ios` contain the Firebase client
 API key. It is public by design, but unrestricted. Google Cloud Console → APIs & Services → Credentials →
 that key: restrict it to Android package `com.bluelytics.mobileapp` with the signing SHA-1, the iOS bundle id,
 and the Firebase APIs actually used (`git-audit.md` §9 item 9). GitHub push protection may flag the key on the

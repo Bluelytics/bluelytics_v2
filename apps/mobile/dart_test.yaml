@@ -1,5 +1,0 @@
-tags:
-  # test/screenshots_test.dart: renders every screen to build/screenshots/ when SCREENSHOTS=1.
-  screenshots:
-  # test/live_api_test.dart: reads the production API when LIVE=1.
-  live:
