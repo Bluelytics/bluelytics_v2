@@ -1,0 +1,117 @@
+# The Cloudflare side (Workers, D1, R2, zone rules): checks on every pull request, and on every push
+# to main the same checks, then `pulumi up` (infra/), the D1 migrations and `wrangler deploy` of the four
+# Workers, in the order the service bindings need. The mobile apps have their own workflows.
+#
+# Repository settings it needs (Settings → Secrets and variables → Actions):
+#   secrets   CLOUDFLARE_API_TOKEN  for wrangler: the "Edit Cloudflare Workers" template plus D1 edit
+#             PULUMI_ACCESS_TOKEN   Pulumi Cloud token with access to the stack magiquear/prod (Pulumi reads
+#                                   its own Cloudflare token from the stack's encrypted config)
+#   variable  CLOUDFLARE_ACCOUNT_ID
+# The Workers' own secrets (BUFFER_API_KEY, APNS_KEY_P8 …) stay in Cloudflare; deploys keep them.
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - apps/android/**
+      - apps/ios/**
+      - docs/**
+      - '**/*.md'
+      - .github/workflows/android.yml
+      - .github/workflows/ios.yml
+  pull_request:
+    paths-ignore:
+      - apps/android/**
+      - apps/ios/**
+      - docs/**
+      - '**/*.md'
+      - .github/workflows/android.yml
+      - .github/workflows/ios.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Typecheck, test, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency:
+      group: check-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+
+  preview:
+    name: Pulumi preview
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: pulumi/actions@v6
+        with:
+          command: preview
+          stack-name: magiquear/prod
+          work-dir: infra
+          diff: true
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+
+  deploy:
+    name: Pulumi up, migrations, Workers
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
+    # One deploy at a time, and never cancel one halfway.
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # Long-lived resources first: D1 and R2 are `protect`ed, so a change that would replace them fails here.
+      - uses: pulumi/actions@v6
+        with:
+          command: up
+          stack-name: magiquear/prod
+          work-dir: infra
+          diff: true
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+      # Before the Workers, so new code never runs against an old schema. Migrations only add.
+      - name: D1 migrations
+        run: pnpm db:migrate:remote
+      # mcp before web (web's MCP service binding); api and jobs are independent.
+      - run: pnpm deploy:api
+      - run: pnpm deploy:jobs
+      - run: pnpm deploy:mcp
+      - run: pnpm deploy:web
