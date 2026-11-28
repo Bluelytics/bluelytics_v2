@@ -25,6 +25,9 @@ struct TodayScreen: View {
                         width: min(proxy.size.width, Bl.maxWidth),
                         onOpenHistory: onOpenHistory
                     )
+                    // Never wider than the screen, whatever a child asks for.
+                    .frame(width: proxy.size.width, alignment: .leading)
+                    .clipped()
                     .padding(.bottom, 8)
                 }
                 .refreshable { await store.refresh(force: true) }

@@ -44,6 +44,31 @@ final class StoreTests: XCTestCase {
         XCTAssertEqual(store.series.count, 45, "the recent days alone")
     }
 
+    /// Production today: a first launch (nothing cached) and `/data/extras.json` answering 404.
+    /// Everything Today shows is there; only the extras section has nothing, and the next launch
+    /// restores the same from the cache.
+    func testAFirstLaunchWithTheExtrasFeedMissingHasEverythingTodayNeeds() async {
+        let cache = MemoryCacheStore()
+        let store = fixtureStore(fail: [.extras], cache: cache)
+        await store.restore()
+        XCTAssertNil(store.snapshot, "nothing cached yet")
+        await store.refresh()
+        XCTAssertFalse(store.offline)
+        XCTAssertFalse(store.loading)
+        let snapshot = store.snapshot
+        XCTAssertNotNil(snapshot?.latest.blue)
+        XCTAssertNotNil(snapshot?.latest.oficial)
+        XCTAssertNotNil(snapshot?.blueMove)
+        XCTAssertNotNil(snapshot?.gap)
+        XCTAssertGreaterThan(rangeOf(store.recent, .m1).count, 1, "the hero chart has days to draw")
+        XCTAssertTrue(store.extras.isEmpty)
+
+        let next = fixtureStore(fail: Set(Feed.allCases), cache: cache)
+        await next.restore()
+        XCTAssertEqual(next.snapshot, snapshot)
+        XCTAssertTrue(next.extras.isEmpty)
+    }
+
     func testWithoutNetworkAndWithoutCacheThereIsNothingToShow() async {
         let store = fixtureStore(fail: Set(Feed.allCases))
         await store.refresh()

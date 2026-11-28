@@ -42,9 +42,13 @@ struct TickerTape: View {
 
     var body: some View {
         if !items.isEmpty {
-            content
+            // The size comes from this clear strip, never from the tape: the moving tape is three
+            // copies wide (thousands of points) and, reported as the ticker's width, it widened the
+            // whole Today column so everything under the ticker was centred off screen.
+            Color.clear
+                .frame(maxWidth: .infinity)
                 .frame(height: 38)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .overlay(alignment: .leading) { content }
                 .clipped()
                 .background(Bl.navy.opacity(0.45))
                 .overlay(alignment: .bottom) { Bl.line.frame(height: 1) }

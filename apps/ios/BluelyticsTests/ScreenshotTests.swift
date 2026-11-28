@@ -24,9 +24,16 @@ private func fixture(_ name: String) -> String {
 }
 
 /// Answers every feed from the fixtures.
+/// `missing` feeds answer 404, as `/data/extras.json` does in production today.
 private final class FixtureClient: HTTPClient, @unchecked Sendable {
+    let missing: Set<Feed>
+
+    init(missing: Set<Feed> = []) { self.missing = missing }
+
     func get(_ url: URL, headers: [String: String], timeout: TimeInterval) async throws -> (status: Int, body: Data) {
-        guard let feed = Feed.allCases.first(where: { $0.url == url.absoluteString }) else { return (404, Data()) }
+        guard let feed = Feed.allCases.first(where: { $0.url == url.absoluteString }), !missing.contains(feed) else {
+            return (404, Data("Not found".utf8))
+        }
         return (200, Data(fixture(feed.rawValue).utf8))
     }
 }
@@ -75,6 +82,55 @@ final class ScreenshotTests: XCTestCase {
                 try png.write(to: out.appendingPathComponent("\(locale.rawValue)-\(shot.name).png"))
             }
         }
+    }
+
+    /// The bug seen on a real iPhone: with motion on (the device default, unlike the screenshots)
+    /// the moving ticker reported its full tape width, the Today column grew to thousands of points
+    /// and everything under the ticker was centred off screen. Here the launch is the real one too:
+    /// an empty cache, then a refresh in which the extras feed is missing.
+    func testTodayFitsTheScreenWithMotionOnAndExtrasMissing() async throws {
+        try XCTSkipIf(UIAccessibility.isReduceMotionEnabled, "the simulator has Reduce Motion on")
+        let prefs = MemoryPreferences()
+        let store = AppStore(api: BluelyticsAPI(client: FixtureClient(missing: [.extras])), cache: MemoryCacheStore(), clock: { fixtureNow })
+        let model = AppModel(
+            store: store,
+            settings: BluelyticsCore.Settings(prefs: prefs, deviceLocale: .es),
+            alerts: AlertsController(backend: FakePush(), prefs: prefs)
+        )
+        await model.start()
+        XCTAssertTrue(store.hasData)
+        XCTAssertFalse(store.offline, "a missing extras feed is not being offline")
+        XCTAssertTrue(store.extras.isEmpty)
+        XCTAssertNotNil(store.snapshot)
+
+        let scene = try await windowScene()
+        let window = UIWindow(windowScene: scene)
+        window.frame = scene.coordinateSpace.bounds
+        window.windowLevel = .alert + 1
+        window.rootViewController = UIHostingController(rootView: AppShell(tab: .today).environmentObject(model).environment(\.motion, true))
+        window.makeKeyAndVisible()
+        defer {
+            window.isHidden = true
+            window.rootViewController = nil
+        }
+        try await settle(window, seconds: 1)
+        let scroll = try XCTUnwrap(largestScrollView(in: window), "Today has no scroll view")
+        XCTAssertLessThanOrEqual(scroll.contentSize.width, scroll.bounds.width + 1, "the Today column is wider than the screen")
+        XCTAssertGreaterThan(scroll.contentSize.height, scroll.bounds.height, "Today has content below the ticker")
+    }
+
+    /// The moving ticker on its own: as wide as it is offered, whatever the length of its tape.
+    func testTheMovingTickerTakesTheWidthItIsGiven() throws {
+        try XCTSkipIf(UIAccessibility.isReduceMotionEnabled, "the simulator has Reduce Motion on")
+        let items = (1...12).map { TapeItem(label: "Dólar \($0)", value: "$ 1.695", direction: .down, change: "-0,88 %") }
+        let view = VStack(alignment: .leading, spacing: 0) {
+            TickerTape(items: items, accessibilityName: "Cotizaciones")
+            Color.red.frame(height: 20)
+        }
+        .environment(\.motion, true)
+        let size = UIHostingController(rootView: view).sizeThatFits(in: CGSize(width: 390, height: 2000))
+        XCTAssertLessThanOrEqual(size.width, 390.5)
+        XCTAssertEqual(size.height, 58, accuracy: 0.5)
     }
 
     private func loadedModel(_ locale: AppLocale) async throws -> AppModel {
