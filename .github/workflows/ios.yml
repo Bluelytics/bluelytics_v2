@@ -1,0 +1,53 @@
+# The native iOS app (apps/ios): the core package's tests, the app's tests on a simulator (with the
+# screenshots as an artifact), and an unsigned device build. See apps/ios/README.md.
+name: iOS app
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - apps/ios/**
+      - .github/workflows/ios.yml
+  pull_request:
+    paths:
+      - apps/ios/**
+      - .github/workflows/ios.yml
+  workflow_dispatch:
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: apps/ios
+
+jobs:
+  ios:
+    name: Test and build
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+      # Firebase 13 needs Xcode 26 or later: use the newest one on the runner.
+      - name: Select Xcode
+        run: |
+          xcode=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
+          sudo xcode-select -s "$xcode"
+          xcodebuild -version
+      - name: Core package tests
+        run: tool/ci.sh core
+      - name: App tests on a simulator
+        run: tool/ci.sh test
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ios-screenshots
+          path: apps/ios/build/screenshots
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Device build (unsigned)
+        run: tool/ci.sh build

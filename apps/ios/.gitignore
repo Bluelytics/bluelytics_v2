@@ -1,0 +1,9 @@
+build/
+DerivedData/
+xcuserdata/
+*.xcuserstate
+BluelyticsCore/.build/
+BluelyticsCore/.swiftpm/
+.swiftpm/
+*.ipa
+*.dSYM.zip
