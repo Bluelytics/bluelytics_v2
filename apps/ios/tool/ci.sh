@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Builds and tests the iOS app. Needs macOS with Xcode 26 or later (Firebase 13 requires it).
+# Builds and tests the iOS app. Needs macOS with Xcode 16 or later.
 #
 #   tool/ci.sh core     # the BluelyticsCore package's tests (also runs on Linux, see README)
 #   tool/ci.sh test     # the app's tests on an iPhone simulator; screenshots in build/screenshots/

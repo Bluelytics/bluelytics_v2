@@ -11,7 +11,7 @@ struct BluelyticsApp: App {
     init() {
         Fonts.registerIfNeeded()
         ShellAppearance.apply()
-        _model = StateObject(wrappedValue: AppModel.live(push: FirebasePush.shared))
+        _model = StateObject(wrappedValue: AppModel.live(push: ApplePush.shared))
     }
 
     var body: some Scene {
@@ -19,7 +19,7 @@ struct BluelyticsApp: App {
             AppShell()
                 .environmentObject(model)
                 .task {
-                    // A test run hosts the app only to borrow its bundle: no network, no Firebase.
+                    // A test run hosts the app only to borrow its bundle: no network, no push registration.
                     guard !isRunningTests else { return }
                     await model.start()
                 }
@@ -40,10 +40,10 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
     }
 
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        Task { @MainActor in FirebasePush.shared.received(apnsToken: deviceToken) }
+        Task { @MainActor in ApplePush.shared.received(deviceToken: deviceToken) }
     }
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-        Task { @MainActor in FirebasePush.shared.registrationFailed() }
+        Task { @MainActor in ApplePush.shared.failedToRegister() }
     }
 }

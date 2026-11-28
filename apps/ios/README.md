@@ -22,18 +22,16 @@ runner (Xcode 26): the core package's tests, the app's tests on an iPhone simula
 screenshots, uploaded as the `ios-screenshots` artifact) and an unsigned device build all pass.
 
 **Not yet done:** running it on a real iPhone, a signed build, and push delivery (needs the APNs key
-below). The first time the project is opened in Xcode it writes `Package.resolved`; commit it.
+and the website's `/app/push/apple` endpoint, below).
 
 ## Requirements
 
-- macOS with **Xcode 26** or later. Firebase 13 (Swift Package Manager) requires it.
+- macOS with **Xcode 16** or later (CI uses Xcode 26).
 - An iPhone simulator runtime (Xcode → Settings → Components) for the tests.
 - For a phone or the App Store: membership of Apple team `9AGK8J3LYF`.
 - Linux only for the core: Docker.
 
-There is no CocoaPods and nothing to install: Xcode fetches Firebase the first time it opens the
-project. Commit the `Package.resolved` it writes
-(`Bluelytics.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved`).
+There are no third-party dependencies: nothing to install, no CocoaPods, no remote packages.
 
 ## Everyday commands
 
@@ -84,15 +82,16 @@ BluelyticsCore/          Swift package, Foundation only (builds on Linux)
   Sources/…/Format.swift   numbers and dates, a port of apps/web/src/lib/format.ts
   Models, Calc, Series     the feeds' types, the calculator, ranges, summaries and the chart's scales
   API, Cache, Store        the feeds, the disk cache and the store the screens read
-  Settings, Alerts         the language, the alerts switch and the carry-over from version 1
+  Settings, Alerts         the language and the alerts switch
+  PushRegistrar            registers the APNs token with the website; reads the APNs environment
   Strings.swift            every string, in Spanish and English
   Tests/                   ports of the Flutter domain, data and alerts tests, with their fixtures
 Bluelytics/
   App/                     entry point, app delegate, AppModel (the core objects for SwiftUI)
-  Push/FirebasePush.swift  alerts over Firebase Cloud Messaging
+  Push/ApplePush.swift     alerts from APNs: permission, the device token, foreground banners
   Theme/                   colours and type from the site
   Views/                   one file per tab, the shell, chart, ticker tape, blade and shared pieces
-  Resources/               fonts, asset catalog, GoogleService-Info.plist, privacy manifest
+  Resources/               fonts, asset catalog, privacy manifest
 Support/                 Info.plist and the entitlements
 BluelyticsTests/         screenshot test, configuration test, fixtures
 tool/ci.sh               build and test commands
@@ -134,28 +133,34 @@ What to check:
 
 ## Push alerts
 
-The topic is `alertas-blue`, the same as versions 1 and the Flutter app, sent by the jobs Worker
-(`apps/jobs/src/alerts.ts`). Firebase is not started, and no push token exists, until someone turns
-the switch on (`FirebaseMessagingAutoInitEnabled` is off in Info.plist). Method swizzling is off too:
-the app delegate hands the APNs token to Firebase. Someone updating from version 1 keeps the choice
-they had. An alert that arrives while the app is open shows as a system banner and in the app.
+Alerts come straight from APNs; there is no Firebase. Nothing is registered until someone turns
+the switch on. Then the app asks for permission (alert and sound), gets the device token from APNs
+and registers it with the website:
 
-**The sender is off today** (`PUSH_ENABLED` is `"false"` in `apps/jobs/wrangler.jsonc`). To turn
-alerts on:
+| Call | Body | Answer |
+| --- | --- | --- |
+| `POST https://bluelytics.com.ar/app/push/apple` | `{"token":"<lowercase hex>","environment":"production"\|"sandbox"}` | 204; anything else means turning alerts on failed |
+| `DELETE` the same URL | `{"token":"<lowercase hex>"}` | 204, also for a token it does not know |
+
+The environment is `sandbox` when the build's `embedded.mobileprovision` says `aps-environment`
+`development` (Xcode builds on a phone), otherwise `production` (App Store and TestFlight builds
+carry no such profile). On every launch with alerts on the app registers again, because a token can
+change. Turning alerts off only unregisters on the server.
+
+The website sends `{"aps":{"alert":{"title":…,"body":…},"sound":"default"}}` to topic
+`com.bluelytics.mobile` with collapse id `dolar-blue`. An alert that arrives while the app is open
+shows as a system banner and in the app.
+
+To make alerts work:
 
 1. In the [Apple Developer](https://developer.apple.com/account/resources/authkeys/list) account
-   create an APNs key (`.p8`) and upload it in the Firebase console: project `bluelytics-mobile` →
-   Project settings → Cloud Messaging → Apple app configuration. Without it iPhones never receive
-   anything.
-2. Give the jobs Worker a service account key as the secret `FIREBASE_SERVICE_ACCOUNT_JSON`
-   (`docs/MIGRATION.md`, step 0.3). That key is a secret: it never goes in the repository.
-3. Set `PUSH_ENABLED` to `"true"` and deploy the jobs Worker.
-
-`Bluelytics/Resources/GoogleService-Info.plist` is a different thing: client identifiers that ship
-inside every copy of the app.
+   create an APNs key (`.p8`) for team `9AGK8J3LYF`.
+2. Give it to the website as a secret, with its key id and the team id. It never goes in the
+   repository.
+3. Deploy the website with the `/app/push/apple` endpoint and the sender turned on.
 
 `Support/Bluelytics.entitlements` says `aps-environment` `development`; Xcode switches it to
-production when it signs an App Store build.
+production when it signs an App Store build. Visible alerts need no background mode.
 
 ## Releasing
 
@@ -183,9 +188,9 @@ Info.plist already declares no non-exempt encryption (`ITSAppUsesNonExemptEncryp
 - Confirm in App Store Connect that the app still exists (the public listing returned "not found"
   on 2026-11-22, `docs/legacy/legacy-mobile.md`).
 - Privacy policy URL: `https://bluelytics.com.ar/privacy.html`. It dates from 2020; consider adding
-  Firebase Cloud Messaging.
-- Data collected, for the privacy form: nothing about the person. With alerts on, Firebase Cloud
-  Messaging holds a push token for the device (a device identifier, used for app functionality, not
+  the push token the website keeps for alerts.
+- Data collected, for the privacy form: nothing about the person. With alerts on, the website holds
+  the device's push token (a device identifier, used for app functionality, not
   for tracking).
 - Screenshots: `tool/ci.sh test` on the simulator size the store asks for (an iPhone 6.9" device).
 

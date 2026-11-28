@@ -8,8 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		B10000000000000000000101 /* BluelyticsCore in Frameworks */ = {isa = PBXBuildFile; productRef = B10000000000000000000201 /* BluelyticsCore */; };
-		B10000000000000000000102 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = B10000000000000000000202 /* FirebaseCore */; };
-		B10000000000000000000103 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = B10000000000000000000203 /* FirebaseMessaging */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,8 +47,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				B10000000000000000000101 /* BluelyticsCore in Frameworks */,
-				B10000000000000000000102 /* FirebaseCore in Frameworks */,
-				B10000000000000000000103 /* FirebaseMessaging in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -114,8 +110,6 @@
 			name = Bluelytics;
 			packageProductDependencies = (
 				B10000000000000000000201 /* BluelyticsCore */,
-				B10000000000000000000202 /* FirebaseCore */,
-				B10000000000000000000203 /* FirebaseMessaging */,
 			);
 			productName = Bluelytics;
 			productReference = B10000000000000000000501 /* Bluelytics.app */;
@@ -175,7 +169,6 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				B10000000000000000000C01 /* XCLocalSwiftPackageReference "BluelyticsCore" */,
-				B10000000000000000000C02 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = B10000000000000000000802 /* Products */;
@@ -423,32 +416,11 @@
 		};
 /* End XCLocalSwiftPackageReference section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		B10000000000000000000C02 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 13.2.0;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
 /* Begin XCSwiftPackageProductDependency section */
 		B10000000000000000000201 /* BluelyticsCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = B10000000000000000000C01 /* XCLocalSwiftPackageReference "BluelyticsCore" */;
 			productName = BluelyticsCore;
-		};
-		B10000000000000000000202 /* FirebaseCore */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = B10000000000000000000C02 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseCore;
-		};
-		B10000000000000000000203 /* FirebaseMessaging */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = B10000000000000000000C02 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseMessaging;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

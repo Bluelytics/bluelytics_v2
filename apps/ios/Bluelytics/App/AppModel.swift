@@ -32,7 +32,7 @@ final class AppModel: ObservableObject {
     var locale: AppLocale { settings.locale }
     var strings: Strings { Strings.of(settings.locale) }
 
-    /// The production wiring: the public API, the cache in Library/Caches, UserDefaults, Firebase.
+    /// The production wiring: the public API, the cache in Library/Caches, UserDefaults, APNs.
     static func live(push: PushBackend) -> AppModel {
         let prefs = DefaultsPreferences()
         let settings = BluelyticsCore.Settings(prefs: prefs, deviceLocale: BluelyticsCore.Settings.deviceLocale(preferredLanguages: Locale.preferredLanguages))

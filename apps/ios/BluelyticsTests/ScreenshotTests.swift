@@ -31,7 +31,7 @@ private final class FixtureClient: HTTPClient, @unchecked Sendable {
     }
 }
 
-/// Alerts already on: a version 1 user carried over.
+/// Alerts already on (saved in the preferences below).
 @MainActor
 private final class FakePush: PushBackend {
     var onMessage: ((AlertMessage) -> Void)?
@@ -39,7 +39,6 @@ private final class FakePush: PushBackend {
     func enable() async throws -> Bool { true }
     func disable() async throws {}
     func resume() async throws {}
-    func legacyEnabled() async throws -> Bool? { true }
 }
 
 private struct Shot {
@@ -79,7 +78,7 @@ final class ScreenshotTests: XCTestCase {
     }
 
     private func loadedModel(_ locale: AppLocale) async throws -> AppModel {
-        let prefs = MemoryPreferences()
+        let prefs = MemoryPreferences(["alerts_enabled": true])
         let store = AppStore(api: BluelyticsAPI(client: FixtureClient()), cache: MemoryCacheStore(), clock: { fixtureNow })
         let model = AppModel(
             store: store,

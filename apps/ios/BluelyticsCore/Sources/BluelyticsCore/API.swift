@@ -47,7 +47,7 @@ public protocol HTTPClient: Sendable {
 }
 
 public final class URLSessionClient: HTTPClient, @unchecked Sendable {
-    private let session: URLSession
+    let session: URLSession
 
     public init(session: URLSession = .shared) { self.session = session }
 

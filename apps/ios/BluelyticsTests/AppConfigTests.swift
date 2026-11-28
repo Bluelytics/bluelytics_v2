@@ -11,12 +11,13 @@ final class AppConfigTests: XCTestCase {
         // MARKETING_VERSION in the project and `appVersion` (sent in the user agent) move together.
         XCTAssertEqual(info["CFBundleShortVersionString"] as? String, appVersion)
         XCTAssertEqual(info["CFBundleVersion"] as? String, "5000000")
-        XCTAssertEqual(info["FirebaseMessagingAutoInitEnabled"] as? Bool, false)
-        XCTAssertEqual(info["FirebaseAppDelegateProxyEnabled"] as? Bool, false)
+        // Visible alerts need no background mode, and no Firebase is left.
+        XCTAssertNil(info["UIBackgroundModes"])
+        XCTAssertFalse(info.keys.contains { $0.hasPrefix("Firebase") })
     }
 
     func testResourcesAreBundled() {
-        XCTAssertNotNil(Bundle.main.url(forResource: "GoogleService-Info", withExtension: "plist"))
+        XCTAssertNil(Bundle.main.url(forResource: "GoogleService-Info", withExtension: "plist"))
         XCTAssertNotNil(Bundle.main.url(forResource: "PrivacyInfo", withExtension: "xcprivacy"))
         XCTAssertNotNil(UIImage(named: "Mark"))
     }

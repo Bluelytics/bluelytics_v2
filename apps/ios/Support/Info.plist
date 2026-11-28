@@ -32,16 +32,6 @@
 	<!-- Only HTTPS, the system's standard encryption: no export-compliance question on upload. -->
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
-	<!-- Blue dollar alerts. No push token exists until someone turns them on (Push/FirebasePush.swift). -->
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>remote-notification</string>
-	</array>
-	<key>FirebaseMessagingAutoInitEnabled</key>
-	<false/>
-	<!-- The app hands the APNs token to Firebase itself (App/AppDelegate.swift): no method swizzling. -->
-	<key>FirebaseAppDelegateProxyEnabled</key>
-	<false/>
 	<!-- Geist and Geist Mono, variable fonts (SIL OFL 1.1, Fonts/OFL.txt). -->
 	<key>UIAppFonts</key>
 	<array>

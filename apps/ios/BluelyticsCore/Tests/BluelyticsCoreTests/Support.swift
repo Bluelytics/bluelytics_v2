@@ -57,14 +57,12 @@ func fixtureStore(
 @MainActor
 final class FakePush: PushBackend {
     var grant: Bool
-    var legacy: Bool?
     var fail: Bool
     var calls: [String] = []
     var onMessage: ((AlertMessage) -> Void)?
 
-    init(grant: Bool = true, legacy: Bool? = nil, fail: Bool = false) {
+    init(grant: Bool = true, fail: Bool = false) {
         self.grant = grant
-        self.legacy = legacy
         self.fail = fail
     }
 
@@ -85,7 +83,6 @@ final class FakePush: PushBackend {
 
     func resume() async throws { calls.append("resume") }
 
-    func legacyEnabled() async throws -> Bool? { legacy }
 }
 
 func utc(_ year: Int, _ month: Int, _ day: Int, _ hour: Int = 0, _ minute: Int = 0, _ second: Int = 0, _ millis: Int = 0) -> Date {
